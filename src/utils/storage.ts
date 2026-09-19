@@ -83,7 +83,9 @@ export function migrateToMultiPlan(data: unknown): AppStoreData {
   return DEFAULT_STORE_DATA;
 }
 
-export async function loadStoreData(getToken?: () => Promise<string | null>): Promise<AppStoreData> {
+export async function loadStoreData(
+  getToken?: (options?: { skipCache?: boolean }) => Promise<string | null>
+): Promise<AppStoreData> {
   // 1. Try loading from server API (./data/plan.json or Drizzle DB)
   try {
     const headers: Record<string, string> = {};
@@ -94,15 +96,27 @@ export async function loadStoreData(getToken?: () => Promise<string | null>): Pr
       }
     }
 
-    const res = await fetch("/api/plan", { headers });
+    let res = await fetch("/api/plan", { headers });
+
+    // Retry once on 401 with fresh token
+    if (res.status === 401 && getToken) {
+      const freshToken = await getToken({ skipCache: true });
+      if (freshToken) {
+        headers['Authorization'] = `Bearer ${freshToken}`;
+        res = await fetch("/api/plan", { headers });
+      }
+    }
+
     if (res.ok) {
       const data: unknown = await res.json();
       if (data && typeof data === "object" && ("plans" in data || "items" in data)) {
         return migrateToMultiPlan(data);
       }
+    } else {
+      console.warn(`[storage] /api/plan returned HTTP ${res.status}`);
     }
-  } catch {
-    // API server not reachable, fallback to localStorage
+  } catch (err) {
+    console.warn("Failed to load store data from /api/plan:", err);
   }
 
   // 2. Try loading from localStorage v3
@@ -143,7 +157,7 @@ export async function loadStoreData(getToken?: () => Promise<string | null>): Pr
 
 export async function saveStoreData(
   data: AppStoreData,
-  getToken?: () => Promise<string | null>
+  getToken?: (options?: { skipCache?: boolean }) => Promise<string | null>
 ): Promise<{ success: boolean; error?: string }> {
   const updatedData: AppStoreData = {
     ...data,
@@ -168,17 +182,34 @@ export async function saveStoreData(
       }
     }
 
-    const res = await fetch("/api/plan", {
+    let res = await fetch("/api/plan", {
       method: "POST",
       headers,
       body: JSON.stringify(updatedData),
     });
+
+    // Retry once on 401 with fresh token
+    if (res.status === 401 && getToken) {
+      const freshToken = await getToken({ skipCache: true });
+      if (freshToken) {
+        headers['Authorization'] = `Bearer ${freshToken}`;
+        res = await fetch("/api/plan", {
+          method: "POST",
+          headers,
+          body: JSON.stringify(updatedData),
+        });
+      }
+    }
+
     if (res.ok) {
       return { success: true };
     }
-    return { success: false, error: "Failed to persist data" };
-  } catch {
-    return { success: true };
+    const errJson = (await res.json().catch(() => ({}))) as { error?: string };
+    console.error(`[storage] POST /api/plan failed (${res.status}):`, errJson.error);
+    return { success: false, error: errJson.error || "Failed to persist data" };
+  } catch (err) {
+    console.error("Network error saving store data:", err);
+    return { success: false, error: "Network error" };
   }
 }
 

@@ -25,7 +25,7 @@ import { PurchasedHistoryModal } from './components/PurchasedHistoryModal';
 import { ExportImportModal } from './components/ExportImportModal';
 
 export const App: React.FC = () => {
-  const { getToken, userId, isSignedIn } = useAuth();
+  const { getToken, userId, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
   const [storeData, setStoreData] = useState<AppStoreData>(DEFAULT_STORE_DATA);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isPortfolioView, setIsPortfolioView] = useState(false);
@@ -85,26 +85,29 @@ export const App: React.FC = () => {
     localStorage.setItem('saving_plan_dark_mode', darkMode.toString());
   }, [darkMode]);
 
-  // Load store data (re-triggers on sign in state change)
+  // Load store data (waits until Clerk auth state is fully resolved)
   useEffect(() => {
+    if (!isAuthLoaded) return; // Wait for Clerk initialization
+
     let isMounted = true;
     setIsLoaded(false);
 
-    loadStoreData(isSignedIn ? getToken : undefined).then(loaded => {
-      if (isMounted) {
-        setStoreData(loaded);
-        const current = loaded.plans.find(p => p.id === loaded.activePlanId) || loaded.plans[0];
-        if (current) {
-          setSimulatedSavingsRate(current.config.amountToSave);
-        }
-        setIsLoaded(true);
+    loadStoreData(isSignedIn ? getToken : undefined).then(async loaded => {
+      if (!isMounted) return;
+
+      // If user just signed in and their DB account is brand new, check if we should push local guest data
+      setStoreData(loaded);
+      const current = loaded.plans.find(p => p.id === loaded.activePlanId) || loaded.plans[0];
+      if (current) {
+        setSimulatedSavingsRate(current.config.amountToSave);
       }
+      setIsLoaded(true);
     });
 
     return () => {
       isMounted = false;
     };
-  }, [isSignedIn, userId, getToken]);
+  }, [isAuthLoaded, isSignedIn, userId, getToken]);
 
   // Sync simulated rate when active plan changes
   useEffect(() => {
@@ -118,8 +121,11 @@ export const App: React.FC = () => {
   // Persist store data
   const persistStore = useCallback(async (nextStore: AppStoreData) => {
     setStoreData(nextStore);
-    await saveStoreData(nextStore, isSignedIn ? getToken : undefined);
-  }, [isSignedIn, getToken]);
+    const saveRes = await saveStoreData(nextStore, isSignedIn ? getToken : undefined);
+    if (!saveRes.success && saveRes.error) {
+      showToast(`Warning: ${saveRes.error}`);
+    }
+  }, [isSignedIn, getToken, showToast]);
 
   // Portfolio calculations
   const portfolioSummary = useMemo(() => {
@@ -454,7 +460,7 @@ export const App: React.FC = () => {
     setSimulatedExtraBonus(0);
   };
 
-  if (!isLoaded) {
+  if (!isLoaded || !isAuthLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-3">
