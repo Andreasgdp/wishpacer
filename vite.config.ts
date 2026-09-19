@@ -1,5 +1,6 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import handler from './api/plan';
 
 function localPersistencePlugin(): Plugin {
@@ -13,44 +14,45 @@ function localPersistencePlugin(): Plugin {
 
         if (req.url === '/api/plan') {
           try {
-            // Convert Connect req to Web Request
-            const protocol = req.headers['x-forwarded-proto'] || 'http';
-            const host = req.headers.host || 'localhost:3000';
-            const fullUrl = `${protocol}://${host}${req.url}`;
-
-            let body: string | undefined;
+            let body: unknown = undefined;
             if (req.method === 'POST') {
               const buffers: Uint8Array[] = [];
               for await (const chunk of req) {
                 buffers.push(chunk as Uint8Array);
               }
-              body = Buffer.concat(buffers).toString('utf-8');
-            }
-
-            const headers = new Headers();
-            for (const [key, value] of Object.entries(req.headers)) {
-              if (value) {
-                headers.set(key, Array.isArray(value) ? value.join(', ') : value);
+              const str = Buffer.concat(buffers).toString('utf-8');
+              try {
+                body = JSON.parse(str);
+              } catch {
+                body = str;
               }
             }
 
-            const webReq = new Request(fullUrl, {
-              method: req.method,
-              headers,
-              body,
-            });
+            const vReq = req as unknown as VercelRequest;
+            vReq.body = body;
 
-            const webRes = await handler(webReq);
-            res.statusCode = webRes.status;
-            webRes.headers.forEach((val, key) => {
-              res.setHeader(key, val);
-            });
+            const vRes = res as unknown as VercelResponse;
+            vRes.status = (statusCode: number) => {
+              res.statusCode = statusCode;
+              return vRes;
+            };
+            vRes.json = (data: unknown) => {
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify(data));
+            };
+            vRes.send = (data: unknown) => {
+              if (typeof data === 'string') {
+                res.end(data);
+              } else {
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify(data));
+              }
+            };
 
-            const resBody = await webRes.text();
-            res.end(resBody);
+            await handler(vReq, vRes);
             return;
           } catch (err) {
-            console.error('Error handling API request:', err);
+            console.error('Error handling API request in Vite dev server:', err);
             res.statusCode = 500;
             res.end(JSON.stringify({ error: 'Internal Server Error' }));
             return;

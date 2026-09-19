@@ -1,3 +1,4 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { verifyToken } from '@clerk/backend';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -6,8 +7,8 @@ import type { AppStoreData } from '../src/types/plan';
 
 const clerkSecretKey = process.env.CLERK_SECRET_KEY;
 
-async function getUserIdFromRequest(req: Request): Promise<{ userId: string | null; authAttempted: boolean }> {
-  const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+async function getUserIdFromReq(req: VercelRequest): Promise<{ userId: string | null; authAttempted: boolean }> {
+  const authHeader = req.headers.authorization || (req.headers.Authorization as string);
   if (!authHeader) {
     return { userId: null, authAttempted: false };
   }
@@ -46,7 +47,7 @@ function safeReadGuestFile(): string | null {
       return fs.readFileSync(dataFile, 'utf-8');
     }
   } catch {
-    // Read-only serverless environment
+    // Ignore read-only filesystem in serverless environments
   }
   return null;
 }
@@ -59,75 +60,64 @@ function safeWriteGuestFile(content: string): boolean {
     fs.writeFileSync(dataFile, content, 'utf-8');
     return true;
   } catch (err) {
-    console.warn('Failed to write local guest file (serverless environment):', err);
+    console.warn('Failed to write local guest file:', err);
     return false;
   }
 }
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
-    const { userId, authAttempted } = await getUserIdFromRequest(req);
+    const { userId, authAttempted } = await getUserIdFromReq(req);
 
-    // If request attempted auth with Bearer token, but verification failed -> return 401
     if (authAttempted && !userId) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid or expired Clerk session token' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      res.status(401).json({ error: 'Unauthorized: Invalid or expired Clerk session token' });
+      return;
     }
 
     if (req.method === 'GET') {
       if (userId) {
-        console.log(`[API /api/plan] Fetching DB store data for authenticated user: ${userId}`);
+        console.log(`[API /api/plan] Fetching DB store data for user: ${userId}`);
         const storeData = await getUserStoreData(userId);
-        return new Response(JSON.stringify(storeData), {
-          headers: { 'Content-Type': 'application/json' },
-        });
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).json(storeData);
+        return;
       }
 
       // Guest mode fallback
       const content = safeReadGuestFile();
       if (content) {
-        return new Response(content, {
-          headers: { 'Content-Type': 'application/json' },
-        });
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send(content);
+        return;
       }
-      return new Response(JSON.stringify({ exists: false }), {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      res.status(200).json({ exists: false });
+      return;
     }
 
     if (req.method === 'POST') {
-      const body = (await req.json()) as AppStoreData;
+      const body = (typeof req.body === 'string' ? JSON.parse(req.body) : req.body) as AppStoreData;
 
       if (userId) {
-        console.log(`[API /api/plan] Saving DB store data for authenticated user: ${userId} (${body.plans.length} plans)`);
+        console.log(`[API /api/plan] Saving DB store data for user: ${userId} (${body.plans?.length || 0} plans)`);
         await saveUserStoreData(userId, body);
-        return new Response(
-          JSON.stringify({ success: true, savedAt: new Date().toISOString(), storage: 'db' }),
-          { headers: { 'Content-Type': 'application/json' } }
-        );
+        res.status(200).json({ success: true, savedAt: new Date().toISOString(), storage: 'db' });
+        return;
       }
 
       // Guest mode fallback
       const written = safeWriteGuestFile(JSON.stringify(body, null, 2));
-      return new Response(
-        JSON.stringify({
-          success: written,
-          savedAt: new Date().toISOString(),
-          storage: written ? 'file' : 'memory',
-        }),
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+      res.status(200).json({
+        success: written,
+        savedAt: new Date().toISOString(),
+        storage: written ? 'file' : 'memory',
+      });
+      return;
     }
 
-    return new Response('Method not allowed', { status: 405 });
+    res.status(405).send('Method not allowed');
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Internal Server Error';
-    console.error('Unhandled API error in /api/plan:', err);
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error('Unhandled error in /api/plan handler:', err);
+    res.status(500).json({ error: message });
   }
 }
