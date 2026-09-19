@@ -1,6 +1,7 @@
 import { serve } from "bun";
 import fs from "node:fs";
 import path from "node:path";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import handler from "../../api/plan";
 
 const port = Number(process.env.PORT) || 3000;
@@ -15,7 +16,61 @@ serve({
 
     // API endpoints
     if (url.pathname === "/api/plan") {
-      return handler(req);
+      let body: unknown = undefined;
+      if (req.method === "POST") {
+        try {
+          body = await req.json();
+        } catch {
+          body = undefined;
+        }
+      }
+
+      const headersObj: Record<string, string> = {};
+      req.headers.forEach((val, key) => {
+        headersObj[key] = val;
+      });
+
+      const vReq = {
+        method: req.method,
+        headers: headersObj,
+        body,
+      } as unknown as VercelRequest;
+
+      let statusCode = 200;
+      let resHeaders: Record<string, string> = {};
+      let resBody = "";
+
+      const vRes = {
+        status(code: number) {
+          statusCode = code;
+          return vRes;
+        },
+        setHeader(key: string, val: string) {
+          resHeaders[key] = val;
+          return vRes;
+        },
+        json(data: unknown) {
+          resHeaders["Content-Type"] = "application/json";
+          resBody = JSON.stringify(data);
+          return vRes;
+        },
+        send(data: unknown) {
+          if (typeof data === "string") {
+            resBody = data;
+          } else {
+            resHeaders["Content-Type"] = "application/json";
+            resBody = JSON.stringify(data);
+          }
+          return vRes;
+        },
+      } as unknown as VercelResponse;
+
+      await handler(vReq, vRes);
+
+      return new Response(resBody, {
+        status: statusCode,
+        headers: resHeaders,
+      });
     }
 
     // Serve static frontend files if built
