@@ -6,20 +6,33 @@ import type { AppStoreData } from '../src/types/plan';
 
 const clerkSecretKey = process.env.CLERK_SECRET_KEY;
 
-async function getUserIdFromRequest(req: Request): Promise<string | null> {
-  if (!clerkSecretKey) return null;
+async function getUserIdFromRequest(req: Request): Promise<{ userId: string | null; authAttempted: boolean }> {
   const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
+  if (!authHeader) {
+    return { userId: null, authAttempted: false };
+  }
+
+  if (!authHeader.startsWith('Bearer ')) {
+    return { userId: null, authAttempted: true };
+  }
 
   const token = authHeader.split(' ')[1];
-  if (!token) return null;
+  if (!token) {
+    return { userId: null, authAttempted: true };
+  }
+
+  if (!clerkSecretKey) {
+    console.warn('CLERK_SECRET_KEY is missing in environment variables');
+    return { userId: null, authAttempted: true };
+  }
 
   try {
     const verified = await verifyToken(token, { secretKey: clerkSecretKey });
-    return verified.sub || null;
+    const userId = verified.sub || null;
+    return { userId, authAttempted: true };
   } catch (err) {
     console.warn('Clerk token verification failed:', err);
-    return null;
+    return { userId: null, authAttempted: true };
   }
 }
 
@@ -53,10 +66,19 @@ function safeWriteGuestFile(content: string): boolean {
 
 export default async function handler(req: Request): Promise<Response> {
   try {
-    const userId = await getUserIdFromRequest(req);
+    const { userId, authAttempted } = await getUserIdFromRequest(req);
+
+    // If request attempted auth with Bearer token, but verification failed -> return 401
+    if (authAttempted && !userId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid or expired Clerk session token' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     if (req.method === 'GET') {
       if (userId) {
+        console.log(`[API /api/plan] Fetching DB store data for authenticated user: ${userId}`);
         const storeData = await getUserStoreData(userId);
         return new Response(JSON.stringify(storeData), {
           headers: { 'Content-Type': 'application/json' },
@@ -79,6 +101,7 @@ export default async function handler(req: Request): Promise<Response> {
       const body = (await req.json()) as AppStoreData;
 
       if (userId) {
+        console.log(`[API /api/plan] Saving DB store data for authenticated user: ${userId} (${body.plans.length} plans)`);
         await saveUserStoreData(userId, body);
         return new Response(
           JSON.stringify({ success: true, savedAt: new Date().toISOString(), storage: 'db' }),
