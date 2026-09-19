@@ -1,11 +1,11 @@
 import { defineConfig } from 'drizzle-kit';
-import { normalizeDbUrl } from './src/db/client';
+import { normalizeDbUrl } from './api/_lib/client';
 
 const rawUrl = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL;
 const url = normalizeDbUrl(rawUrl);
 
 export default defineConfig({
-  schema: './src/db/schema.ts',
+  schema: './api/_lib/schema.ts',
   out: './drizzle',
   dialect: 'turso',
   dbCredentials: {
