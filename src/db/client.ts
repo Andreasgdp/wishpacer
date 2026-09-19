@@ -23,9 +23,13 @@ function getDbClient(): DbConnection {
   const authToken = process.env.TURSO_AUTH_TOKEN;
 
   if (url.startsWith('file:')) {
-    const dataDir = path.resolve(process.cwd(), 'data');
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
+    try {
+      const dataDir = path.resolve(process.cwd(), 'data');
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+    } catch {
+      // Ignore read-only filesystem in serverless environments
     }
   }
 

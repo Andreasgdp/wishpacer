@@ -1,28 +1,10 @@
 import { eq, asc } from 'drizzle-orm';
-import { migrate } from 'drizzle-orm/libsql/migrator';
 import { db } from '../db/client';
 import { users, plans, wishItems } from '../db/schema';
 import type { AppStoreData, CurrencyConfig, GlobalSettings, Plan, WishItem } from '../types/plan';
 import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_PLANS } from '../utils/defaults';
-import path from 'node:path';
-
-let isDbMigrated = false;
-
-async function ensureDbInit(): Promise<void> {
-  if (!isDbMigrated) {
-    try {
-      const migrationsFolder = path.resolve(process.cwd(), 'drizzle');
-      await migrate(db, { migrationsFolder });
-    } catch (err) {
-      console.warn('Auto migration notice:', err);
-    }
-    isDbMigrated = true;
-  }
-}
 
 export async function getUserStoreData(userId: string): Promise<AppStoreData> {
-  await ensureDbInit();
-
   // 1. Fetch user settings
   const userRows = await db.select().from(users).where(eq(users.id, userId));
   let userSettings: GlobalSettings = { ...DEFAULT_GLOBAL_SETTINGS };
@@ -175,7 +157,6 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
 }
 
 export async function saveUserStoreData(userId: string, data: AppStoreData): Promise<void> {
-  await ensureDbInit();
   const now = new Date().toISOString();
 
   // 1. Update user settings
