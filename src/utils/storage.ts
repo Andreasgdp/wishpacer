@@ -1,6 +1,6 @@
-import type { AppStoreData, CurrencyConfig, GlobalSettings, Plan } from "../types/plan";
-import { CURRENCY_PRESETS } from "./currency";
-import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_STORE_DATA } from "./defaults";
+import type { AppStoreData, CurrencyConfig, GlobalSettings, Plan } from "../types/plan.js";
+import { CURRENCY_PRESETS } from "./currency.js";
+import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_STORE_DATA } from "./defaults.js";
 
 const LOCAL_STORAGE_KEY = "saving_plan_app_store_v3";
 const LEGACY_V2_STORAGE_KEY = "saving_plan_app_store_v2";
