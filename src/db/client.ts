@@ -9,8 +9,17 @@ export interface DbConnection {
   rawClient: Client;
 }
 
+export function normalizeDbUrl(rawUrl?: string): string {
+  const url = rawUrl || 'file:./data/saving_plan.db';
+  if (url.startsWith('turso://')) {
+    return url.replace('turso://', 'libsql://');
+  }
+  return url;
+}
+
 function getDbClient(): DbConnection {
-  const url = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL || 'file:./data/saving_plan.db';
+  const rawUrl = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL;
+  const url = normalizeDbUrl(rawUrl);
   const authToken = process.env.TURSO_AUTH_TOKEN;
 
   if (url.startsWith('file:')) {
