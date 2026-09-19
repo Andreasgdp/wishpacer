@@ -1,4 +1,4 @@
-import type { CurrencyConfig } from "../types/plan";
+import type { CurrencyConfig } from "../types/plan.js";
 
 export const CURRENCY_PRESETS: Record<string, CurrencyConfig> = {
   USD: { code: "USD", symbol: "$", position: "prefix", decimals: 0 },

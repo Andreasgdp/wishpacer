@@ -1,8 +1,8 @@
 import { eq, asc } from 'drizzle-orm';
-import { db } from './client';
-import { users, plans, wishItems } from './schema';
-import type { AppStoreData, CurrencyConfig, GlobalSettings, Plan, WishItem } from '../../src/types/plan';
-import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_PLANS } from '../../src/utils/defaults';
+import { db } from './client.js';
+import { users, plans, wishItems } from './schema.js';
+import type { AppStoreData, CurrencyConfig, GlobalSettings, Plan, WishItem } from '../../src/types/plan.js';
+import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_PLANS } from '../../src/utils/defaults.js';
 
 export async function getUserStoreData(userId: string): Promise<AppStoreData> {
   // 1. Fetch user settings
