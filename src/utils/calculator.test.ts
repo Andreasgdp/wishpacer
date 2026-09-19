@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { calculatePlan, calculatePortfolioSummary } from "./calculator";
+import { normalizeDbUrl } from "../db/client";
 import type { Plan, PlanConfig, WishItem } from "../types/plan";
 
 const baseConfig: PlanConfig = {
@@ -50,6 +51,14 @@ const sampleItems: WishItem[] = [
   },
 ];
 
+describe("db URL normalization", () => {
+  it("converts turso:// scheme to libsql://", () => {
+    expect(normalizeDbUrl("turso://my-db-org.turso.io")).toBe("libsql://my-db-org.turso.io");
+    expect(normalizeDbUrl("libsql://my-db-org.turso.io")).toBe("libsql://my-db-org.turso.io");
+    expect(normalizeDbUrl("file:./data/saving_plan.db")).toBe("file:./data/saving_plan.db");
+  });
+});
+
 describe("calculatePlan engine", () => {
   it("calculates effective savings taking emergency buffer into account", () => {
     const result = calculatePlan(baseConfig, sampleItems);
@@ -67,11 +76,6 @@ describe("calculatePlan engine", () => {
       amountToSave: 500,     // Saves 500/mo
     };
 
-    // Item 1 price = 300
-    // Total deficit before item 1 is funded = 1000 (buffer shortfall) + 300 (item) = 1300
-    // At 500/mo, deposit 1 = 500 (buffer at 500/1000)
-    // deposit 2 = 1000 (buffer at 1000/1000)
-    // deposit 3 = 1500 (buffer full, 500 for item 1 >= 300) -> 3 deposits needed!
     const result = calculatePlan(configWithBufferShortfall, [sampleItems[0]]);
     expect(result.effectiveSaved).toBe(0);
     expect(result.totalRemainingDeficit).toBe(1300);
