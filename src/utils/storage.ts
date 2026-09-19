@@ -25,7 +25,6 @@ export function migrateToMultiPlan(data: unknown): AppStoreData {
   if ("plans" in data && Array.isArray(data.plans)) {
     const plans = data.plans as Plan[];
     if (plans.length > 0) {
-      // If global currency wasn't set, infer from first plan's config if present
       if (!("settings" in data)) {
         const firstPlanCur = plans[0]?.config?.currency;
         if (firstPlanCur && firstPlanCur.code && firstPlanCur.symbol) {
@@ -84,10 +83,18 @@ export function migrateToMultiPlan(data: unknown): AppStoreData {
   return DEFAULT_STORE_DATA;
 }
 
-export async function loadStoreData(): Promise<AppStoreData> {
-  // 1. Try loading from server API (./data/plan.json)
+export async function loadStoreData(getToken?: () => Promise<string | null>): Promise<AppStoreData> {
+  // 1. Try loading from server API (./data/plan.json or Drizzle DB)
   try {
-    const res = await fetch("/api/plan");
+    const headers: Record<string, string> = {};
+    if (getToken) {
+      const token = await getToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+
+    const res = await fetch("/api/plan", { headers });
     if (res.ok) {
       const data: unknown = await res.json();
       if (data && typeof data === "object" && ("plans" in data || "items" in data)) {
@@ -134,7 +141,10 @@ export async function loadStoreData(): Promise<AppStoreData> {
   return DEFAULT_STORE_DATA;
 }
 
-export async function saveStoreData(data: AppStoreData): Promise<{ success: boolean; error?: string }> {
+export async function saveStoreData(
+  data: AppStoreData,
+  getToken?: () => Promise<string | null>
+): Promise<{ success: boolean; error?: string }> {
   const updatedData: AppStoreData = {
     ...data,
     version: 3,
@@ -148,17 +158,25 @@ export async function saveStoreData(data: AppStoreData): Promise<{ success: bool
     console.warn("Failed to save to localStorage", err);
   }
 
-  // 2. Persist to server / data/plan.json
+  // 2. Persist to API / DB
   try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (getToken) {
+      const token = await getToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+
     const res = await fetch("/api/plan", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(updatedData),
     });
     if (res.ok) {
       return { success: true };
     }
-    return { success: false, error: "Failed to persist to file system" };
+    return { success: false, error: "Failed to persist data" };
   } catch {
     return { success: true };
   }

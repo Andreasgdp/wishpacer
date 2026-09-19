@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useAuth } from '@clerk/clerk-react';
 import type {
   AppStoreData,
   ComputedWishItem,
@@ -24,6 +25,7 @@ import { PurchasedHistoryModal } from './components/PurchasedHistoryModal';
 import { ExportImportModal } from './components/ExportImportModal';
 
 export const App: React.FC = () => {
+  const { getToken, userId, isSignedIn } = useAuth();
   const [storeData, setStoreData] = useState<AppStoreData>(DEFAULT_STORE_DATA);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isPortfolioView, setIsPortfolioView] = useState(false);
@@ -83,17 +85,26 @@ export const App: React.FC = () => {
     localStorage.setItem('saving_plan_dark_mode', darkMode.toString());
   }, [darkMode]);
 
-  // Load store data on mount
+  // Load store data (re-triggers on sign in state change)
   useEffect(() => {
-    loadStoreData().then(loaded => {
-      setStoreData(loaded);
-      const current = loaded.plans.find(p => p.id === loaded.activePlanId) || loaded.plans[0];
-      if (current) {
-        setSimulatedSavingsRate(current.config.amountToSave);
+    let isMounted = true;
+    setIsLoaded(false);
+
+    loadStoreData(isSignedIn ? getToken : undefined).then(loaded => {
+      if (isMounted) {
+        setStoreData(loaded);
+        const current = loaded.plans.find(p => p.id === loaded.activePlanId) || loaded.plans[0];
+        if (current) {
+          setSimulatedSavingsRate(current.config.amountToSave);
+        }
+        setIsLoaded(true);
       }
-      setIsLoaded(true);
     });
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isSignedIn, userId, getToken]);
 
   // Sync simulated rate when active plan changes
   useEffect(() => {
@@ -107,10 +118,10 @@ export const App: React.FC = () => {
   // Persist store data
   const persistStore = useCallback(async (nextStore: AppStoreData) => {
     setStoreData(nextStore);
-    await saveStoreData(nextStore);
-  }, []);
+    await saveStoreData(nextStore, isSignedIn ? getToken : undefined);
+  }, [isSignedIn, getToken]);
 
-  // Portfolio calculations with global currency
+  // Portfolio calculations
   const portfolioSummary = useMemo(() => {
     return calculatePortfolioSummary(storeData.plans, storeData.settings.currency);
   }, [storeData.plans, storeData.settings.currency]);
@@ -491,7 +502,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+      <main className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full space-y-4 sm:space-y-6">
         {isPortfolioView ? (
           /* Portfolio Multi-Plan Overview */
           <PortfolioOverview
@@ -532,10 +543,10 @@ export const App: React.FC = () => {
             <section className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                  <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                     {activePlan.name} Priority Queue
                   </h2>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-500 hidden sm:inline">
                     ({activePlanCalculation.totalActiveItemsCount} active wishes)
                   </span>
                 </div>

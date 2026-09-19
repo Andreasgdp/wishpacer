@@ -12,7 +12,9 @@ import {
   MoreVertical,
   X,
   Sparkles,
+  User as UserIcon,
 } from 'lucide-react';
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 import type { Plan, PlanCalculationResult } from '../types/plan';
 import { PlanSwitcher } from './PlanSwitcher';
 
@@ -200,10 +202,28 @@ export const Header: React.FC<HeaderProps> = ({
                 <span>Add Wish</span>
               </button>
             )}
+
+            {/* Clerk Authentication Controls */}
+            <div className="pl-1 border-l border-slate-200 dark:border-slate-800 flex items-center">
+              <SignedIn>
+                <UserButton userProfileMode="modal" />
+              </SignedIn>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
+                  >
+                    <UserIcon className="w-3.5 h-3.5" />
+                    <span>Sign In</span>
+                  </button>
+                </SignInButton>
+              </SignedOut>
+            </div>
           </div>
 
           {/* Mobile Actions Header (< 640px) */}
-          <div className="flex sm:hidden items-center gap-1 flex-shrink-0" ref={mobileMenuRef}>
+          <div className="flex sm:hidden items-center gap-1.5 flex-shrink-0" ref={mobileMenuRef}>
             {/* Primary Action Button on Mobile */}
             {isPortfolioView ? (
               <button
@@ -225,6 +245,11 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
+            {/* Clerk User Button / Sign In on Mobile */}
+            <SignedIn>
+              <UserButton userProfileMode="modal" />
+            </SignedIn>
+
             {/* Mobile Menu Toggle Button */}
             <button
               type="button"
@@ -242,6 +267,19 @@ export const Header: React.FC<HeaderProps> = ({
                   <span>Quick Actions</span>
                   <Sparkles className="w-3 h-3 text-brand-500" />
                 </div>
+
+                {/* Sign In Button if Signed Out */}
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900 mb-2 shadow-xs"
+                    >
+                      <UserIcon className="w-4 h-4" />
+                      <span>Sign In / Create Account</span>
+                    </button>
+                  </SignInButton>
+                </SignedOut>
 
                 {/* All Plans */}
                 <button

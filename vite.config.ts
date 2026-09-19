@@ -1,59 +1,60 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
-import fs from 'node:fs';
-import path from 'node:path';
+import handler from './api/plan';
 
 function localPersistencePlugin(): Plugin {
-  const dataDir = path.resolve(process.cwd(), 'data');
-  const dataFile = path.resolve(dataDir, 'plan.json');
-
   return {
     name: 'local-persistence-api',
     configureServer(server) {
-      server.middlewares.use((req, res, next) => {
+      server.middlewares.use(async (req, res, next) => {
         if (!req.url?.startsWith('/api/')) {
           return next();
         }
 
-        if (!fs.existsSync(dataDir)) {
-          fs.mkdirSync(dataDir, { recursive: true });
-        }
+        if (req.url === '/api/plan') {
+          try {
+            // Convert Connect req to Web Request
+            const protocol = req.headers['x-forwarded-proto'] || 'http';
+            const host = req.headers.host || 'localhost:3000';
+            const fullUrl = `${protocol}://${host}${req.url}`;
 
-        if (req.url === '/api/plan' && req.method === 'GET') {
-          if (fs.existsSync(dataFile)) {
-            try {
-              const content = fs.readFileSync(dataFile, 'utf-8');
-              res.setHeader('Content-Type', 'application/json');
-              res.end(content);
-              return;
-            } catch (err) {
-              console.error('Failed to read plan.json', err);
+            let body: string | undefined;
+            if (req.method === 'POST') {
+              const buffers: Uint8Array[] = [];
+              for await (const chunk of req) {
+                buffers.push(chunk as Uint8Array);
+              }
+              body = Buffer.concat(buffers).toString('utf-8');
             }
+
+            const headers = new Headers();
+            for (const [key, value] of Object.entries(req.headers)) {
+              if (value) {
+                headers.set(key, Array.isArray(value) ? value.join(', ') : value);
+              }
+            }
+
+            const webReq = new Request(fullUrl, {
+              method: req.method,
+              headers,
+              body,
+            });
+
+            const webRes = await handler(webReq);
+            res.statusCode = webRes.status;
+            webRes.headers.forEach((val, key) => {
+              res.setHeader(key, val);
+            });
+
+            const resBody = await webRes.text();
+            res.end(resBody);
+            return;
+          } catch (err) {
+            console.error('Error handling API request:', err);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Internal Server Error' }));
+            return;
           }
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ exists: false }));
-          return;
-        }
-
-        if (req.url === '/api/plan' && req.method === 'POST') {
-          let body = '';
-          req.on('data', chunk => {
-            body += chunk;
-          });
-          req.on('end', () => {
-            try {
-              const parsed: unknown = JSON.parse(body);
-              fs.writeFileSync(dataFile, JSON.stringify(parsed, null, 2), 'utf-8');
-              res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ success: true, savedAt: new Date().toISOString() }));
-            } catch (err) {
-              const errorMessage = err instanceof Error ? err.message : 'Invalid JSON';
-              res.statusCode = 400;
-              res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ error: errorMessage }));
-            }
-          });
-          return;
         }
 
         next();
