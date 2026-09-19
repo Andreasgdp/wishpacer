@@ -1,5 +1,5 @@
-import type { AppStoreData, GlobalSettings, Plan, PlanConfig, WishItem } from "../types/plan";
-import { CURRENCY_PRESETS } from "./currency";
+import type { AppStoreData, GlobalSettings, Plan, PlanConfig, WishItem } from "../types/plan.js";
+import { CURRENCY_PRESETS } from "./currency.js";
 
 export interface CategoryMeta {
   name: string;

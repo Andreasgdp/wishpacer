@@ -1,5 +1,5 @@
 import { defineConfig } from 'drizzle-kit';
-import { normalizeDbUrl } from './src/db/client.js';
+import { normalizeDbUrl } from './src/db/client';
 
 const rawUrl = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL;
 const url = normalizeDbUrl(rawUrl);

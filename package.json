@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "bun run db:migrate && tsc && vite build",
+    "build": "bun run db:migrate && tsc && vite build && esbuild api/plan.ts --bundle --platform=node --target=node20 --format=esm --outdir=api --external:@clerk/backend --external:@libsql/client --external:@vercel/node",
     "preview": "vite preview",
     "server": "bun src/server/index.ts",
     "start": "bun src/server/index.ts",
@@ -38,6 +38,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.10",
+    "esbuild": "^0.28.2",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.2",
