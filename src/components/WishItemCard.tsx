@@ -45,14 +45,9 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
   onMoveUp,
   onMoveDown,
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: item.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -86,10 +81,10 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
         item.isPurchased
           ? 'border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/20 dark:bg-emerald-950/10'
           : item.isPaused
-          ? 'border-dashed border-slate-300 dark:border-slate-800 opacity-60'
-          : item.isAffordable
-          ? 'border-emerald-300 dark:border-emerald-800/80 shadow-xs hover:shadow-md'
-          : 'border-slate-200/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
+            ? 'border-dashed border-slate-300 dark:border-slate-800 opacity-60'
+            : item.isAffordable
+              ? 'border-emerald-300 dark:border-emerald-800/80 shadow-xs hover:shadow-md'
+              : 'border-slate-200/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
       }`}
     >
       <div className="p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -216,7 +211,11 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                 <div className="flex items-center gap-1 truncate text-[11px] sm:text-xs">
                   <Layers className="w-3 h-3 text-slate-400 flex-shrink-0" />
                   <span className="truncate">
-                    Allocated: <strong className="text-slate-700 dark:text-slate-300">{formatCurrency(item.availableSavings, currency)}</strong> of {formatCurrency(item.price, currency)}
+                    Allocated:{' '}
+                    <strong className="text-slate-700 dark:text-slate-300">
+                      {formatCurrency(item.availableSavings, currency)}
+                    </strong>{' '}
+                    of {formatCurrency(item.price, currency)}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 font-mono text-[11px] sm:text-xs flex-shrink-0 ml-1">
@@ -225,9 +224,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                       -{formatCurrency(item.deficit, currency)}
                     </span>
                   ) : (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                      100%
-                    </span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">100%</span>
                   )}
                 </div>
               </div>
@@ -239,8 +236,8 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                     item.isAffordable
                       ? 'bg-emerald-500'
                       : item.progressPercent > 0
-                      ? 'bg-brand-500'
-                      : 'bg-transparent'
+                        ? 'bg-brand-500'
+                        : 'bg-transparent'
                   }`}
                   style={{ width: `${Math.min(100, Math.max(0, item.progressPercent))}%` }}
                 />
@@ -276,7 +273,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                   ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400'
                   : 'text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
               }`}
-              title={item.isPurchased ? "Mark as planned" : "Mark as purchased"}
+              title={item.isPurchased ? 'Mark as planned' : 'Mark as purchased'}
             >
               <CheckCircle className="w-4 h-4" />
             </button>
@@ -290,7 +287,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                   ? 'bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400'
                   : 'text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
               }`}
-              title={item.isPaused ? "Include in active plan" : "Temporarily pause item"}
+              title={item.isPaused ? 'Include in active plan' : 'Temporarily pause item'}
             >
               {item.isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
             </button>

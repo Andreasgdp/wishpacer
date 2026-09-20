@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  Settings,
-  Coins,
-  Calendar,
-  ShieldAlert,
-  Percent,
-  PiggyBank,
-} from 'lucide-react';
+import { X, Settings, Coins, Calendar, ShieldAlert, Percent, PiggyBank } from 'lucide-react';
 import type { PlanConfig } from '../types/plan';
 import { ModalBackdrop } from './ModalBackdrop';
 
@@ -25,13 +17,19 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
   onSave,
 }) => {
   const [name, setName] = useState(config.name);
-  const [currentAmountSaved, setCurrentAmountSaved] = useState(config.currentAmountSaved.toString());
+  const [currentAmountSaved, setCurrentAmountSaved] = useState(
+    config.currentAmountSaved.toString()
+  );
   const [amountToSave, setAmountToSave] = useState(config.amountToSave.toString());
   const [frequency, setFrequency] = useState(config.frequency);
   const [savingsDayOfMonth, setSavingsDayOfMonth] = useState<number>(config.savingsDayOfMonth || 1);
-  const [firstSavingDate, setFirstSavingDate] = useState(config.firstSavingDate || new Date().toISOString().split('T')[0]);
+  const [firstSavingDate, setFirstSavingDate] = useState(
+    config.firstSavingDate || new Date().toISOString().split('T')[0]
+  );
   const [emergencyBuffer, setEmergencyBuffer] = useState(config.emergencyBuffer.toString());
-  const [annualInterestRate, setAnnualInterestRate] = useState((config.annualInterestRate || 0).toString());
+  const [annualInterestRate, setAnnualInterestRate] = useState(
+    (config.annualInterestRate || 0).toString()
+  );
 
   useEffect(() => {
     setName(config.name);

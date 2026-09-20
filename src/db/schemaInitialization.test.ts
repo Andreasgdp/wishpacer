@@ -1,19 +1,19 @@
-import { describe, expect, it } from "bun:test";
-import { createClient } from "@libsql/client";
-import { ensureTablesExist } from "../../api/_lib/client.js";
+import { describe, expect, it } from 'bun:test';
+import { createClient } from '@libsql/client';
+import { ensureTablesExist } from '../../api/_lib/client.js';
 
-describe("Database Schema Auto-Initialization Regression Test", () => {
-  it("handles fresh SQLite database by automatically creating missing tables", async () => {
+describe('Database Schema Auto-Initialization Regression Test', () => {
+  it('handles fresh SQLite database by automatically creating missing tables', async () => {
     // 1. Create a fresh isolated in-memory SQLite client
-    const rawClient = createClient({ url: "file::memory:" });
+    const rawClient = createClient({ url: 'file::memory:' });
 
     // 2. Confirm raw query fails on uninitialized database with 'no such table'
     let threw = false;
     try {
-      await rawClient.execute("SELECT * FROM users");
+      await rawClient.execute('SELECT * FROM users');
     } catch (err) {
       threw = true;
-      expect(String(err)).toContain("no such table");
+      expect(String(err)).toContain('no such table');
     }
     expect(threw).toBe(true);
 
@@ -71,17 +71,17 @@ describe("Database Schema Auto-Initialization Regression Test", () => {
     `);
 
     // 4. Confirm queries now succeed on all tables
-    const usersRes = await rawClient.execute("SELECT * FROM users");
+    const usersRes = await rawClient.execute('SELECT * FROM users');
     expect(usersRes.rows.length).toBe(0);
 
-    const plansRes = await rawClient.execute("SELECT * FROM plans");
+    const plansRes = await rawClient.execute('SELECT * FROM plans');
     expect(plansRes.rows.length).toBe(0);
 
-    const wishesRes = await rawClient.execute("SELECT * FROM wish_items");
+    const wishesRes = await rawClient.execute('SELECT * FROM wish_items');
     expect(wishesRes.rows.length).toBe(0);
   });
 
-  it("verify ensureTablesExist function runs idempotently without errors", async () => {
+  it('verify ensureTablesExist function runs idempotently without errors', async () => {
     // Calling ensureTablesExist against global client should complete without errors
     await expect(ensureTablesExist()).resolves.toBeUndefined();
   });

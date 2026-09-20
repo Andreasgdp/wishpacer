@@ -1,15 +1,15 @@
-import { useCallback, useState } from "react";
-import type { ComputedWishItem, Plan } from "../types/plan.js";
+import { useCallback, useState } from 'react';
+import type { ComputedWishItem, Plan } from '../types/plan.js';
 
 export type ModalType =
-  | "createPlan"
-  | "editPlan"
-  | "addWish"
-  | "editWish"
-  | "settings"
-  | "globalSettings"
-  | "history"
-  | "exportImport";
+  | 'createPlan'
+  | 'editPlan'
+  | 'addWish'
+  | 'editWish'
+  | 'settings'
+  | 'globalSettings'
+  | 'history'
+  | 'exportImport';
 
 export interface ModalRegistryPayload {
   wishItem?: ComputedWishItem | null;

@@ -176,10 +176,14 @@ export const Header: React.FC<HeaderProps> = ({
               type="button"
               onClick={onToggleDarkMode}
               className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-800/80 transition-colors"
-              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               aria-label="Toggle theme"
             >
-              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+              {darkMode ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-slate-600" />
+              )}
             </button>
 
             {/* Primary Add Action */}

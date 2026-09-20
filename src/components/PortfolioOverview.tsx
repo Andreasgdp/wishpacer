@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  Layers,
-  ArrowRight,
-  Plus,
-  Settings,
-  CheckCircle2,
-  Calendar,
-} from 'lucide-react';
+import { Layers, ArrowRight, Plus, Settings, CheckCircle2, Calendar } from 'lucide-react';
 import type { Plan, PortfolioSummary } from '../types/plan';
 import { calculatePlan } from '../utils/calculator';
 import { formatCurrency } from '../utils/currency';
@@ -42,7 +35,8 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
               All Active Savings Plans
             </h2>
             <p className="text-sm text-slate-300 max-w-xl mt-1.5">
-              Managing <strong>{plans.length} independent plans</strong> with a combined monthly savings rate of{' '}
+              Managing <strong>{plans.length} independent plans</strong> with a combined monthly
+              savings rate of{' '}
               <strong className="text-emerald-400">
                 {formatCurrency(summary.totalMonthlyContribution, summary.currency)}/mo
               </strong>
@@ -116,7 +110,13 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {plans.map(plan => {
-            const calc = calculatePlan(plan.config, plan.items, plan.id, plan.name, summary.currency);
+            const calc = calculatePlan(
+              plan.config,
+              plan.items,
+              plan.id,
+              plan.name,
+              summary.currency
+            );
             const colorMeta = PLAN_COLORS[plan.color || 'violet'] || PLAN_COLORS.violet;
 
             return (
@@ -180,7 +180,8 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
                         Monthly Saving
                       </span>
                       <strong className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                        {formatCurrency(plan.config.amountToSave, calc.currency)}/{plan.config.frequency.charAt(0)}
+                        {formatCurrency(plan.config.amountToSave, calc.currency)}/
+                        {plan.config.frequency.charAt(0)}
                       </strong>
                     </div>
                   </div>
@@ -198,7 +199,9 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
                     <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
                       <div
                         className={`h-full rounded-full bg-gradient-to-r ${colorMeta.gradient} transition-all duration-500`}
-                        style={{ width: `${Math.min(100, Math.max(calc.overallProgressPercent > 0 ? 3 : 0, calc.overallProgressPercent))}%` }}
+                        style={{
+                          width: `${Math.min(100, Math.max(calc.overallProgressPercent > 0 ? 3 : 0, calc.overallProgressPercent))}%`,
+                        }}
                       />
                     </div>
                   </div>

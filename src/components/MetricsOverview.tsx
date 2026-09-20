@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  Wallet,
-  Calendar,
-  PiggyBank,
-  CheckCircle2,
-  ShieldCheck,
-  Target,
-} from 'lucide-react';
+import { Wallet, Calendar, PiggyBank, CheckCircle2, ShieldCheck, Target } from 'lucide-react';
 import type { PlanCalculationResult, PlanConfig } from '../types/plan';
 import { formatCurrency } from '../utils/currency';
 
@@ -25,10 +18,10 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
     config.frequency === 'monthly'
       ? 'Monthly'
       : config.frequency === 'biweekly'
-      ? 'Bi-weekly'
-      : config.frequency === 'weekly'
-      ? 'Weekly'
-      : 'Daily';
+        ? 'Bi-weekly'
+        : config.frequency === 'weekly'
+          ? 'Weekly'
+          : 'Daily';
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -83,7 +76,11 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
           <div className="mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
             {result.totalRemainingDeficit > 0 ? (
               <span className="truncate">
-                Need <strong className="text-amber-600 dark:text-amber-400 font-semibold">{formatCurrency(result.totalRemainingDeficit, result.currency)}</strong> more
+                Need{' '}
+                <strong className="text-amber-600 dark:text-amber-400 font-semibold">
+                  {formatCurrency(result.totalRemainingDeficit, result.currency)}
+                </strong>{' '}
+                more
               </span>
             ) : (
               <span className="text-emerald-600 dark:text-emerald-400 font-medium">
@@ -94,7 +91,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
         </div>
 
         {/* 3. Savings Rate / Velocity */}
-        <div 
+        <div
           onClick={onOpenSettings}
           className="bg-white dark:bg-slate-900 rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-xs relative overflow-hidden cursor-pointer hover:border-brand-300 dark:hover:border-brand-700 transition-colors group"
         >
@@ -132,17 +129,22 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
           <div className="mt-1.5 sm:mt-2 flex items-baseline gap-2">
             <span className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               {result.totalRemainingDeficit === 0
-                ? "Today! 🚀"
+                ? 'Today! 🚀'
                 : config.amountToSave <= 0
-                ? "Paused"
-                : result.formattedCompletionDate}
+                  ? 'Paused'
+                  : result.formattedCompletionDate}
             </span>
           </div>
           <div className="mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
             {result.totalRemainingDeficit === 0 ? (
-              <span className="text-emerald-600 dark:text-emerald-400 font-medium">Ready to purchase all</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                Ready to purchase all
+              </span>
             ) : config.amountToSave > 0 ? (
-              <span>~{result.totalIntervalsToComplete} deposit{result.totalIntervalsToComplete === 1 ? '' : 's'} remaining</span>
+              <span>
+                ~{result.totalIntervalsToComplete} deposit
+                {result.totalIntervalsToComplete === 1 ? '' : 's'} remaining
+              </span>
             ) : (
               <span>Set savings rate to project</span>
             )}
@@ -164,7 +166,8 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
           </div>
           <div className="flex items-center justify-between sm:justify-end gap-2 text-xs">
             <span className="text-slate-600 dark:text-slate-400 text-[11px] sm:text-xs">
-              <strong>{formatCurrency(result.effectiveSaved, result.currency)}</strong> of {formatCurrency(result.totalActiveCost, result.currency)}
+              <strong>{formatCurrency(result.effectiveSaved, result.currency)}</strong> of{' '}
+              {formatCurrency(result.totalActiveCost, result.currency)}
             </span>
             <span className="px-2 py-0.5 rounded-full font-bold text-[10px] sm:text-xs bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
               {result.overallProgressPercent.toFixed(0)}%
@@ -176,7 +179,9 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
         <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 sm:h-3.5 overflow-hidden p-0.5 relative">
           <div
             className="bg-gradient-to-r from-brand-600 via-indigo-500 to-emerald-500 h-full rounded-full transition-all duration-500 ease-out shadow-xs"
-            style={{ width: `${Math.max(result.overallProgressPercent > 0 ? 2 : 0, Math.min(100, result.overallProgressPercent))}%` }}
+            style={{
+              width: `${Math.max(result.overallProgressPercent > 0 ? 2 : 0, Math.min(100, result.overallProgressPercent))}%`,
+            }}
           />
         </div>
 
@@ -192,12 +197,18 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
                     : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-800'
                 }`}
               >
-                <span className="font-mono font-bold text-[9px] sm:text-[10px] opacity-70">#{idx + 1}</span>
-                <span className="max-w-[90px] sm:max-w-[160px] truncate font-medium">{item.title}</span>
+                <span className="font-mono font-bold text-[9px] sm:text-[10px] opacity-70">
+                  #{idx + 1}
+                </span>
+                <span className="max-w-[90px] sm:max-w-[160px] truncate font-medium">
+                  {item.title}
+                </span>
                 {item.isAffordable ? (
                   <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0" />
                 ) : (
-                  <span className="font-mono text-[9px] sm:text-[10px] opacity-80">{item.progressPercent.toFixed(0)}%</span>
+                  <span className="font-mono text-[9px] sm:text-[10px] opacity-80">
+                    {item.progressPercent.toFixed(0)}%
+                  </span>
                 )}
               </div>
             ))}

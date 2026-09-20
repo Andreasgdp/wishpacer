@@ -14,13 +14,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import {
-  Search,
-  Plus,
-  Filter,
-  Sparkles,
-  ListOrdered,
-} from 'lucide-react';
+import { Search, Plus, Filter, Sparkles, ListOrdered } from 'lucide-react';
 import type { ComputedWishItem, CurrencyConfig } from '../types/plan';
 import { WishItemCard } from './WishItemCard';
 import { CATEGORIES } from '../utils/defaults';
@@ -77,11 +71,9 @@ export const WishList: React.FC<WishListProps> = ({
         (item.notes && item.notes.toLowerCase().includes(searchQuery.toLowerCase())) ||
         item.category.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesCategory =
-        selectedCategory === 'all' || item.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
 
-      const matchesAffordable =
-        !filterAffordableOnly || item.isAffordable;
+      const matchesAffordable = !filterAffordableOnly || item.isAffordable;
 
       return matchesSearch && matchesCategory && matchesAffordable;
     });

@@ -1,0 +1,9 @@
+dist
+dist-ssr
+build
+data
+node_modules
+.jj
+.cache
+coverage
+bun.lock

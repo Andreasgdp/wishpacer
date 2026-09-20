@@ -1,14 +1,14 @@
-export * from "./types.js";
-export * from "./migrations.js";
-export * from "./adapters/LocalStorageAdapter.js";
-export * from "./adapters/ApiSyncAdapter.js";
-export * from "./adapters/HybridStorageAdapter.js";
-export * from "./adapters/InMemoryStorageRepository.js";
+export * from './types.js';
+export * from './migrations.js';
+export * from './adapters/LocalStorageAdapter.js';
+export * from './adapters/ApiSyncAdapter.js';
+export * from './adapters/HybridStorageAdapter.js';
+export * from './adapters/InMemoryStorageRepository.js';
 
-import type { GetTokenFn, StorageRepository } from "./types.js";
-import { LocalStorageAdapter } from "./adapters/LocalStorageAdapter.js";
-import { ApiSyncAdapter } from "./adapters/ApiSyncAdapter.js";
-import { HybridStorageAdapter } from "./adapters/HybridStorageAdapter.js";
+import type { GetTokenFn, StorageRepository } from './types.js';
+import { LocalStorageAdapter } from './adapters/LocalStorageAdapter.js';
+import { ApiSyncAdapter } from './adapters/ApiSyncAdapter.js';
+import { HybridStorageAdapter } from './adapters/HybridStorageAdapter.js';
 
 /**
  * Creates the standard default storage repository configured for local browser storage

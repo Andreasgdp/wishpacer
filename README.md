@@ -9,6 +9,7 @@ Inspired by [Wishing-Plan](https://github.com/Andreasgdp/Wishing-Plan), upgraded
 ## ⚡ Quick Start (Local Development)
 
 ### 1. Install Dependencies
+
 ```bash
 bun install
 ```
@@ -132,11 +133,32 @@ bun run build
 
 ---
 
+## 🛑 Deployment Quality Gates & Blockers
+
+Deployments (via Vercel CLI, Vercel GitHub Integration, or manual trigger) are **automatically blocked and failed** if any quality check fails:
+
+1. **Automatic Pre-Build Gating (`package.json`)**:
+   - `bun run build` automatically executes `bun run prebuild` first:
+     ```bash
+     bun run typecheck && bun run lint && bun run format:check && bun run test
+     ```
+   - If typechecking, ESLint, Prettier verification, or any unit test fails, Vercel **immediately aborts the build** and cancels deployment.
+
+2. **GitHub Branch Protection Rules**:
+   - To prevent merging broken code to `main` or `master`, enable Branch Protection in GitHub:
+     1. Go to **Settings** → **Branches** → **Branch protection rules** on GitHub.
+     2. Add protection rule for `main` / `master`.
+     3. Check **Require status checks to pass before merging**.
+     4. Select **Typecheck, Lint, Test & Build** (`validate` job from `.github/workflows/ci.yml`).
+
+---
+
 ## 🚀 Deployment to Vercel + Turso Database
 
 This project deploys natively to **Vercel Serverless Functions** (`/api/plan`) backed by **Turso (LibSQL)**.
 
 ### Step 1: Create a Production Database on Turso
+
 ```bash
 # Create Turso database
 turso db create saving-plan-prod
@@ -147,6 +169,7 @@ turso db tokens create saving-plan-prod
 ```
 
 ### Step 2: Add Production Secrets to Doppler
+
 In your Doppler `prd` environment (or via Doppler Vercel Integration):
 
 ```bash
@@ -157,6 +180,7 @@ doppler secrets set CLERK_SECRET_KEY="sk_live_..." --config prd
 ```
 
 ### Step 3: Deploy to Vercel
+
 ```bash
 # Connect Doppler to Vercel environment variables automatically
 doppler integrations setup vercel

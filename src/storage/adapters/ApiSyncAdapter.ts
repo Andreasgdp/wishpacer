@@ -1,7 +1,7 @@
-import type { AppStoreData } from "../../types/plan.js";
-import { DEFAULT_STORE_DATA } from "../../utils/defaults.js";
-import { migrateToMultiPlan } from "../migrations.js";
-import type { GetTokenFn, SaveResult, StorageRepository } from "../types.js";
+import type { AppStoreData } from '../../types/plan.js';
+import { DEFAULT_STORE_DATA } from '../../utils/defaults.js';
+import { migrateToMultiPlan } from '../migrations.js';
+import type { GetTokenFn, SaveResult, StorageRepository } from '../types.js';
 
 /**
  * Remote API persistence adapter communicating with `/api/plan`
@@ -10,8 +10,10 @@ import type { GetTokenFn, SaveResult, StorageRepository } from "../types.js";
 export class ApiSyncAdapter implements StorageRepository {
   constructor(
     private readonly getToken?: GetTokenFn,
-    private readonly endpoint: string = "/api/plan",
-    private readonly fetchFn: typeof fetch = typeof fetch !== "undefined" ? fetch.bind(window) : fetch
+    private readonly endpoint: string = '/api/plan',
+    private readonly fetchFn: typeof fetch = typeof fetch !== 'undefined'
+      ? fetch.bind(window)
+      : fetch
   ) {}
 
   public async load(): Promise<AppStoreData> {
@@ -20,7 +22,7 @@ export class ApiSyncAdapter implements StorageRepository {
       if (this.getToken) {
         const token = await this.getToken();
         if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
+          headers['Authorization'] = `Bearer ${token}`;
         }
       }
 
@@ -30,14 +32,14 @@ export class ApiSyncAdapter implements StorageRepository {
       if (res.status === 401 && this.getToken) {
         const freshToken = await this.getToken({ skipCache: true });
         if (freshToken) {
-          headers["Authorization"] = `Bearer ${freshToken}`;
+          headers['Authorization'] = `Bearer ${freshToken}`;
           res = await this.fetchFn(this.endpoint, { headers });
         }
       }
 
       if (res.ok) {
         const data: unknown = await res.json();
-        if (data && typeof data === "object" && ("plans" in data || "items" in data)) {
+        if (data && typeof data === 'object' && ('plans' in data || 'items' in data)) {
           return migrateToMultiPlan(data);
         }
       } else {
@@ -52,11 +54,11 @@ export class ApiSyncAdapter implements StorageRepository {
 
   public async save(data: AppStoreData): Promise<SaveResult> {
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (this.getToken) {
         const token = await this.getToken();
         if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
+          headers['Authorization'] = `Bearer ${token}`;
         }
       }
 
@@ -67,7 +69,7 @@ export class ApiSyncAdapter implements StorageRepository {
       };
 
       let res = await this.fetchFn(this.endpoint, {
-        method: "POST",
+        method: 'POST',
         headers,
         body: JSON.stringify(payload),
       });
@@ -76,9 +78,9 @@ export class ApiSyncAdapter implements StorageRepository {
       if (res.status === 401 && this.getToken) {
         const freshToken = await this.getToken({ skipCache: true });
         if (freshToken) {
-          headers["Authorization"] = `Bearer ${freshToken}`;
+          headers['Authorization'] = `Bearer ${freshToken}`;
           res = await this.fetchFn(this.endpoint, {
-            method: "POST",
+            method: 'POST',
             headers,
             body: JSON.stringify(payload),
           });
@@ -94,8 +96,8 @@ export class ApiSyncAdapter implements StorageRepository {
       console.error(`[ApiSyncAdapter] POST ${this.endpoint} failed:`, errorMsg);
       return { success: false, localSaved: false, remoteSaved: false, error: errorMsg };
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Network error saving store data";
-      console.error("[ApiSyncAdapter] Network error:", err);
+      const msg = err instanceof Error ? err.message : 'Network error saving store data';
+      console.error('[ApiSyncAdapter] Network error:', err);
       return { success: false, localSaved: false, remoteSaved: false, error: msg };
     }
   }

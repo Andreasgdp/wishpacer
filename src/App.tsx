@@ -159,10 +159,7 @@ export const App: React.FC = () => {
             </section>
 
             {/* Milestone Timeline & Schedule */}
-            <MilestoneTimeline
-              config={effectiveConfig}
-              result={activePlanCalculation}
-            />
+            <MilestoneTimeline config={effectiveConfig} result={activePlanCalculation} />
           </>
         )}
       </main>

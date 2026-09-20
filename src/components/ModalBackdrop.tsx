@@ -6,11 +6,7 @@ interface ModalBackdropProps {
   children: React.ReactNode;
 }
 
-export const ModalBackdrop: React.FC<ModalBackdropProps> = ({
-  isOpen,
-  onClose,
-  children,
-}) => {
+export const ModalBackdrop: React.FC<ModalBackdropProps> = ({ isOpen, onClose, children }) => {
   useEffect(() => {
     if (!isOpen) return;
 

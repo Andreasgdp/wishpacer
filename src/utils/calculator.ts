@@ -8,21 +8,21 @@ import type {
   PortfolioSummary,
   SavingsFrequency,
   WishItem,
-} from "../types/plan";
-import { CURRENCY_PRESETS } from "./currency";
+} from '../types/plan';
+import { CURRENCY_PRESETS } from './currency';
 
 export function formatHumanTimeRemaining(targetDate: Date | null, isAffordable: boolean): string {
   if (isAffordable) {
-    return "Ready to buy now! ✨";
+    return 'Ready to buy now! ✨';
   }
   if (!targetDate) {
-    return "Set a monthly savings amount to calculate";
+    return 'Set a monthly savings amount to calculate';
   }
 
   const now = new Date();
   const diffMs = targetDate.getTime() - now.getTime();
   if (diffMs <= 0) {
-    return "Ready to buy now! ✨";
+    return 'Ready to buy now! ✨';
   }
 
   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
@@ -30,37 +30,37 @@ export function formatHumanTimeRemaining(targetDate: Date | null, isAffordable: 
   const diffYears = Math.floor(diffDays / 365.25);
 
   if (diffDays < 14) {
-    return `In ${diffDays} day${diffDays === 1 ? "" : "s"}`;
+    return `In ${diffDays} day${diffDays === 1 ? '' : 's'}`;
   }
   if (diffDays < 60) {
     const weeks = Math.ceil(diffDays / 7);
-    return `In ${weeks} week${weeks === 1 ? "" : "s"}`;
+    return `In ${weeks} week${weeks === 1 ? '' : 's'}`;
   }
   if (diffYears < 1) {
-    return `In ~${diffMonths} month${diffMonths === 1 ? "" : "s"}`;
+    return `In ~${diffMonths} month${diffMonths === 1 ? '' : 's'}`;
   }
 
   const remainingMonths = diffMonths % 12;
   if (remainingMonths === 0) {
-    return `In ~${diffYears} year${diffYears === 1 ? "" : "s"}`;
+    return `In ~${diffYears} year${diffYears === 1 ? '' : 's'}`;
   }
-  return `In ~${diffYears} yr${diffYears === 1 ? "" : "s"}, ${remainingMonths} mo${remainingMonths === 1 ? "" : "s"}`;
+  return `In ~${diffYears} yr${diffYears === 1 ? '' : 's'}, ${remainingMonths} mo${remainingMonths === 1 ? '' : 's'}`;
 }
 
 export function formatDateString(date: Date | null): string {
-  if (!date) return "—";
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  if (!date) return '—';
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   }).format(date);
 }
 
 export function formatMonthYear(date: Date | null): string {
-  if (!date) return "—";
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    year: "numeric",
+  if (!date) return '—';
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    year: 'numeric',
   }).format(date);
 }
 
@@ -72,17 +72,17 @@ export function getNextDepositDate(
 ): Date {
   const next = new Date(currentDate);
 
-  if (frequency === "daily") {
+  if (frequency === 'daily') {
     next.setDate(next.getDate() + 1);
     return next;
   }
 
-  if (frequency === "weekly") {
+  if (frequency === 'weekly') {
     next.setDate(next.getDate() + 7);
     return next;
   }
 
-  if (frequency === "biweekly") {
+  if (frequency === 'biweekly') {
     next.setDate(next.getDate() + 14);
     return next;
   }
@@ -107,31 +107,34 @@ export function getNextDepositDate(
 export function calculatePlan(
   config: PlanConfig,
   items: WishItem[],
-  planId: string = "default-plan",
-  planName: string = "Savings Plan",
+  planId: string = 'default-plan',
+  planName: string = 'Savings Plan',
   globalCurrency?: CurrencyConfig
 ): PlanCalculationResult {
   const activeCurrency = globalCurrency || config.currency || CURRENCY_PRESETS.USD;
   const buffer = config.emergencyBuffer || 0;
-  
+
   // Net savings available above buffer (can be negative if buffer is not yet fully funded)
   const netAvailableSaved = config.currentAmountSaved - buffer;
   const effectiveSaved = Math.max(0, netAvailableSaved);
-  
+
   const purchasedItems = items.filter(i => i.isPurchased);
   const pausedItems = items.filter(i => !i.isPurchased && i.isPaused);
-  
+
   // Active items sorted by priority
   const activeUnsorted = items.filter(i => !i.isPurchased && !i.isPaused);
   const sortedActive = [...activeUnsorted].sort((a, b) => a.priority - b.priority);
 
   const totalActiveCost = sortedActive.reduce((sum, item) => sum + item.price, 0);
-  const totalPurchasedCost = purchasedItems.reduce((sum, item) => sum + (item.purchasedPrice ?? item.price), 0);
+  const totalPurchasedCost = purchasedItems.reduce(
+    (sum, item) => sum + (item.purchasedPrice ?? item.price),
+    0
+  );
 
   // Pre-calculate target dates by stepping through savings schedule
   const hasSavingsRate = config.amountToSave > 0;
   const annualRate = (config.annualInterestRate || 0) / 100;
-  
+
   // Simulate timeline starting from netAvailableSaved
   let runningSavings = netAvailableSaved;
   const startDate = config.firstSavingDate ? new Date(config.firstSavingDate) : new Date();
@@ -173,16 +176,16 @@ export function calculatePlan(
       );
 
       const startBal = runningSavings;
-      
+
       // Interest computation for the interval
       let interestFactor = 0;
       if (annualRate > 0) {
-        if (config.frequency === "monthly") interestFactor = annualRate / 12;
-        else if (config.frequency === "weekly") interestFactor = annualRate / 52;
-        else if (config.frequency === "biweekly") interestFactor = annualRate / 26;
-        else if (config.frequency === "daily") interestFactor = annualRate / 365;
+        if (config.frequency === 'monthly') interestFactor = annualRate / 12;
+        else if (config.frequency === 'weekly') interestFactor = annualRate / 52;
+        else if (config.frequency === 'biweekly') interestFactor = annualRate / 26;
+        else if (config.frequency === 'daily') interestFactor = annualRate / 365;
       }
-      
+
       const interestEarned = Math.max(0, runningSavings) * interestFactor;
       runningSavings += config.amountToSave + interestEarned;
 
@@ -212,7 +215,8 @@ export function calculatePlan(
           interestEarned,
           endingBalance: runningSavings + buffer,
           unlockedItems: newlyUnlocked,
-          cumulativeUnlockedValue: totalActiveCost - stillUnreached.reduce((s, i) => s + i.item.price, 0),
+          cumulativeUnlockedValue:
+            totalActiveCost - stillUnreached.reduce((s, i) => s + i.item.price, 0),
         });
       }
 
@@ -227,20 +231,17 @@ export function calculatePlan(
     const cumulativeTarget = priorTotal + item.price;
     runningPriorTotal = cumulativeTarget;
 
-    const availableSavings = Math.max(
-      0,
-      Math.min(item.price, netAvailableSaved - priorTotal)
-    );
+    const availableSavings = Math.max(0, Math.min(item.price, netAvailableSaved - priorTotal));
     const progressPercent =
-      item.price > 0
-        ? Math.min(100, Math.max(0, (availableSavings / item.price) * 100))
-        : 100;
+      item.price > 0 ? Math.min(100, Math.max(0, (availableSavings / item.price) * 100)) : 100;
     const deficit = Math.max(0, cumulativeTarget - netAvailableSaved);
     const isAffordable = deficit <= 0;
 
     const unlockInfo = itemUnlockDates.get(item.id);
     const projectedDate = isAffordable ? new Date() : (unlockInfo?.date ?? null);
-    const intervalsNeeded = isAffordable ? 0 : (unlockInfo?.intervals ?? (hasSavingsRate ? Infinity : 0));
+    const intervalsNeeded = isAffordable
+      ? 0
+      : (unlockInfo?.intervals ?? (hasSavingsRate ? Infinity : 0));
 
     return {
       ...item,
@@ -251,7 +252,7 @@ export function calculatePlan(
       isAffordable,
       intervalsNeeded,
       projectedDate,
-      formattedProjectedDate: isAffordable ? "Affordable now" : formatDateString(projectedDate),
+      formattedProjectedDate: isAffordable ? 'Affordable now' : formatDateString(projectedDate),
       humanTimeRemaining: formatHumanTimeRemaining(projectedDate, isAffordable),
     };
   });
@@ -270,8 +271,8 @@ export function calculatePlan(
       isAffordable: item.isPurchased,
       intervalsNeeded: 0,
       projectedDate: item.isPurchased ? new Date(item.purchasedAt || Date.now()) : null,
-      formattedProjectedDate: item.isPurchased ? "Purchased" : "Paused",
-      humanTimeRemaining: item.isPurchased ? "Purchased" : "Paused in plan",
+      formattedProjectedDate: item.isPurchased ? 'Purchased' : 'Paused',
+      humanTimeRemaining: item.isPurchased ? 'Purchased' : 'Paused in plan',
     };
   });
 
@@ -284,7 +285,11 @@ export function calculatePlan(
   const fullyFundedItemsCount = computedActiveItems.filter(i => i.isAffordable).length;
 
   const lastActiveItem = computedActiveItems[computedActiveItems.length - 1];
-  const completionDate = lastActiveItem ? (lastActiveItem.isAffordable ? new Date() : lastActiveItem.projectedDate) : new Date();
+  const completionDate = lastActiveItem
+    ? lastActiveItem.isAffordable
+      ? new Date()
+      : lastActiveItem.projectedDate
+    : new Date();
   const totalIntervalsToComplete = lastActiveItem?.intervalsNeeded ?? 0;
 
   return {
@@ -309,7 +314,10 @@ export function calculatePlan(
   };
 }
 
-export function calculatePortfolioSummary(plans: Plan[], globalCurrency?: CurrencyConfig): PortfolioSummary {
+export function calculatePortfolioSummary(
+  plans: Plan[],
+  globalCurrency?: CurrencyConfig
+): PortfolioSummary {
   const activeCurrency = globalCurrency || CURRENCY_PRESETS.USD;
   let totalMonthlyContribution = 0;
   let totalSavedAcrossAllPlans = 0;
@@ -320,12 +328,12 @@ export function calculatePortfolioSummary(plans: Plan[], globalCurrency?: Curren
 
   for (const plan of plans) {
     const calc = calculatePlan(plan.config, plan.items, plan.id, plan.name, activeCurrency);
-    
+
     // Normalize contribution to monthly
     let monthlyEquivalent = plan.config.amountToSave;
-    if (plan.config.frequency === "weekly") monthlyEquivalent *= 4.33;
-    else if (plan.config.frequency === "biweekly") monthlyEquivalent *= 2.165;
-    else if (plan.config.frequency === "daily") monthlyEquivalent *= 30.4;
+    if (plan.config.frequency === 'weekly') monthlyEquivalent *= 4.33;
+    else if (plan.config.frequency === 'biweekly') monthlyEquivalent *= 2.165;
+    else if (plan.config.frequency === 'daily') monthlyEquivalent *= 30.4;
 
     totalMonthlyContribution += monthlyEquivalent;
     totalSavedAcrossAllPlans += calc.effectiveSaved;

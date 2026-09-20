@@ -42,7 +42,8 @@ export const PurchasedHistoryModal: React.FC<PurchasedHistoryModalProps> = ({
                 Purchased Wishes Archive
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                {purchasedItems.length} wish{purchasedItems.length === 1 ? '' : 'es'} fulfilled • Total spent:{' '}
+                {purchasedItems.length} wish{purchasedItems.length === 1 ? '' : 'es'} fulfilled •
+                Total spent:{' '}
                 <strong className="text-slate-700 dark:text-slate-200 font-semibold">
                   {formatCurrency(totalSpent, currency)}
                 </strong>

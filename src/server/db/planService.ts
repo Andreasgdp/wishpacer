@@ -1,14 +1,8 @@
-import { asc, eq } from "drizzle-orm";
-import { db, ensureTablesExist } from "./client.js";
-import { plans, users, wishItems } from "./schema.js";
-import type {
-  AppStoreData,
-  GlobalSettings,
-  Plan,
-  PlanConfig,
-  WishItem,
-} from "../../types/plan.js";
-import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_PLANS } from "../../utils/defaults.js";
+import { asc, eq } from 'drizzle-orm';
+import { db, ensureTablesExist } from './client.js';
+import { plans, users, wishItems } from './schema.js';
+import type { AppStoreData, GlobalSettings, Plan, PlanConfig, WishItem } from '../../types/plan.js';
+import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_PLANS } from '../../utils/defaults.js';
 
 export async function getUserStoreData(userId: string): Promise<AppStoreData> {
   await ensureTablesExist();
@@ -34,7 +28,7 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
       currency: {
         code: userRows[0].currencyCode,
         symbol: userRows[0].currencySymbol,
-        position: userRows[0].currencyPosition as "prefix" | "suffix",
+        position: userRows[0].currencyPosition as 'prefix' | 'suffix',
         decimals: userRows[0].currencyDecimals,
       },
     };
@@ -132,7 +126,7 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
         name: p.name,
         currentAmountSaved: p.currentAmountSaved,
         amountToSave: p.amountToSave,
-        frequency: p.frequency as PlanConfig["frequency"],
+        frequency: p.frequency as PlanConfig['frequency'],
         savingsDayOfMonth: p.savingsDayOfMonth,
         firstSavingDate: p.firstSavingDate,
         emergencyBuffer: p.emergencyBuffer,
@@ -153,10 +147,7 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
   };
 }
 
-export async function saveUserStoreData(
-  userId: string,
-  data: AppStoreData
-): Promise<void> {
+export async function saveUserStoreData(userId: string, data: AppStoreData): Promise<void> {
   await ensureTablesExist();
   const now = new Date().toISOString();
 
@@ -203,8 +194,8 @@ export async function saveUserStoreData(
         userId,
         name: p.name,
         description: p.description,
-        icon: p.icon || "sparkles",
-        color: p.color || "violet",
+        icon: p.icon || 'sparkles',
+        color: p.color || 'violet',
         currentAmountSaved: p.config.currentAmountSaved,
         amountToSave: p.config.amountToSave,
         frequency: p.config.frequency,
@@ -220,8 +211,8 @@ export async function saveUserStoreData(
         set: {
           name: p.name,
           description: p.description,
-          icon: p.icon || "sparkles",
-          color: p.color || "violet",
+          icon: p.icon || 'sparkles',
+          color: p.color || 'violet',
           currentAmountSaved: p.config.currentAmountSaved,
           amountToSave: p.config.amountToSave,
           frequency: p.config.frequency,
@@ -233,10 +224,7 @@ export async function saveUserStoreData(
         },
       });
 
-    const existingWishes = await db
-      .select()
-      .from(wishItems)
-      .where(eq(wishItems.planId, p.id));
+    const existingWishes = await db.select().from(wishItems).where(eq(wishItems.planId, p.id));
     const newWishIds = new Set(p.items.map(w => w.id));
 
     // Delete removed wish items

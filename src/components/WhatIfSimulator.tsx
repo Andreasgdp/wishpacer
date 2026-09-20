@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  TrendingUp,
-  RotateCcw,
-  Sparkles,
-} from 'lucide-react';
+import { TrendingUp, RotateCcw, Sparkles } from 'lucide-react';
 import type { PlanCalculationResult, PlanConfig } from '../types/plan';
 import { formatCurrency } from '../utils/currency';
 
@@ -28,8 +24,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
   onResetSimulation,
   onClose,
 }) => {
-  const isModified =
-    simulatedSavingsRate !== config.amountToSave || simulatedExtraBonus > 0;
+  const isModified = simulatedSavingsRate !== config.amountToSave || simulatedExtraBonus > 0;
 
   const rateDelta = simulatedSavingsRate - config.amountToSave;
 
@@ -50,7 +45,8 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-              Experiment with adjusting your savings rate or adding a lump-sum windfall to see your wishlist dates accelerate.
+              Experiment with adjusting your savings rate or adding a lump-sum windfall to see your
+              wishlist dates accelerate.
             </p>
           </div>
         </div>
@@ -130,10 +126,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                 key={delta}
                 type="button"
                 onClick={() =>
-                  onUpdateSimulation(
-                    Math.max(0, simulatedSavingsRate + delta),
-                    simulatedExtraBonus
-                  )
+                  onUpdateSimulation(Math.max(0, simulatedSavingsRate + delta), simulatedExtraBonus)
                 }
                 className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 transition-colors"
               >
@@ -171,7 +164,10 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                 key={bonus}
                 type="button"
                 onClick={() =>
-                  onUpdateSimulation(simulatedSavingsRate, simulatedExtraBonus === bonus ? 0 : bonus)
+                  onUpdateSimulation(
+                    simulatedSavingsRate,
+                    simulatedExtraBonus === bonus ? 0 : bonus
+                  )
                 }
                 className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors ${
                   simulatedExtraBonus === bonus
@@ -194,12 +190,18 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
             Projected completion under this scenario:
           </span>
           <strong className="text-xs font-bold text-slate-900 dark:text-white">
-            {result.totalRemainingDeficit === 0 ? "Immediately funded!" : result.formattedCompletionDate}
+            {result.totalRemainingDeficit === 0
+              ? 'Immediately funded!'
+              : result.formattedCompletionDate}
           </strong>
         </div>
 
         <div className="text-xs text-slate-500 dark:text-slate-400">
-          Funded wishes: <strong className="text-emerald-600 dark:text-emerald-400">{result.fullyFundedItemsCount}</strong> of {result.totalActiveItemsCount}
+          Funded wishes:{' '}
+          <strong className="text-emerald-600 dark:text-emerald-400">
+            {result.fullyFundedItemsCount}
+          </strong>{' '}
+          of {result.totalActiveItemsCount}
         </div>
       </div>
     </div>

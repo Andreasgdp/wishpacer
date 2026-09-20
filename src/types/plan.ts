@@ -72,20 +72,20 @@ export interface PlanCalculationResult {
   activeItems: ComputedWishItem[];
   purchasedItems: WishItem[];
   pausedItems: WishItem[];
-  
+
   totalActiveCost: number;
   totalPurchasedCost: number;
   effectiveSaved: number;
   totalRemainingDeficit: number;
   overallProgressPercent: number;
-  
+
   fullyFundedItemsCount: number;
   totalActiveItemsCount: number;
-  
+
   completionDate: Date | null;
   formattedCompletionDate: string;
   totalIntervalsToComplete: number;
-  
+
   milestones: MonthlyMilestone[];
 }
 

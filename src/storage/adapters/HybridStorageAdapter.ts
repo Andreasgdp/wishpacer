@@ -1,6 +1,6 @@
-import type { AppStoreData } from "../../types/plan.js";
-import type { SaveResult, StorageRepository } from "../types.js";
-import { LocalStorageAdapter } from "./LocalStorageAdapter.js";
+import type { AppStoreData } from '../../types/plan.js';
+import type { SaveResult, StorageRepository } from '../types.js';
+import { LocalStorageAdapter } from './LocalStorageAdapter.js';
 /**
  * Composite repository adapter combining fast local browser persistence (LocalStorageAdapter)
  * with background remote API syncing (ApiSyncAdapter).
@@ -22,7 +22,10 @@ export class HybridStorageAdapter implements StorageRepository {
           return remoteData;
         }
       } catch (err) {
-        console.warn("[HybridStorageAdapter] Remote load failed, falling back to local storage:", err);
+        console.warn(
+          '[HybridStorageAdapter] Remote load failed, falling back to local storage:',
+          err
+        );
       }
     }
 
@@ -43,7 +46,11 @@ export class HybridStorageAdapter implements StorageRepository {
         success: overallSuccess,
         localSaved: localResult.success,
         remoteSaved: remoteResult.success,
-        error: !remoteResult.success ? remoteResult.error : (!localResult.success ? localResult.error : undefined),
+        error: !remoteResult.success
+          ? remoteResult.error
+          : !localResult.success
+            ? localResult.error
+            : undefined,
       } as SaveResult;
     }
 

@@ -1,8 +1,8 @@
-import { createClient, type Client } from "@libsql/client";
-import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
-import * as schema from "./schema.js";
-import fs from "node:fs";
-import path from "node:path";
+import { createClient, type Client } from '@libsql/client';
+import { drizzle, type LibSQLDatabase } from 'drizzle-orm/libsql';
+import * as schema from './schema.js';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export interface DbConnection {
   db: LibSQLDatabase<typeof schema>;
@@ -10,9 +10,9 @@ export interface DbConnection {
 }
 
 export function normalizeDbUrl(rawUrl?: string): string {
-  const url = rawUrl || "file:./data/saving_plan.db";
-  if (url.startsWith("turso://")) {
-    return url.replace("turso://", "libsql://");
+  const url = rawUrl || 'file:./data/saving_plan.db';
+  if (url.startsWith('turso://')) {
+    return url.replace('turso://', 'libsql://');
   }
   return url;
 }
@@ -22,9 +22,9 @@ function getDbClient(): DbConnection {
   const url = normalizeDbUrl(rawUrl);
   const authToken = process.env.TURSO_AUTH_TOKEN;
 
-  if (url.startsWith("file:")) {
+  if (url.startsWith('file:')) {
     try {
-      const dataDir = path.resolve(process.cwd(), "data");
+      const dataDir = path.resolve(process.cwd(), 'data');
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
       }
@@ -102,6 +102,6 @@ export async function ensureTablesExist(): Promise<void> {
     `);
     tablesChecked = true;
   } catch (err) {
-    console.warn("[db] ensureTablesExist warning:", err);
+    console.warn('[db] ensureTablesExist warning:', err);
   }
 }
