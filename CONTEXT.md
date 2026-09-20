@@ -34,3 +34,7 @@ The persistence seam hiding storage technologies, Bearer token authentication, n
 - **`ApiSyncAdapter`**: Remote serverless database persistence with Clerk 401 Bearer token refresh retries.
 - **`HybridStorageAdapter`**: Composes `LocalStorageAdapter` and `ApiSyncAdapter` to guarantee local fast-path writes while syncing to backend database.
 - **`InMemoryStorageRepository`**: Fast headless fake adapter for unit and integration testing.
+### App State & Modal Hooks (`src/hooks/`)
+UI state orchestration and action handlers decoupled from layout components:
+- **`usePlanManager`**: Custom hook encapsulating store state loading, persistence, active plan lookup, what-if scenario overrides, and high-level domain action triggers with `sonner` toast notifications.
+- **`useModalRegistry`**: Type-safe modal visibility registry managing active modal selection (`createPlan`, `editPlan`, `addWish`, `editWish`, `settings`, `globalSettings`, `history`, `exportImport`) and modal targets.
