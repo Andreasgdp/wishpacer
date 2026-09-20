@@ -275,3 +275,20 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
     }
   }
 }
+export async function deleteUserStoreData(userId: string): Promise<void> {
+  await ensureTablesExist();
+
+  // Find all plans belonging to this user
+  const userPlans = await db.select({ id: plans.id }).from(plans).where(eq(plans.userId, userId));
+
+  // Delete all wish items associated with user's plans
+  for (const p of userPlans) {
+    await db.delete(wishItems).where(eq(wishItems.planId, p.id));
+  }
+
+  // Delete user's plans
+  await db.delete(plans).where(eq(plans.userId, userId));
+
+  // Delete user record
+  await db.delete(users).where(eq(users.id, userId));
+}

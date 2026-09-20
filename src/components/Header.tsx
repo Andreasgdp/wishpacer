@@ -12,6 +12,8 @@ import {
   MoreVertical,
   X,
   Sparkles,
+  HelpCircle,
+  ShieldCheck,
   User as UserIcon,
 } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
@@ -34,6 +36,9 @@ interface HeaderProps {
   onOpenGlobalSettingsModal: () => void;
   onOpenHistoryModal: () => void;
   onOpenExportModal: () => void;
+  onOpenPrivacyModal: () => void;
+  onOpenSupportModal: () => void;
+  onOpenOnboardingModal: () => void;
   showWhatIf: boolean;
   onToggleWhatIf: () => void;
 }
@@ -54,6 +59,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenGlobalSettingsModal,
   onOpenHistoryModal,
   onOpenExportModal,
+  onOpenPrivacyModal,
+  onOpenSupportModal,
+  onOpenOnboardingModal,
   showWhatIf,
   onToggleWhatIf,
 }) => {
@@ -157,8 +165,39 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Download className="w-4 h-4" />
             </button>
+            {/* Support / Help */}
+            <button
+              type="button"
+              onClick={onOpenSupportModal}
+              className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-800/80 transition-colors"
+              title="Help & Support"
+              aria-label="Help and Support"
+            >
+              <HelpCircle className="w-4 h-4 text-sky-500" />
+            </button>
 
-            {/* Plan Budget Settings */}
+            {/* Privacy Policy */}
+            <button
+              type="button"
+              onClick={onOpenPrivacyModal}
+              className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-800/80 transition-colors"
+              title="Privacy Policy"
+              aria-label="Privacy Policy"
+            >
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            </button>
+
+            {/* Guided Tour / Feature Guide */}
+            <button
+              type="button"
+              onClick={onOpenOnboardingModal}
+              className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-800/80 transition-colors"
+              title="Feature Tour & Guide"
+              aria-label="Feature Tour and Guide"
+            >
+              <Sparkles className="w-4 h-4 text-amber-500" />
+            </button>
+
             {!isPortfolioView && (
               <button
                 type="button"

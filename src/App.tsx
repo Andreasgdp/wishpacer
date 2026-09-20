@@ -15,14 +15,30 @@ import { WhatIfSimulator } from './components/WhatIfSimulator';
 import { MilestoneTimeline } from './components/MilestoneTimeline';
 import { PurchasedHistoryModal } from './components/PurchasedHistoryModal';
 import { ExportImportModal } from './components/ExportImportModal';
+import { ThinkingOrbLoader } from './components/ThinkingOrbLoader';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { PrivacyModal } from './components/PrivacyModal';
+import { SupportModal } from './components/SupportModal';
+import { ActivationWallModal } from './components/ActivationWallModal';
+import { OnboardingModal } from './components/OnboardingModal';
+import { ConfirmDialogModal } from './components/ConfirmDialogModal';
 import { useTheme } from './context/ThemeContext';
+import { DEFAULT_PLANS } from './utils/defaults';
 
-export const App: React.FC = () => {
+export const AppContent: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
 
   const modal = useModalRegistry();
   const [planManageMode, setPlanManageMode] = useState<'create' | 'edit'>('create');
+
+  const [isActivated, setIsActivated] = useState<boolean>(() => {
+    return localStorage.getItem('saving_plan_activated') === 'true';
+  });
+
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(() => {
+    return localStorage.getItem('saving_plan_onboarding_seen') === 'true';
+  });
 
   const {
     storeData,
@@ -53,13 +69,54 @@ export const App: React.FC = () => {
     modal.open('editPlan', { plan: planToEdit });
   };
 
+  const handleActivate = (code: string) => {
+    const validCode = (import.meta.env.VITE_DEV_ACTIVATION_CODE || 'SAVINGS2026')
+      .trim()
+      .toLowerCase();
+    if (code.toLowerCase() === validCode) {
+      localStorage.setItem('saving_plan_activated', 'true');
+      setIsActivated(true);
+      return true;
+    }
+    return false;
+  };
+
+  const handleCloseOnboarding = () => {
+    localStorage.setItem('saving_plan_onboarding_seen', 'true');
+    setHasSeenOnboarding(true);
+    modal.close();
+  };
+
+  const handleConfirmLoadSamplePlan = () => {
+    modal.open('confirmDialog', {
+      confirm: {
+        title: 'Load Interactive Sample Plan',
+        description:
+          'Loading the sample plan will replace your current savings plans and wishlists with sample data. Do you wish to continue?',
+        confirmLabel: 'Load Sample Data',
+        variant: 'warning',
+        onConfirm: () => {
+          actions.importStoreData({
+            version: 3,
+            lastSaved: new Date().toISOString(),
+            activePlanId: DEFAULT_PLANS[0].id,
+            plans: DEFAULT_PLANS,
+            settings: storeData.settings,
+          });
+        },
+      },
+    });
+  };
+
   if (isLoading || !isAuthLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-brand-600 border-t-transparent animate-spin" />
-          <p className="text-xs text-slate-500 font-medium">Loading your savings plans...</p>
-        </div>
+        <ThinkingOrbLoader
+          state="searching"
+          size={64}
+          label="Loading your savings plans..."
+          dark={darkMode}
+        />
       </div>
     );
   }
@@ -67,6 +124,9 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
+
+      {/* Temporary Paywall / Dev Gate Modal */}
+      {!isActivated && <ActivationWallModal isOpen={!isActivated} onActivate={handleActivate} />}
 
       {/* Header */}
       <Header
@@ -85,6 +145,9 @@ export const App: React.FC = () => {
         onOpenGlobalSettingsModal={() => modal.open('globalSettings')}
         onOpenHistoryModal={() => modal.open('history')}
         onOpenExportModal={() => modal.open('exportImport')}
+        onOpenPrivacyModal={() => modal.open('privacy')}
+        onOpenSupportModal={() => modal.open('support')}
+        onOpenOnboardingModal={() => modal.open('onboarding')}
         showWhatIf={showWhatIf}
         onToggleWhatIf={() => actions.setShowWhatIf(!showWhatIf)}
       />
@@ -123,18 +186,18 @@ export const App: React.FC = () => {
               onOpenSettings={() => modal.open('settings')}
             />
 
-            {/* Priority Wishlist Queue */}
+            {/* Wish List & Prioritization */}
             <section className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                    {activePlan.name} Priority Queue
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                    Wishlist & Priority Queue
                   </h2>
-                  <span className="text-xs text-slate-500 hidden sm:inline">
-                    ({activePlanCalculation.totalActiveItemsCount} active wishes)
-                  </span>
+                  <p className="text-xs text-slate-500">
+                    Priority ordered 1 to {activePlanCalculation.items.length}. Drag or click arrows
+                    to recalibrate.
+                  </p>
                 </div>
-
                 <button
                   type="button"
                   onClick={() => handleOpenEditPlanModal(activePlan)}
@@ -149,7 +212,18 @@ export const App: React.FC = () => {
                 currency={storeData.settings.currency}
                 onReorder={actions.reorderWishes}
                 onEdit={item => modal.open('editWish', { wishItem: item })}
-                onDelete={actions.deleteWishItem}
+                onDelete={itemId => {
+                  const targetItem = activePlanCalculation.items.find(i => i.id === itemId);
+                  modal.open('confirmDialog', {
+                    confirm: {
+                      title: 'Remove Wish Item',
+                      description: `Are you sure you want to remove "${targetItem?.title || 'this item'}" from your wishlist?`,
+                      confirmLabel: 'Remove Item',
+                      variant: 'danger',
+                      onConfirm: () => actions.deleteWishItem(itemId),
+                    },
+                  });
+                }}
                 onTogglePurchased={actions.toggleWishPurchased}
                 onTogglePaused={actions.toggleWishPaused}
                 onMoveUp={actions.moveWishUp}
@@ -195,6 +269,20 @@ export const App: React.FC = () => {
           actions.updateGlobalSettings(newSettings);
           modal.close();
         }}
+        onOpenPrivacyModal={() => modal.open('privacy')}
+        onOpenSupportModal={() => modal.open('support')}
+        onDeleteAccountData={() => {
+          modal.open('confirmDialog', {
+            confirm: {
+              title: 'Delete Account & Erase Data',
+              description:
+                'Are you sure you want to permanently erase all your savings plans, wishlists, and database records? This cannot be undone.',
+              confirmLabel: 'Erase All Data',
+              variant: 'danger',
+              onConfirm: () => actions.deleteAccountData(),
+            },
+          });
+        }}
       />
 
       <PlanManagementModal
@@ -216,8 +304,16 @@ export const App: React.FC = () => {
           modal.close();
         }}
         onDeletePlan={planId => {
-          actions.deletePlan(planId);
-          modal.close();
+          const targetPlan = storeData.plans.find(p => p.id === planId);
+          modal.open('confirmDialog', {
+            confirm: {
+              title: 'Delete Savings Plan',
+              description: `Are you sure you want to delete "${targetPlan?.name || 'this plan'}"?`,
+              confirmLabel: 'Delete Plan',
+              variant: 'danger',
+              onConfirm: () => actions.deletePlan(planId),
+            },
+          });
         }}
       />
 
@@ -227,7 +323,17 @@ export const App: React.FC = () => {
         purchasedItems={activePlanCalculation.purchasedItems}
         currency={storeData.settings.currency}
         onRestoreToPlan={actions.toggleWishPurchased}
-        onDelete={actions.deleteWishItem}
+        onDelete={itemId => {
+          modal.open('confirmDialog', {
+            confirm: {
+              title: 'Remove Purchased History Item',
+              description: 'Are you sure you want to delete this purchased item from history?',
+              confirmLabel: 'Delete Item',
+              variant: 'danger',
+              onConfirm: () => actions.deleteWishItem(itemId),
+            },
+          });
+        }}
       />
 
       <ExportImportModal
@@ -236,10 +342,55 @@ export const App: React.FC = () => {
         storeData={storeData}
         activePlan={activePlan}
         onImportData={data => {
-          actions.importStoreData(data);
-          modal.close();
+          modal.open('confirmDialog', {
+            confirm: {
+              title: 'Overwrite Data with Import File',
+              description:
+                'Importing this backup file will replace your current savings plans and settings. Are you sure you want to proceed?',
+              confirmLabel: 'Overwrite & Import',
+              variant: 'warning',
+              onConfirm: () => {
+                actions.importStoreData(data);
+                modal.close();
+              },
+            },
+          });
         }}
       />
+
+      <PrivacyModal isOpen={modal.isOpen('privacy')} onClose={modal.close} />
+
+      <SupportModal isOpen={modal.isOpen('support')} onClose={modal.close} />
+
+      <OnboardingModal
+        isOpen={!hasSeenOnboarding || modal.isOpen('onboarding')}
+        onClose={handleCloseOnboarding}
+        onLoadSamplePlan={() => {
+          handleCloseOnboarding();
+          handleConfirmLoadSamplePlan();
+        }}
+      />
+
+      {modal.isOpen('confirmDialog') && modal.confirmPayload && (
+        <ConfirmDialogModal
+          isOpen={modal.isOpen('confirmDialog')}
+          title={modal.confirmPayload.title}
+          description={modal.confirmPayload.description}
+          confirmLabel={modal.confirmPayload.confirmLabel}
+          cancelLabel={modal.confirmPayload.cancelLabel}
+          variant={modal.confirmPayload.variant}
+          onConfirm={modal.confirmPayload.onConfirm}
+          onClose={modal.close}
+        />
+      )}
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   );
 };

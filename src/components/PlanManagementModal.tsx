@@ -275,14 +275,8 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    if (
-                      window.confirm(
-                        `Are you sure you want to delete the plan "${editingPlan.name}"?`
-                      )
-                    ) {
-                      onDeletePlan(editingPlan.id);
-                      onClose();
-                    }
+                    onDeletePlan(editingPlan.id);
+                    onClose();
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors ml-auto"
                 >

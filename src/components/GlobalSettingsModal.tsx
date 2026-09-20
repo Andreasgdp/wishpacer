@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Globe, Coins } from 'lucide-react';
+import { X, Globe, Coins, ShieldCheck, HelpCircle, Trash2 } from 'lucide-react';
 import type { CurrencyConfig, GlobalSettings } from '../types/plan';
 import { CURRENCY_PRESETS } from '../utils/currency';
 import { ModalBackdrop } from './ModalBackdrop';
@@ -9,6 +9,9 @@ interface GlobalSettingsModalProps {
   onClose: () => void;
   settings: GlobalSettings;
   onSaveSettings: (newSettings: GlobalSettings) => void;
+  onOpenPrivacyModal?: () => void;
+  onOpenSupportModal?: () => void;
+  onDeleteAccountData?: () => void;
 }
 
 export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
@@ -16,6 +19,9 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
   onClose,
   settings,
   onSaveSettings,
+  onOpenPrivacyModal,
+  onOpenSupportModal,
+  onDeleteAccountData,
 }) => {
   const [selectedCurrencyCode, setSelectedCurrencyCode] = useState(settings.currency.code);
   const [customSymbol, setCustomSymbol] = useState(settings.currency.symbol);
@@ -157,6 +163,52 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
                   ? `${customSymbol}1,250`
                   : `1,250 ${customSymbol}`}
             </span>
+          </div>
+          {/* Privacy, Support & Danger Zone */}
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              {onOpenPrivacyModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenPrivacyModal();
+                  }}
+                  className="py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Privacy Policy</span>
+                </button>
+              )}
+
+              {onOpenSupportModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenSupportModal();
+                  }}
+                  className="py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <HelpCircle className="w-3.5 h-3.5 text-sky-500" />
+                  <span>Help & Support</span>
+                </button>
+              )}
+            </div>
+
+            {onDeleteAccountData && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onDeleteAccountData();
+                }}
+                className="w-full py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-950/80 border border-rose-200/80 dark:border-rose-900/80 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                <span>Delete Account & Erase All Data</span>
+              </button>
+            )}
           </div>
 
           {/* Footer */}

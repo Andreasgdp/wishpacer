@@ -28,6 +28,14 @@ Budget settings (`PlanConfig`) governing deposit frequency (daily, weekly, biwee
 
 A scenario projection that simulates altered monthly savings rates or lump-sum bonus additions without mutating or persisting the underlying plan state.
 
+### Developer Gate & Activation
+
+A session access gate (`ActivationWallModal`) that restricts unauthorized web access prior to production paywall deployment, unlocked via a developer invite key (`VITE_DEV_ACTIVATION_CODE`).
+
+### Confirmation Flow
+
+A type-safe modal dialog (`ConfirmDialogModal`) guarding all destructive state mutations (plan deletion, wish removal, account data purge) with explicit title, description, and action confirmation.
+
 ## Architecture Seams
 
 ### `SavingsPlan` Domain Aggregate (`src/domain/SavingsPlan.ts`)
@@ -49,4 +57,4 @@ The persistence seam hiding storage technologies, Bearer token authentication, n
 UI state orchestration and action handlers decoupled from layout components:
 
 - **`usePlanManager`**: Custom hook encapsulating store state loading, persistence, active plan lookup, what-if scenario overrides, and high-level domain action triggers with `sonner` toast notifications.
-- **`useModalRegistry`**: Type-safe modal visibility registry managing active modal selection (`createPlan`, `editPlan`, `addWish`, `editWish`, `settings`, `globalSettings`, `history`, `exportImport`) and modal targets.
+- **`useModalRegistry`**: Type-safe modal visibility registry managing active modal selection (`createPlan`, `editPlan`, `addWish`, `editWish`, `settings`, `globalSettings`, `history`, `exportImport`, `privacy`, `support`, `activation`, `onboarding`, `confirmDialog`) and modal targets.
