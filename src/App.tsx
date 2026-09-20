@@ -8,7 +8,8 @@ import type {
   PlanConfig,
   WishItem,
 } from './types/plan';
-import { calculatePlan, calculatePortfolioSummary } from './utils/calculator';
+import { SavingsPlan } from './domain/SavingsPlan';
+import { calculatePortfolioSummary } from './utils/calculator';
 import { DEFAULT_STORE_DATA } from './utils/defaults';
 import { loadStoreData, saveStoreData } from './utils/storage';
 import { Header } from './components/Header';
@@ -117,27 +118,31 @@ export const App: React.FC = () => {
     return calculatePortfolioSummary(storeData.plans, storeData.settings.currency);
   }, [storeData.plans, storeData.settings.currency]);
 
-  // Effective config for active plan (incorporates what-if simulation if active)
-  const effectiveActiveConfig: PlanConfig = useMemo(() => {
-    if (!showWhatIf) return activePlan.config;
-    return {
-      ...activePlan.config,
-      currentAmountSaved: activePlan.config.currentAmountSaved + simulatedExtraBonus,
-      amountToSave: simulatedSavingsRate,
-    };
-  }, [activePlan.config, showWhatIf, simulatedSavingsRate, simulatedExtraBonus]);
+  // Active SavingsPlan aggregate instance
+  const activeSavingsPlan = useMemo(() => {
+    return new SavingsPlan(activePlan);
+  }, [activePlan]);
 
-  // Calculation result for active plan using site-wide currency
+  // Calculation result for active plan (incorporates what-if simulation if active)
   const activePlanCalculation = useMemo(() => {
-    return calculatePlan(
-      effectiveActiveConfig,
-      activePlan.items,
-      activePlan.id,
-      activePlan.name,
-      storeData.settings.currency
-    );
-  }, [effectiveActiveConfig, activePlan.items, activePlan.id, activePlan.name, storeData.settings.currency]);
+    const planToCalculate = showWhatIf
+      ? activeSavingsPlan.simulateScenario({
+          savingsRate: simulatedSavingsRate,
+          lumpSumBonus: simulatedExtraBonus,
+        })
+      : activeSavingsPlan;
 
+    return planToCalculate.calculate(storeData.settings.currency);
+  }, [activeSavingsPlan, showWhatIf, simulatedSavingsRate, simulatedExtraBonus, storeData.settings.currency]);
+
+  // Effective plan config for UI display
+  const effectiveConfig = useMemo(() => {
+    if (!showWhatIf) return activeSavingsPlan.config;
+    return activeSavingsPlan.simulateScenario({
+      savingsRate: simulatedSavingsRate,
+      lumpSumBonus: simulatedExtraBonus,
+    }).config;
+  }, [activeSavingsPlan, showWhatIf, simulatedSavingsRate, simulatedExtraBonus]);
   // Switch active plan
   const handleSelectPlan = (planId: string) => {
     setIsPortfolioView(false);
@@ -260,52 +265,26 @@ export const App: React.FC = () => {
     showToast(`Site-wide currency set to ${newSettings.currency.code} (${newSettings.currency.symbol})`);
   };
 
-  // Update budget settings for active plan
-  const handleSaveBudgetSettings = (newConfig: PlanConfig) => {
-    const updatedPlans = storeData.plans.map(p => {
-      if (p.id === activePlan.id) {
-        return {
-          ...p,
-          config: newConfig,
-          updatedAt: new Date().toISOString(),
-        };
-      }
-      return p;
-    });
-
-    persistStore({
-      ...storeData,
-      plans: updatedPlans,
-    });
-    setSimulatedSavingsRate(newConfig.amountToSave);
-    showToast('Budget settings updated');
+  // Helper to persist updated SavingsPlan
+  const updateActivePlanInStore = (nextPlan: SavingsPlan, toastMsg?: string) => {
+    const updatedPlans = storeData.plans.map(p =>
+      p.id === nextPlan.id ? nextPlan.toJSON() : p
+    );
+    persistStore({ ...storeData, plans: updatedPlans });
+    if (toastMsg) showToast(toastMsg);
   };
 
-  // Wish Management in active plan
+  // Update budget settings for active plan
+  const handleSaveBudgetSettings = (newConfig: PlanConfig) => {
+    const updatedPlan = activeSavingsPlan.updateConfig(newConfig);
+    updateActivePlanInStore(updatedPlan, 'Budget settings updated');
+    setSimulatedSavingsRate(newConfig.amountToSave);
+  };
+
+  // Wish Management in active plan using SavingsPlan aggregate
   const handleReorderWishes = (activeId: string, overId: string) => {
-    const activeIndex = activePlan.items.findIndex(i => i.id === activeId);
-    const overIndex = activePlan.items.findIndex(i => i.id === overId);
-    if (activeIndex === -1 || overIndex === -1) return;
-
-    const newItems = [...activePlan.items];
-    const [movedItem] = newItems.splice(activeIndex, 1);
-    newItems.splice(overIndex, 0, movedItem);
-
-    const reindexed = newItems.map((item, idx) => ({
-      ...item,
-      priority: idx + 1,
-      updatedAt: new Date().toISOString(),
-    }));
-
-    const updatedPlans = storeData.plans.map(p => {
-      if (p.id === activePlan.id) {
-        return { ...p, items: reindexed, updatedAt: new Date().toISOString() };
-      }
-      return p;
-    });
-
-    persistStore({ ...storeData, plans: updatedPlans });
-    showToast('Wishlist priority reordered');
+    const updatedPlan = activeSavingsPlan.reorderWishItems(activeId, overId);
+    updateActivePlanInStore(updatedPlan, 'Wishlist priority reordered');
   };
 
   const handleMoveWishUp = (id: string) => {
@@ -324,110 +303,32 @@ export const App: React.FC = () => {
     itemData: Omit<WishItem, 'id' | 'createdAt' | 'updatedAt' | 'isPurchased' | 'isPaused'>,
     existingId?: string
   ) => {
-    let updatedItems: WishItem[];
-
+    let updatedPlan: SavingsPlan;
     if (existingId) {
-      updatedItems = activePlan.items.map(i => {
-        if (i.id === existingId) {
-          return {
-            ...i,
-            ...itemData,
-            updatedAt: new Date().toISOString(),
-          };
-        }
-        return i;
-      });
-      updatedItems.sort((a, b) => a.priority - b.priority);
-      updatedItems = updatedItems.map((item, idx) => ({ ...item, priority: idx + 1 }));
+      updatedPlan = activeSavingsPlan.updateWishItem(existingId, itemData);
       showToast('Wish updated');
     } else {
-      const newItem: WishItem = {
-        id: `wish-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        ...itemData,
-        isPurchased: false,
-        isPaused: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      const itemsCopy = [...activePlan.items];
-      const targetPos = Math.min(itemsCopy.length, Math.max(0, itemData.priority - 1));
-      itemsCopy.splice(targetPos, 0, newItem);
-      updatedItems = itemsCopy.map((item, idx) => ({ ...item, priority: idx + 1 }));
-      showToast(`Added to "${activePlan.name}" ✨`);
+      updatedPlan = activeSavingsPlan.addWishItem(itemData, itemData.priority);
+      showToast(`Added to "${activeSavingsPlan.name}" ✨`);
     }
 
-    const updatedPlans = storeData.plans.map(p => {
-      if (p.id === activePlan.id) {
-        return { ...p, items: updatedItems, updatedAt: new Date().toISOString() };
-      }
-      return p;
-    });
-
-    persistStore({ ...storeData, plans: updatedPlans });
+    updateActivePlanInStore(updatedPlan);
   };
 
   const handleDeleteWishItem = (id: string) => {
-    const filtered = activePlan.items.filter(i => i.id !== id);
-    const reindexed = filtered.map((item, idx) => ({ ...item, priority: idx + 1 }));
-
-    const updatedPlans = storeData.plans.map(p => {
-      if (p.id === activePlan.id) {
-        return { ...p, items: reindexed, updatedAt: new Date().toISOString() };
-      }
-      return p;
-    });
-
-    persistStore({ ...storeData, plans: updatedPlans });
-    showToast('Wish removed from plan');
+    const updatedPlan = activeSavingsPlan.removeWishItem(id);
+    updateActivePlanInStore(updatedPlan, 'Wish removed from plan');
   };
 
   const handleToggleWishPurchased = (id: string) => {
-    const updatedItems = activePlan.items.map(item => {
-      if (item.id === id) {
-        const nextPurchased = !item.isPurchased;
-        return {
-          ...item,
-          isPurchased: nextPurchased,
-          purchasedAt: nextPurchased ? new Date().toISOString() : null,
-          purchasedPrice: nextPurchased ? item.price : null,
-          updatedAt: new Date().toISOString(),
-        };
-      }
-      return item;
-    });
-
-    const updatedPlans = storeData.plans.map(p => {
-      if (p.id === activePlan.id) {
-        return { ...p, items: updatedItems, updatedAt: new Date().toISOString() };
-      }
-      return p;
-    });
-
-    persistStore({ ...storeData, plans: updatedPlans });
+    const updatedPlan = activeSavingsPlan.toggleWishPurchased(id);
+    updateActivePlanInStore(updatedPlan);
   };
 
   const handleToggleWishPaused = (id: string) => {
-    const updatedItems = activePlan.items.map(item => {
-      if (item.id === id) {
-        return {
-          ...item,
-          isPaused: !item.isPaused,
-          updatedAt: new Date().toISOString(),
-        };
-      }
-      return item;
-    });
-
-    const updatedPlans = storeData.plans.map(p => {
-      if (p.id === activePlan.id) {
-        return { ...p, items: updatedItems, updatedAt: new Date().toISOString() };
-      }
-      return p;
-    });
-
-    persistStore({ ...storeData, plans: updatedPlans });
+    const updatedPlan = activeSavingsPlan.toggleWishPaused(id);
+    updateActivePlanInStore(updatedPlan);
   };
-
   // What-If Simulation Apply
   const handleApplySimulation = (newRate: number, extraBonus: number) => {
     const updatedConfig: PlanConfig = {
@@ -525,7 +426,7 @@ export const App: React.FC = () => {
 
             {/* Financial Metrics Overview */}
             <MetricsOverview
-              config={effectiveActiveConfig}
+              config={effectiveConfig}
               result={activePlanCalculation}
               onOpenSettings={() => setIsSettingsModalOpen(true)}
             />
@@ -573,7 +474,7 @@ export const App: React.FC = () => {
 
             {/* Milestone Timeline & Schedule */}
             <MilestoneTimeline
-              config={effectiveActiveConfig}
+              config={effectiveConfig}
               result={activePlanCalculation}
             />
           </>
