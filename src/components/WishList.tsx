@@ -100,7 +100,7 @@ export const WishList: React.FC<WishListProps> = ({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search wishes by name, notes, or category..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
           />
           {searchQuery && (
             <button
@@ -141,7 +141,7 @@ export const WishList: React.FC<WishListProps> = ({
       </div>
 
       {/* Category Pills Bar */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+      <div className="flex items-center gap-1.5 overflow-x-auto touch-pan-x pb-1 scrollbar-none text-xs">
         <span className="text-slate-400 flex items-center gap-1 pl-1 pr-2 font-medium">
           <Filter className="w-3 h-3" /> Categories:
         </span>

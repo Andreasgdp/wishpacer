@@ -79,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-200">
+    <header className="sticky top-0 z-30 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-200 pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
           {/* Plan Selector & Quick Switcher */}
@@ -266,24 +266,24 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Mobile Actions Header (< 640px) */}
-          <div className="flex sm:hidden items-center gap-1.5 flex-shrink-0" ref={mobileMenuRef}>
+          <div className="flex sm:hidden items-center gap-2 flex-shrink-0" ref={mobileMenuRef}>
             {/* Primary Action Button on Mobile */}
             {isPortfolioView ? (
               <button
                 type="button"
                 onClick={onOpenNewPlanModal}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs active:scale-95 transition-all"
+                className="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs active:scale-95 transition-all min-h-[38px]"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
                 <span>Plan</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onOpenAddWishModal}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs active:scale-95 transition-all"
+                className="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs active:scale-95 transition-all min-h-[38px]"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
                 <span>Wish</span>
               </button>
             )}
@@ -297,7 +297,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 transition-colors"
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center"
               aria-label="Toggle mobile menu"
             >
               {isMobileMenuOpen ? <X className="w-4 h-4" /> : <MoreVertical className="w-4 h-4" />}

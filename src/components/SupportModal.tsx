@@ -82,7 +82,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                   value={feedback}
                   onChange={e => setFeedback(e.target.value)}
                   placeholder="Describe any issues, ideas, or feature requests..."
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors resize-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors resize-none"
                 />
               </div>
               <button

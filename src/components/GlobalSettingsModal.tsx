@@ -63,7 +63,7 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
 
   return (
     <ModalBackdrop isOpen={isOpen} onClose={onClose}>
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[88vh] sm:max-h-[90vh]">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -104,7 +104,7 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
                     setCustomSymbol(CURRENCY_PRESETS[code].symbol);
                   }
                 }}
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
               >
                 {Object.keys(CURRENCY_PRESETS).map(code => (
                   <option key={code} value={code}>
@@ -131,7 +131,7 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
                   value={customSymbol}
                   onChange={e => setCustomSymbol(e.target.value)}
                   placeholder="e.g. kr, $, €"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -142,7 +142,7 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
                 <select
                   value={position}
                   onChange={e => setPosition(e.target.value as 'prefix' | 'suffix')}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white"
                 >
                   <option value="suffix">Suffix (1,000 kr)</option>
                   <option value="prefix">Prefix ($1,000)</option>
