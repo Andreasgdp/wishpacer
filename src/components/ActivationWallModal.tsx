@@ -59,7 +59,7 @@ export const ActivationWallModal: React.FC<ActivationWallModalProps> = ({ isOpen
                 value={code}
                 onChange={e => setCode(e.target.value)}
                 placeholder="Enter developer invite code..."
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
               />
             </div>
             <p className="text-[11px] text-slate-500 mt-1">
