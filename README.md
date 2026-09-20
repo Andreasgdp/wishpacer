@@ -188,3 +188,28 @@ doppler integrations setup vercel
 # Deploy with Vercel CLI
 vercel --prod
 ```
+
+---
+
+## 📋 Implementation Roadmap & Todo List (14-Point Specification)
+
+This project follows a systematic 14-point roadmap balancing immediate in-code deliverables with future service integrations:
+
+| #   | Feature / Milestone       | Status                          | Details & Implementation Seam                                                                                                                                                          |
+| --- | ------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Analytics**             | ⏳ Planned                      | Vercel Analytics / PostHog event logging (`plan_created`, `wish_added`, `scenario_simulated`).                                                                                         |
+| 2   | **Crash Reporting**       | ⏳ Planned                      | Sentry React & Node SDK setup for frontend exception tracking and serverless function monitoring.                                                                                      |
+| 3   | **Privacy Policy**        | ✅ Completed                    | `PrivacyModal` with complete data protection disclosures, Clerk auth details, and zero tracking guarantee.                                                                             |
+| 4   | **Loading States**        | ✅ Completed                    | Integrated `thinking-orbs` library (`ThinkingOrbLoader`) for hand-tuned animated AI thinking/loading visuals.                                                                          |
+| 5   | **Error States**          | ✅ Completed                    | Global React `ErrorBoundary` catching top-level runtime exceptions with reload retry UI.                                                                                               |
+| 6   | **Onboarding**            | ✅ Completed                    | `OnboardingModal` offering a multi-step feature walkthrough and 1-click interactive sample plan loader.                                                                                |
+| 7   | **Paywall**               | ✅ Completed (Gate) / ⏳ Stripe | Temporary `ActivationWallModal` with developer invite key (`VITE_DEV_ACTIVATION_CODE` / `SAVINGS2026`) blocking unactivated users; Stripe SaaS billing planned for production release. |
+| 8   | **Restore Purchases**     | ⏳ Planned                      | Stripe Billing Customer Portal web subscription recovery flow.                                                                                                                         |
+| 9   | **Account Deletion**      | ✅ Completed                    | `/api/user/delete` serverless endpoint to hard-delete user database rows (`plans`, `wish_items`, `users`) and reset local state.                                                       |
+| 10  | **Empty States**          | ✅ Completed                    | Polished empty state graphics and actionable CTA buttons across WishList, Portfolio, and History views.                                                                                |
+| 11  | **Real-Device Testing**   | ⏳ Planned                      | Mobile browser viewport audit checklist, PWA manifest, and touch target verification.                                                                                                  |
+| 12  | **App Store Screenshots** | ⏳ Planned                      | Playwright visual screenshot generation script for app showcase previews.                                                                                                              |
+| 13  | **Support Flow**          | ✅ Completed                    | In-app `SupportModal` with direct `mailto:support@savingplan.app` contact link and feedback form.                                                                                      |
+| 14  | **Monitoring**            | ✅ Completed                    | Serverless `/api/health` healthcheck endpoint reporting database connection status, timestamp, and latency.                                                                            |
+
+> **Note on Safety & Confirmation Flows**: All dangerous actions (deleting plans, removing wishlist items, wiping user account data) use a custom, type-safe `ConfirmDialogModal` rather than browser native `window.confirm` dialogs.

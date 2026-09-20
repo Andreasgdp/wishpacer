@@ -55,24 +55,16 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
     try {
       const imported = await importStoreFromJsonFile(file);
       onImportData(imported);
-      setStatusMessage({ text: 'Plans imported and restored successfully!', isError: false });
-      setTimeout(() => {
-        onClose();
-      }, 1200);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to import file';
       setStatusMessage({ text: msg, isError: true });
     }
   };
-
   const handleResetToDemo = () => {
-    if (window.confirm('Reset all plans to the sample demo dataset?')) {
-      onImportData(DEFAULT_STORE_DATA);
-      setStatusMessage({ text: 'Reset to sample multi-plan dataset!', isError: false });
-      setTimeout(() => {
-        onClose();
-      }, 1000);
-    }
+    onImportData(DEFAULT_STORE_DATA);
   };
 
   return (

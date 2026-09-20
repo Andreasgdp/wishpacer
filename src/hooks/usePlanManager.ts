@@ -43,7 +43,7 @@ export interface PlanManagerActions {
   moveWishUp: (itemId: string) => void;
   moveWishDown: (itemId: string) => void;
   importStoreData: (data: AppStoreData) => void;
-  // What-if simulator controls
+  deleteAccountData: () => Promise<void>;
   setSimulatedSavingsRate: (rate: number) => void;
   setSimulatedExtraBonus: (bonus: number) => void;
   setShowWhatIf: (show: boolean) => void;
@@ -410,6 +410,25 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     [persistStore]
   );
 
+  const deleteAccountData = useCallback(async () => {
+    try {
+      const token = getToken ? await getToken() : null;
+      if (token) {
+        await fetch('/api/user/delete', {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+    } catch (err) {
+      console.error('Failed to purge remote user database records:', err);
+    }
+    localStorage.clear();
+    toast.success('All user data permanently deleted.');
+    window.location.reload();
+  }, [getToken]);
+
   const applySimulation = useCallback(
     (newRate: number, extraBonus: number) => {
       const updatedConfig: PlanConfig = {
@@ -446,6 +465,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       moveWishUp,
       moveWishDown,
       importStoreData,
+      deleteAccountData,
       setSimulatedSavingsRate,
       setSimulatedExtraBonus,
       setShowWhatIf,
@@ -468,6 +488,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       moveWishUp,
       moveWishDown,
       importStoreData,
+      deleteAccountData,
       applySimulation,
       resetSimulation,
     ]
