@@ -8,6 +8,11 @@ async function runMigrate() {
 }
 
 runMigrate().catch(err => {
-  console.error('Migration failed:', err);
-  process.exit(1);
+  const msg = err instanceof Error ? err.message : String(err);
+  if (msg.includes('already exists')) {
+    console.log('Database tables already exist.');
+  } else {
+    console.error('Migration failed:', err);
+    process.exit(1);
+  }
 });

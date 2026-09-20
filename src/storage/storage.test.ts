@@ -172,7 +172,7 @@ describe("Storage Seam & Repository Adapters", () => {
   });
 
   describe("HybridStorageAdapter", () => {
-    it("writes to local storage and syncs to remote adapter, returning error if remote fails", async () => {
+    it("writes to local storage and syncs to remote adapter, returning success false if remote fails so UI triggers warning toast", async () => {
       const localRepo = new InMemoryStorageRepository(sampleStore);
       const remoteRepo = new InMemoryStorageRepository(sampleStore);
       remoteRepo.shouldFailSave = true;
@@ -181,9 +181,23 @@ describe("Storage Seam & Repository Adapters", () => {
       const hybrid = new HybridStorageAdapter(localRepo, remoteRepo);
       const saveRes = await hybrid.save(sampleStore);
 
+      expect(saveRes.success).toBe(false);
       expect(saveRes.localSaved).toBe(true);
       expect(saveRes.remoteSaved).toBe(false);
       expect(saveRes.error).toBe("Backend database connection timeout");
+    });
+
+    it("returns success true when both local and remote persistence succeed", async () => {
+      const localRepo = new InMemoryStorageRepository(sampleStore);
+      const remoteRepo = new InMemoryStorageRepository(sampleStore);
+
+      const hybrid = new HybridStorageAdapter(localRepo, remoteRepo);
+      const saveRes = await hybrid.save(sampleStore);
+
+      expect(saveRes.success).toBe(true);
+      expect(saveRes.localSaved).toBe(true);
+      expect(saveRes.remoteSaved).toBe(true);
+      expect(saveRes.error).toBeUndefined();
     });
   });
 });

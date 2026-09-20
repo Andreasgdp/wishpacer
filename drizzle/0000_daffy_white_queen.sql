@@ -1,4 +1,4 @@
-CREATE TABLE `plans` (
+CREATE TABLE IF NOT EXISTS `plans` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
 	`name` text NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE `plans` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
 	`id` text PRIMARY KEY NOT NULL,
 	`currency_code` text DEFAULT 'USD' NOT NULL,
 	`currency_symbol` text DEFAULT '$' NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE `users` (
 	`updated_at` text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `wish_items` (
+CREATE TABLE IF NOT EXISTS `wish_items` (
 	`id` text PRIMARY KEY NOT NULL,
 	`plan_id` text NOT NULL,
 	`title` text NOT NULL,

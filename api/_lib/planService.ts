@@ -1,11 +1,11 @@
 import { eq, asc } from 'drizzle-orm';
-import { db } from './client.js';
+import { db, ensureTablesExist } from './client.js';
 import { users, plans, wishItems } from './schema.js';
 import type { AppStoreData, CurrencyConfig, GlobalSettings, Plan, WishItem } from '../../src/types/plan.js';
 import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_PLANS } from '../../src/utils/defaults.js';
 
 export async function getUserStoreData(userId: string): Promise<AppStoreData> {
-  // 1. Fetch user settings
+  await ensureTablesExist();
   const userRows = await db.select().from(users).where(eq(users.id, userId));
   let userSettings: GlobalSettings = { ...DEFAULT_GLOBAL_SETTINGS };
 
@@ -157,8 +157,8 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
 }
 
 export async function saveUserStoreData(userId: string, data: AppStoreData): Promise<void> {
+  await ensureTablesExist();
   const now = new Date().toISOString();
-
   // 1. Update user settings
   await db
     .insert(users)

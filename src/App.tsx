@@ -113,7 +113,7 @@ export const App: React.FC = () => {
     setStoreData(nextStore);
     const saveRes = await storageRepo.save(nextStore);
     if (!saveRes.success && saveRes.error) {
-      showToast(`Warning: ${saveRes.error}`);
+      showToast(`Warning: Failed to save to server (${saveRes.error})`);
     }
   }, [storageRepo, showToast]);
   // Portfolio calculations
