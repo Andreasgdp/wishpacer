@@ -1,5 +1,5 @@
 import { migrate } from 'drizzle-orm/libsql/migrator';
-import { db } from './client';
+import { db } from '../server/db/client';
 
 async function runMigrate() {
   console.log('Running database migrations...');
