@@ -1,6 +1,7 @@
 import type { AppStoreData } from '../../types/plan.js';
 import type { SaveResult, StorageRepository } from '../types.js';
 import { LocalStorageAdapter } from './LocalStorageAdapter.js';
+
 /**
  * Composite repository adapter combining fast local browser persistence (LocalStorageAdapter)
  * with background remote API syncing (ApiSyncAdapter).
@@ -12,25 +13,30 @@ export class HybridStorageAdapter implements StorageRepository {
   ) {}
 
   public async load(): Promise<AppStoreData> {
-    // 1. First try loading from remote API if available
+    // 1. Immediately read fast local storage
+    const localData = await this.local.load();
+
+    // 2. If remote API sync is enabled, try fetching remote data with a fast timeout fallback
     if (this.remote) {
       try {
-        const remoteData = await this.remote.load();
+        const remotePromise = this.remote.load();
+        const timeoutPromise = new Promise<null>(resolve => setTimeout(() => resolve(null), 800));
+        const remoteData = await Promise.race([remotePromise, timeoutPromise]);
+
         if (remoteData && remoteData.plans && remoteData.plans.length > 0) {
-          // Sync remote data into local storage cache
+          // Cache fresh remote data locally
           await this.local.save(remoteData);
           return remoteData;
         }
       } catch (err) {
         console.warn(
-          '[HybridStorageAdapter] Remote load failed, falling back to local storage:',
+          '[HybridStorageAdapter] Remote load failed or timed out, using fast local storage:',
           err
         );
       }
     }
 
-    // 2. Fall back to local storage
-    return this.local.load();
+    return localData;
   }
 
   public async save(data: AppStoreData): Promise<SaveResult> {

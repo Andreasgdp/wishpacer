@@ -276,7 +276,6 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
                   type="button"
                   onClick={() => {
                     onDeletePlan(editingPlan.id);
-                    onClose();
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors ml-auto"
                 >

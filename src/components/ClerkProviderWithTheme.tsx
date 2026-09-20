@@ -4,7 +4,8 @@ import { dark } from '@clerk/themes';
 import { useTheme } from '../context/ThemeContext';
 
 const PUBLISHABLE_KEY =
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_placeholder_key_for_dev_mode';
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
+  'pk_test_a25vd24tY2xlcmsuY2xlcmsuYWNjb3VudHMuZGV2JA';
 
 export const ClerkProviderWithTheme: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { darkMode } = useTheme();

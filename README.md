@@ -44,8 +44,12 @@ The codebase is designed around **deep modules**, clean seams, and strong locali
 ```
 saving-plan/
 ├── api/
+│   ├── health.ts                   # Serverless healthcheck & monitoring endpoint
 │   ├── plan.ts                     # Vercel Serverless API handler (Clerk auth + Drizzle DB)
+│   ├── user/delete.ts              # Account data erasure serverless endpoint
 │   └── _lib/                       # Serverless DB helpers re-exporting from src/server/db
+├── e2e/
+│   └── flows.spec.ts               # Playwright E2E user flow tests (7 core scenarios)
 ├── CONTEXT.md                      # Project domain glossary & architectural seam definitions
 ├── data/
 │   └── saving_plan.db              # Local SQLite database (Git-ignored & auto-initialized)
@@ -55,87 +59,49 @@ saving-plan/
 │   │   ├── SavingsPlan.ts          # SavingsPlan aggregate class (priority 1..N, calculations)
 │   │   └── SavingsPlan.test.ts     # Domain aggregate unit tests
 │   ├── hooks/                      # Custom State Orchestration Hooks
-│   │   ├── usePlanManager.ts       # Store actions, what-if state, sonner toast feedback
-│   │   ├── useModalRegistry.ts     # Type-safe modal visibility & target payload registry
-│   │   └── usePlanManager.test.ts  # Hook unit tests with InMemoryStorageRepository
-│   ├── server/
-│   │   └── db/                     # Canonical Server & Database Boundary
-│   │       ├── client.ts           # LibSQL/SQLite client with auto schema initialization
-│   │       ├── schema.ts           # Drizzle ORM tables (users, plans, wishItems)
-│   │       ├── planService.ts      # User store CRUD & relational mapping
-│   │       └── db.test.ts          # Database client & URL normalization tests
+│   ├── server/                     # Canonical Database & Server Boundary
 │   ├── storage/                    # Persistence Seam & Pluggable Repository Adapters
-│   │   ├── types.ts                # StorageRepository interface & SaveResult union
-│   │   ├── migrations.ts           # Schema upgrade transformer (v1/v2/v3 payloads)
-│   │   ├── storage.test.ts         # Repository adapters & migration unit tests
-│   │   └── adapters/
-│   │       ├── LocalStorageAdapter.ts      # Fast local browser storage
-│   │       ├── ApiSyncAdapter.ts          # Remote API sync with Clerk 401 token refresh retry
-│   │       ├── HybridStorageAdapter.ts    # Composes fast local write + remote API sync
-│   │       └── InMemoryStorageRepository.ts # Headless fake repository for fast testing
 │   ├── types/
-│   │   └── plan.ts                 # Domain interfaces (Plan, WishItem, PlanConfig, etc.)
-│   ├── utils/
-│   │   ├── calculator.ts           # Pure financial compounding & milestone calculator
-│   │   ├── currency.ts             # Currency formatting & presets
-│   │   ├── defaults.ts             # Default sample plans & categories
-│   │   └── exporters/
-│   │       └── fileExporters.ts    # DOM JSON/CSV export & file upload import utils
-│   ├── App.tsx                     # Top-level React layout composition (~230 LOC)
-│   └── main.tsx                    # ClerkProvider & React entry point
+│   └── utils/
 └── README.md
 ```
 
 ---
 
-## 💡 Key Architectural Deepening
+## 🧪 Testing Standard Practice (Unit & Playwright E2E)
 
-1. **`SavingsPlan` Domain Aggregate (`src/domain/SavingsPlan.ts`)**:
-   - Encapsulates plan budget rules and wish list items behind an immutable OOP class.
-   - Enforces contiguous priority sequence (`1..N`) automatically on item additions, deletions, or reorders.
-   - Provides scenario projections (`.simulateScenario({ savingsRate, lumpSumBonus })`) yielding un-persisted plan instances for what-if simulations without dirtying UI state.
+Writing and maintaining both **Unit Tests** and **Playwright End-to-End (E2E) Tests** is a **REQUIRED standard practice** for all new features, bug fixes, and architectural changes.
 
-2. **Unified Persistence Seam (`src/storage/`)**:
-   - Defines `StorageRepository` interface (`load()`, `save()`) backed by pluggable adapters.
-   - `HybridStorageAdapter` guarantees immediate local browser persistence while background-syncing to serverless database.
-   - Handles Clerk Bearer token authentication and 401 refresh retries cleanly behind the seam.
-   - Provides `InMemoryStorageRepository` for instant headless testing without network or DOM mocks.
+### 1. Unit Tests (`bun test src`)
 
-3. **UI Hooks & Toast Orchestration (`src/hooks/`)**:
-   - `useModalRegistry()` manages modal visibility and editing payloads in a single type-safe registry.
-   - `usePlanManager()` orchestrates state loading, persistence, actions, and `sonner` toast notifications.
-   - Reduces `App.tsx` from 550+ lines to ~230 lines of clean layout composition.
-
-4. **Canonical Database Boundary (`src/server/db/`)**:
-   - Consolidates LibSQL database connections, Drizzle ORM schemas, and relational persistence.
-   - Eliminates shallow 1-line re-export pass-through files.
-   - Automatically initializes SQLite tables (`CREATE TABLE IF NOT EXISTS`) so clearing or resetting local dev databases works without manual migration steps.
-
----
-
-## 🧪 Testing
-
-The repository maintains **35+ unit tests** across 6 test suites covering domain math, storage adapters, schema migrations, custom hooks, and database client utilities:
+Covers domain math, storage adapters, schema migrations, custom hooks, and database client utilities:
 
 ```bash
-bun test
+bun run test
 ```
 
-### Type Checking & Build Verification
+### 2. Playwright End-to-End Tests (`bun run test:e2e`)
+
+Playwright executes headless browser testing across all 7 core user flows (Activation Gate, Onboarding Tour, Multi-Plan CRUD, Wishlist Queue, What-If Simulator, Privacy/Support Modals, and Account Erasure):
 
 ```bash
-# Typecheck across entire workspace
-bun tsc --noEmit
+# Run full E2E test suite locally
+bun run test:e2e
 
-# Test full production build
-bun run build
+# Run Playwright UI mode
+npx playwright test --ui
 ```
+
+### 3. CI/CD & Deployment Strategy
+
+- **GitHub Actions CI (`.github/workflows/ci.yml`)**: Executes the full validation suite including typechecking, linting, formatting, unit tests, production build, AND Playwright E2E browser tests on every pull request and push to `main`.
+- **Vercel Deployment Pipeline (`prebuild`)**: Vercel executes `bun run prebuild` (`typecheck && lint && format:check && test`). **Playwright E2E tests are intentionally EXCLUDED from Vercel's build pipeline** to prevent slow, heavy browser downloads and ensure ultra-fast deployment builds.
 
 ---
 
 ## 🛑 Deployment Quality Gates & Blockers
 
-Deployments (via Vercel CLI, Vercel GitHub Integration, or manual trigger) are **automatically blocked and failed** if any quality check fails:
+Deployments are **automatically blocked** if any quality check fails:
 
 1. **Automatic Pre-Build Gating (`package.json`)**:
    - `bun run build` automatically executes `bun run prebuild` first:
@@ -145,11 +111,7 @@ Deployments (via Vercel CLI, Vercel GitHub Integration, or manual trigger) are *
    - If typechecking, ESLint, Prettier verification, or any unit test fails, Vercel **immediately aborts the build** and cancels deployment.
 
 2. **GitHub Branch Protection Rules**:
-   - To prevent merging broken code to `main` or `master`, enable Branch Protection in GitHub:
-     1. Go to **Settings** → **Branches** → **Branch protection rules** on GitHub.
-     2. Add protection rule for `main` / `master`.
-     3. Check **Require status checks to pass before merging**.
-     4. Select **Typecheck, Lint, Test & Build** (`validate` job from `.github/workflows/ci.yml`).
+   - Require `validate` job from `.github/workflows/ci.yml` (including Playwright E2E tests) to pass before merging PRs.
 
 ---
 
@@ -160,17 +122,12 @@ This project deploys natively to **Vercel Serverless Functions** (`/api/plan`) b
 ### Step 1: Create a Production Database on Turso
 
 ```bash
-# Create Turso database
 turso db create saving-plan-prod
-
-# Get connection URL and Auth Token
 turso db show saving-plan-prod --url
 turso db tokens create saving-plan-prod
 ```
 
 ### Step 2: Add Production Secrets to Doppler
-
-In your Doppler `prd` environment (or via Doppler Vercel Integration):
 
 ```bash
 doppler secrets set TURSO_DATABASE_URL="libsql://saving-plan-prod-YOUR_ORG.turso.io" --config prd
@@ -182,18 +139,12 @@ doppler secrets set CLERK_SECRET_KEY="sk_live_..." --config prd
 ### Step 3: Deploy to Vercel
 
 ```bash
-# Connect Doppler to Vercel environment variables automatically
-doppler integrations setup vercel
-
-# Deploy with Vercel CLI
 vercel --prod
 ```
 
 ---
 
 ## 📋 Implementation Roadmap & Todo List (14-Point Specification)
-
-This project follows a systematic 14-point roadmap balancing immediate in-code deliverables with future service integrations:
 
 | #   | Feature / Milestone       | Status                          | Details & Implementation Seam                                                                                                                                                          |
 | --- | ------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -1,14 +1,7 @@
 {
   "version": 3,
+  "lastSaved": "2026-09-20T16:55:38.033Z",
   "activePlanId": "plan-personal-wants",
-  "settings": {
-    "currency": {
-      "code": "USD",
-      "symbol": "$",
-      "position": "prefix",
-      "decimals": 0
-    }
-  },
   "plans": [
     {
       "id": "plan-personal-wants",
@@ -22,7 +15,7 @@
         "amountToSave": 300,
         "frequency": "monthly",
         "savingsDayOfMonth": 25,
-        "firstSavingDate": "2026-09-19",
+        "firstSavingDate": "2026-09-20",
         "emergencyBuffer": 200,
         "annualInterestRate": 0
       },
@@ -37,8 +30,8 @@
           "notes": "For focused coding and peaceful travel.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-19T14:52:36.484Z",
-          "updatedAt": "2026-09-19T14:52:36.484Z"
+          "createdAt": "2026-09-20T16:55:37.210Z",
+          "updatedAt": "2026-09-20T16:55:37.210Z"
         },
         {
           "id": "wish-p2",
@@ -49,8 +42,8 @@
           "notes": "Custom tactile switches for daily programming.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-19T14:52:36.484Z",
-          "updatedAt": "2026-09-19T14:52:36.484Z"
+          "createdAt": "2026-09-20T16:55:37.210Z",
+          "updatedAt": "2026-09-20T16:55:37.210Z"
         },
         {
           "id": "wish-p3",
@@ -61,12 +54,12 @@
           "notes": "Hiking getaway in nature.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-19T14:52:36.484Z",
-          "updatedAt": "2026-09-19T14:52:36.484Z"
+          "createdAt": "2026-09-20T16:55:37.210Z",
+          "updatedAt": "2026-09-20T16:55:37.210Z"
         }
       ],
-      "createdAt": "2026-09-19T14:52:36.484Z",
-      "updatedAt": "2026-09-19T14:52:36.484Z"
+      "createdAt": "2026-09-20T16:55:37.210Z",
+      "updatedAt": "2026-09-20T16:55:37.210Z"
     },
     {
       "id": "plan-house-needs",
@@ -80,7 +73,7 @@
         "amountToSave": 450,
         "frequency": "monthly",
         "savingsDayOfMonth": 25,
-        "firstSavingDate": "2026-09-19",
+        "firstSavingDate": "2026-09-20",
         "emergencyBuffer": 500,
         "annualInterestRate": 0
       },
@@ -94,8 +87,8 @@
           "notes": "Automate heating and reduce winter energy bills.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-19T14:52:36.484Z",
-          "updatedAt": "2026-09-19T14:52:36.484Z"
+          "createdAt": "2026-09-20T16:55:37.210Z",
+          "updatedAt": "2026-09-20T16:55:37.210Z"
         },
         {
           "id": "wish-h2",
@@ -106,8 +99,8 @@
           "notes": "Quiet, energy-efficient model for the kitchen.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-19T14:52:36.484Z",
-          "updatedAt": "2026-09-19T14:52:36.484Z"
+          "createdAt": "2026-09-20T16:55:37.210Z",
+          "updatedAt": "2026-09-20T16:55:37.210Z"
         },
         {
           "id": "wish-h3",
@@ -118,13 +111,20 @@
           "notes": "Storage for books, plants, and records.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-19T14:52:36.484Z",
-          "updatedAt": "2026-09-19T14:52:36.484Z"
+          "createdAt": "2026-09-20T16:55:37.210Z",
+          "updatedAt": "2026-09-20T16:55:37.210Z"
         }
       ],
-      "createdAt": "2026-09-19T14:52:36.484Z",
-      "updatedAt": "2026-09-19T14:52:36.484Z"
+      "createdAt": "2026-09-20T16:55:37.210Z",
+      "updatedAt": "2026-09-20T16:55:37.210Z"
     }
   ],
-  "lastSaved": "2026-09-19T14:52:46.588Z"
+  "settings": {
+    "currency": {
+      "code": "USD",
+      "symbol": "$",
+      "position": "prefix",
+      "decimals": 0
+    }
+  }
 }

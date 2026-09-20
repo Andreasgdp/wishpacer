@@ -10,7 +10,7 @@ async function getUserIdFromReq(req: VercelRequest): Promise<string | null> {
     return null;
   }
   const token = authHeader.split(' ')[1];
-  if (!token || !clerkSecretKey) {
+  if (!token || !clerkSecretKey || clerkSecretKey.includes('placeholder')) {
     return null;
   }
   try {

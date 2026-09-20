@@ -8,3 +8,5 @@ node_modules
 coverage
 bun.lock
 .vercel
+playwright-report
+test-results
