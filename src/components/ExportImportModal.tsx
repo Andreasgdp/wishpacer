@@ -34,7 +34,9 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   onImportData,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [statusMessage, setStatusMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ text: string; isError: boolean } | null>(
+    null
+  );
 
   const handleJsonExport = () => {
     exportStoreToJsonFile(storeData);
@@ -173,9 +175,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
                   <div className="text-xs font-bold text-slate-900 dark:text-white">
                     Upload JSON Backup
                   </div>
-                  <div className="text-[11px] text-slate-500">
-                    Restore all plans and items
-                  </div>
+                  <div className="text-[11px] text-slate-500">Restore all plans and items</div>
                 </div>
               </div>
             </button>

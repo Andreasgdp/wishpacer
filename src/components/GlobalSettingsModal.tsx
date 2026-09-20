@@ -154,8 +154,8 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
                   ? `${CURRENCY_PRESETS[selectedCurrencyCode].symbol}1,250`
                   : `1,250 ${CURRENCY_PRESETS[selectedCurrencyCode].symbol}`
                 : position === 'prefix'
-                ? `${customSymbol}1,250`
-                : `1,250 ${customSymbol}`}
+                  ? `${customSymbol}1,250`
+                  : `1,250 ${customSymbol}`}
             </span>
           </div>
 

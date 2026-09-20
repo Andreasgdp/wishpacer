@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { SavingsPlan } from "../domain/SavingsPlan.js";
-import { createStorageRepository, type StorageRepository } from "../storage/index.js";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { SavingsPlan } from '../domain/SavingsPlan.js';
+import { createStorageRepository, type StorageRepository } from '../storage/index.js';
 import type {
   AppStoreData,
   GlobalSettings,
@@ -10,9 +10,9 @@ import type {
   PlanConfig,
   PortfolioSummary,
   WishItem,
-} from "../types/plan.js";
-import { calculatePortfolioSummary } from "../utils/calculator.js";
-import { DEFAULT_STORE_DATA } from "../utils/defaults.js";
+} from '../types/plan.js';
+import { calculatePortfolioSummary } from '../utils/calculator.js';
+import { DEFAULT_STORE_DATA } from '../utils/defaults.js';
 
 export interface PlanManagerOptions {
   isAuthLoaded?: boolean;
@@ -24,13 +24,16 @@ export interface PlanManagerOptions {
 export interface PlanManagerActions {
   selectPlan: (planId: string) => void;
   createPlan: (planData: Partial<Plan> & { config?: Partial<PlanConfig> }) => void;
-  updatePlanMetadata: (planData: Partial<Plan> & { config?: Partial<PlanConfig> }, targetPlanId?: string) => void;
+  updatePlanMetadata: (
+    planData: Partial<Plan> & { config?: Partial<PlanConfig> },
+    targetPlanId?: string
+  ) => void;
   duplicatePlan: (planId: string) => void;
   deletePlan: (planId: string) => void;
   updateBudgetSettings: (newConfig: PlanConfig) => void;
   updateGlobalSettings: (newSettings: GlobalSettings) => void;
   saveWishItem: (
-    itemData: Omit<WishItem, "id" | "createdAt" | "updatedAt" | "isPurchased" | "isPaused">,
+    itemData: Omit<WishItem, 'id' | 'createdAt' | 'updatedAt' | 'isPurchased' | 'isPaused'>,
     existingId?: string
   ) => void;
   deleteWishItem: (itemId: string) => void;
@@ -125,7 +128,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       setSimulatedExtraBonus(0);
       setShowWhatIf(false);
     }
-  }, [activePlan?.id]);
+  }, [activePlan]);
 
   // Persist store data and notify user via sonner toast if save fails
   const persistStore = useCallback(
@@ -134,7 +137,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       const saveRes = await storageRepo.save(nextStore);
 
       if (!saveRes.success) {
-        toast.warning(`Failed to save to server (${saveRes.error || "Sync error"})`);
+        toast.warning(`Failed to save to server (${saveRes.error || 'Sync error'})`);
       } else if (successToast) {
         toast.success(successToast);
       }
@@ -145,9 +148,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   // Helper to persist updated active SavingsPlan
   const updateActivePlanInStore = useCallback(
     (nextPlan: SavingsPlan, toastMsg?: string) => {
-      const updatedPlans = storeData.plans.map(p =>
-        p.id === nextPlan.id ? nextPlan.toJSON() : p
-      );
+      const updatedPlans = storeData.plans.map(p => (p.id === nextPlan.id ? nextPlan.toJSON() : p));
       persistStore({ ...storeData, plans: updatedPlans }, toastMsg);
     },
     [storeData, persistStore]
@@ -172,7 +173,13 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       : activeSavingsPlan;
 
     return planToCalculate.calculate(storeData.settings.currency);
-  }, [activeSavingsPlan, showWhatIf, simulatedSavingsRate, simulatedExtraBonus, storeData.settings.currency]);
+  }, [
+    activeSavingsPlan,
+    showWhatIf,
+    simulatedSavingsRate,
+    simulatedExtraBonus,
+    storeData.settings.currency,
+  ]);
 
   // Portfolio summary
   const portfolioSummary = useMemo(() => {
@@ -196,17 +203,17 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       const newPlanId = `plan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
       const newPlan: Plan = {
         id: newPlanId,
-        name: planData.name || "New Savings Plan",
+        name: planData.name || 'New Savings Plan',
         description: planData.description,
-        icon: planData.icon || "sparkles",
-        color: planData.color || "violet",
+        icon: planData.icon || 'sparkles',
+        color: planData.color || 'violet',
         config: (planData.config as PlanConfig) || {
-          name: planData.name || "New Savings Plan",
+          name: planData.name || 'New Savings Plan',
           currentAmountSaved: 0,
           amountToSave: 100,
-          frequency: "monthly",
+          frequency: 'monthly',
           savingsDayOfMonth: 1,
-          firstSavingDate: new Date().toISOString().split("T")[0],
+          firstSavingDate: new Date().toISOString().split('T')[0],
           emergencyBuffer: 0,
           annualInterestRate: 0,
         },
@@ -245,7 +252,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         return p;
       });
 
-      persistStore({ ...storeData, plans: updatedPlans }, "Plan details updated");
+      persistStore({ ...storeData, plans: updatedPlans }, 'Plan details updated');
     },
     [activePlan.id, storeData, persistStore]
   );
@@ -284,7 +291,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   const deletePlan = useCallback(
     (planId: string) => {
       if (storeData.plans.length <= 1) {
-        toast.error("Cannot delete the only remaining plan.");
+        toast.error('Cannot delete the only remaining plan.');
         return;
       }
       const filtered = storeData.plans.filter(p => p.id !== planId);
@@ -296,7 +303,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
           activePlanId: nextActiveId,
           plans: filtered,
         },
-        "Plan deleted"
+        'Plan deleted'
       );
     },
     [storeData, persistStore]
@@ -305,7 +312,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   const updateBudgetSettings = useCallback(
     (newConfig: PlanConfig) => {
       const updatedPlan = activeSavingsPlan.updateConfig(newConfig);
-      updateActivePlanInStore(updatedPlan, "Budget settings updated");
+      updateActivePlanInStore(updatedPlan, 'Budget settings updated');
       setSimulatedSavingsRate(newConfig.amountToSave);
     },
     [activeSavingsPlan, updateActivePlanInStore]
@@ -326,7 +333,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
 
   const saveWishItem = useCallback(
     (
-      itemData: Omit<WishItem, "id" | "createdAt" | "updatedAt" | "isPurchased" | "isPaused">,
+      itemData: Omit<WishItem, 'id' | 'createdAt' | 'updatedAt' | 'isPurchased' | 'isPaused'>,
       existingId?: string
     ) => {
       let updatedPlan: SavingsPlan;
@@ -334,7 +341,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
 
       if (existingId) {
         updatedPlan = activeSavingsPlan.updateWishItem(existingId, itemData);
-        toastMsg = "Wish updated";
+        toastMsg = 'Wish updated';
       } else {
         updatedPlan = activeSavingsPlan.addWishItem(itemData, itemData.priority);
         toastMsg = `Added to "${activeSavingsPlan.name}" ✨`;
@@ -348,7 +355,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   const deleteWishItem = useCallback(
     (itemId: string) => {
       const updatedPlan = activeSavingsPlan.removeWishItem(itemId);
-      updateActivePlanInStore(updatedPlan, "Wish removed from plan");
+      updateActivePlanInStore(updatedPlan, 'Wish removed from plan');
     },
     [activeSavingsPlan, updateActivePlanInStore]
   );
@@ -372,7 +379,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   const reorderWishes = useCallback(
     (activeId: string, overId: string) => {
       const updatedPlan = activeSavingsPlan.reorderWishItems(activeId, overId);
-      updateActivePlanInStore(updatedPlan, "Wishlist priority reordered");
+      updateActivePlanInStore(updatedPlan, 'Wishlist priority reordered');
     },
     [activeSavingsPlan, updateActivePlanInStore]
   );
@@ -397,7 +404,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
 
   const importStoreData = useCallback(
     (data: AppStoreData) => {
-      persistStore(data, "Successfully imported store data!");
+      persistStore(data, 'Successfully imported store data!');
       setIsPortfolioView(false);
     },
     [persistStore]

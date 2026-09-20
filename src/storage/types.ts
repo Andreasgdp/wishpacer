@@ -1,4 +1,4 @@
-import type { AppStoreData } from "../types/plan.js";
+import type { AppStoreData } from '../types/plan.js';
 
 export type GetTokenFn = (options?: { skipCache?: boolean }) => Promise<string | null>;
 

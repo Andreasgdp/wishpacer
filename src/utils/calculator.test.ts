@@ -1,25 +1,25 @@
-import { describe, expect, it } from "bun:test";
-import { calculatePlan, calculatePortfolioSummary } from "./calculator";
-import type { Plan, PlanConfig, WishItem } from "../types/plan";
+import { describe, expect, it } from 'bun:test';
+import { calculatePlan, calculatePortfolioSummary } from './calculator';
+import type { Plan, PlanConfig, WishItem } from '../types/plan';
 
 const baseConfig: PlanConfig = {
-  name: "Test Plan",
+  name: 'Test Plan',
   currentAmountSaved: 1000,
   amountToSave: 500,
-  frequency: "monthly",
+  frequency: 'monthly',
   savingsDayOfMonth: 1,
-  firstSavingDate: "2026-09-01",
+  firstSavingDate: '2026-09-01',
   emergencyBuffer: 200,
-  currency: { code: "USD", symbol: "$", position: "prefix", decimals: 0 },
+  currency: { code: 'USD', symbol: '$', position: 'prefix', decimals: 0 },
   annualInterestRate: 0,
 };
 
 const sampleItems: WishItem[] = [
   {
-    id: "item-1",
-    title: "Noise Cancelling Headphones",
+    id: 'item-1',
+    title: 'Noise Cancelling Headphones',
     price: 300,
-    category: "Tech",
+    category: 'Tech',
     priority: 1,
     isPurchased: false,
     isPaused: false,
@@ -27,10 +27,10 @@ const sampleItems: WishItem[] = [
     updatedAt: new Date().toISOString(),
   },
   {
-    id: "item-2",
-    title: "Ergonomic Desk Chair",
+    id: 'item-2',
+    title: 'Ergonomic Desk Chair',
     price: 600,
-    category: "Home & Living",
+    category: 'Home & Living',
     priority: 2,
     isPurchased: false,
     isPaused: false,
@@ -38,10 +38,10 @@ const sampleItems: WishItem[] = [
     updatedAt: new Date().toISOString(),
   },
   {
-    id: "item-3",
-    title: "4K OLED Monitor",
+    id: 'item-3',
+    title: '4K OLED Monitor',
     price: 1200,
-    category: "Tech",
+    category: 'Tech',
     priority: 3,
     isPurchased: false,
     isPaused: false,
@@ -50,9 +50,8 @@ const sampleItems: WishItem[] = [
   },
 ];
 
-
-describe("calculatePlan engine", () => {
-  it("calculates effective savings taking emergency buffer into account", () => {
+describe('calculatePlan engine', () => {
+  it('calculates effective savings taking emergency buffer into account', () => {
     const result = calculatePlan(baseConfig, sampleItems);
     // 1000 saved - 200 buffer = 800 effective saved
     expect(result.effectiveSaved).toBe(800);
@@ -60,12 +59,12 @@ describe("calculatePlan engine", () => {
     expect(result.totalRemainingDeficit).toBe(1300);
   });
 
-  it("correctly accounts for buffer shortfall when current saved < emergency buffer", () => {
+  it('correctly accounts for buffer shortfall when current saved < emergency buffer', () => {
     const configWithBufferShortfall: PlanConfig = {
       ...baseConfig,
       currentAmountSaved: 0, // 0 saved currently
       emergencyBuffer: 1000, // Wants 1000 buffer
-      amountToSave: 500,     // Saves 500/mo
+      amountToSave: 500, // Saves 500/mo
     };
 
     const result = calculatePlan(configWithBufferShortfall, [sampleItems[0]]);
@@ -75,7 +74,7 @@ describe("calculatePlan engine", () => {
     expect(result.activeItems[0].intervalsNeeded).toBe(3);
   });
 
-  it("correctly allocates available savings to items in priority order", () => {
+  it('correctly allocates available savings to items in priority order', () => {
     const result = calculatePlan(baseConfig, sampleItems);
     const [item1, item2, item3] = result.activeItems;
 
@@ -101,7 +100,7 @@ describe("calculatePlan engine", () => {
     expect(item3.deficit).toBe(1300); // 2100 - 800 = 1300
   });
 
-  it("calculates deposit intervals needed for each item", () => {
+  it('calculates deposit intervals needed for each item', () => {
     const result = calculatePlan(baseConfig, sampleItems);
     const [item1, item2, item3] = result.activeItems;
 
@@ -115,27 +114,27 @@ describe("calculatePlan engine", () => {
     expect(item3.intervalsNeeded).toBe(3);
   });
 
-  it("respects paused items and purchased items", () => {
+  it('respects paused items and purchased items', () => {
     const itemsWithPausedAndPurchased: WishItem[] = [
       ...sampleItems,
       {
-        id: "item-4",
-        title: "Mechanical Keyboard",
+        id: 'item-4',
+        title: 'Mechanical Keyboard',
         price: 150,
-        category: "Tech",
+        category: 'Tech',
         priority: 4,
         isPurchased: true,
-        purchasedAt: "2026-08-01",
+        purchasedAt: '2026-08-01',
         purchasedPrice: 140,
         isPaused: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
       {
-        id: "item-5",
-        title: "Dream Vacation",
+        id: 'item-5',
+        title: 'Dream Vacation',
         price: 5000,
-        category: "Travel",
+        category: 'Travel',
         priority: 5,
         isPurchased: false,
         isPaused: true,
@@ -152,10 +151,10 @@ describe("calculatePlan engine", () => {
     expect(result.totalActiveCost).toBe(2100);
   });
 
-  it("calculates portfolio summary across multiple plans", () => {
+  it('calculates portfolio summary across multiple plans', () => {
     const plan1: Plan = {
-      id: "p1",
-      name: "Personal Wants",
+      id: 'p1',
+      name: 'Personal Wants',
       config: baseConfig, // 500/mo, 800 effective saved
       items: sampleItems, // 2100 total active cost, 1300 deficit
       createdAt: new Date().toISOString(),
@@ -163,8 +162,8 @@ describe("calculatePlan engine", () => {
     };
 
     const plan2: Plan = {
-      id: "p2",
-      name: "House Needs",
+      id: 'p2',
+      name: 'House Needs',
       config: {
         ...baseConfig,
         amountToSave: 400,
@@ -173,10 +172,10 @@ describe("calculatePlan engine", () => {
       },
       items: [
         {
-          id: "h1",
-          title: "Dishwasher",
+          id: 'h1',
+          title: 'Dishwasher',
           price: 800,
-          category: "Home & Living",
+          category: 'Home & Living',
           priority: 1,
           isPurchased: false,
           isPaused: false,

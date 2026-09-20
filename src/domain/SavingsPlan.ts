@@ -4,8 +4,8 @@ import type {
   PlanCalculationResult,
   PlanConfig,
   WishItem,
-} from "../types/plan.js";
-import { calculatePlan } from "../utils/calculator.js";
+} from '../types/plan.js';
+import { calculatePlan } from '../utils/calculator.js';
 
 /**
  * Re-indexes an array of wish items to ensure contiguous 1..N priority sequence.
@@ -100,10 +100,7 @@ export class SavingsPlan {
    * Generates a what-if scenario projection by returning a temporary, unpersisted SavingsPlan
    * with overridden savings rate or lump-sum bonus additions.
    */
-  public simulateScenario(override: {
-    savingsRate?: number;
-    lumpSumBonus?: number;
-  }): SavingsPlan {
+  public simulateScenario(override: { savingsRate?: number; lumpSumBonus?: number }): SavingsPlan {
     const savingsRate = override.savingsRate ?? this.data.config.amountToSave;
     const lumpSumBonus = override.lumpSumBonus ?? 0;
 
@@ -124,17 +121,17 @@ export class SavingsPlan {
    * or appending it to the end by default. Priorities are automatically re-indexed 1..N.
    */
   public addWishItem(
-    itemData: Partial<WishItem> & Pick<WishItem, "title" | "price">,
+    itemData: Partial<WishItem> & Pick<WishItem, 'title' | 'price'>,
     targetPriority?: number
   ): SavingsPlan {
     const now = new Date().toISOString();
     const id = itemData.id || `wish-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    
+
     const newItem: WishItem = {
       id,
       title: itemData.title,
       price: itemData.price,
-      category: itemData.category || "General",
+      category: itemData.category || 'General',
       priority: targetPriority ?? (itemData.priority || this.data.items.length + 1),
       url: itemData.url,
       imageUrl: itemData.imageUrl,
@@ -165,10 +162,7 @@ export class SavingsPlan {
   /**
    * Updates an existing wish item's properties and returns a new SavingsPlan.
    */
-  public updateWishItem(
-    itemId: string,
-    updates: Partial<Omit<WishItem, "id">>
-  ): SavingsPlan {
+  public updateWishItem(itemId: string, updates: Partial<Omit<WishItem, 'id'>>): SavingsPlan {
     const now = new Date().toISOString();
     let found = false;
 
@@ -305,7 +299,7 @@ export class SavingsPlan {
    * Updates metadata (name, description, icon, color) for this plan.
    */
   public updateMetadata(
-    metadata: Partial<Pick<Plan, "name" | "description" | "icon" | "color">>
+    metadata: Partial<Pick<Plan, 'name' | 'description' | 'icon' | 'color'>>
   ): SavingsPlan {
     const now = new Date().toISOString();
     return new SavingsPlan({

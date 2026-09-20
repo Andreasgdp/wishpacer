@@ -1,11 +1,11 @@
-import { serve } from "bun";
-import fs from "node:fs";
-import path from "node:path";
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import handler from "../../api/plan";
+import { serve } from 'bun';
+import fs from 'node:fs';
+import path from 'node:path';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import handler from '../../api/plan';
 
 const port = Number(process.env.PORT) || 3000;
-const distDir = path.resolve(process.cwd(), "dist");
+const distDir = path.resolve(process.cwd(), 'dist');
 
 console.log(`Starting Saving Plan server on http://localhost:${port}`);
 
@@ -15,9 +15,9 @@ serve({
     const url = new URL(req.url);
 
     // API endpoints
-    if (url.pathname === "/api/plan") {
+    if (url.pathname === '/api/plan') {
       let body: unknown = undefined;
-      if (req.method === "POST") {
+      if (req.method === 'POST') {
         try {
           body = await req.json();
         } catch {
@@ -37,8 +37,8 @@ serve({
       } as unknown as VercelRequest;
 
       let statusCode = 200;
-      let resHeaders: Record<string, string> = {};
-      let resBody = "";
+      const resHeaders: Record<string, string> = {};
+      let resBody = '';
 
       const vRes = {
         status(code: number) {
@@ -50,15 +50,15 @@ serve({
           return vRes;
         },
         json(data: unknown) {
-          resHeaders["Content-Type"] = "application/json";
+          resHeaders['Content-Type'] = 'application/json';
           resBody = JSON.stringify(data);
           return vRes;
         },
         send(data: unknown) {
-          if (typeof data === "string") {
+          if (typeof data === 'string') {
             resBody = data;
           } else {
-            resHeaders["Content-Type"] = "application/json";
+            resHeaders['Content-Type'] = 'application/json';
             resBody = JSON.stringify(data);
           }
           return vRes;
@@ -75,17 +75,17 @@ serve({
 
     // Serve static frontend files if built
     if (fs.existsSync(distDir)) {
-      let filePath = path.join(distDir, url.pathname === "/" ? "index.html" : url.pathname);
+      let filePath = path.join(distDir, url.pathname === '/' ? 'index.html' : url.pathname);
       if (!fs.existsSync(filePath)) {
-        filePath = path.join(distDir, "index.html");
+        filePath = path.join(distDir, 'index.html');
       }
       const file = Bun.file(filePath);
       return new Response(file);
     }
 
     return new Response(
-      "Frontend not built yet. Run `bun run dev` for development or `bun run build` before starting production server.",
-      { status: 200, headers: { "Content-Type": "text/plain" } }
+      'Frontend not built yet. Run `bun run dev` for development or `bun run build` before starting production server.',
+      { status: 200, headers: { 'Content-Type': 'text/plain' } }
     );
   },
 });

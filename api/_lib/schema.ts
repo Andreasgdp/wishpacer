@@ -1,1 +1,1 @@
-export * from "../../src/server/db/schema.js";
+export * from '../../src/server/db/schema.js';

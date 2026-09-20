@@ -88,7 +88,11 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
               : `bg-gradient-to-tr ${activeColor.gradient}`
           }`}
         >
-          {isPortfolioView ? <Layers className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : getPlanIcon(activePlan?.icon)}
+          {isPortfolioView ? (
+            <Layers className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+          ) : (
+            getPlanIcon(activePlan?.icon)
+          )}
         </div>
 
         <div className="flex flex-col min-w-0 pr-0.5">
@@ -153,12 +157,15 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
                         {plan.name}
                       </div>
                       <div className="text-[10px] text-slate-500 truncate">
-                        {activeCount} wish{activeCount === 1 ? '' : 'es'} • ${plan.config.amountToSave}/{plan.config.frequency}
+                        {activeCount} wish{activeCount === 1 ? '' : 'es'} • $
+                        {plan.config.amountToSave}/{plan.config.frequency}
                       </div>
                     </div>
                   </div>
 
-                  {isSelected && <Check className="w-4 h-4 text-brand-600 dark:text-brand-400 flex-shrink-0" />}
+                  {isSelected && (
+                    <Check className="w-4 h-4 text-brand-600 dark:text-brand-400 flex-shrink-0" />
+                  )}
                 </button>
               );
             })}

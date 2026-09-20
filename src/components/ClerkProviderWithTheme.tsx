@@ -3,7 +3,8 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import { dark } from '@clerk/themes';
 import { useTheme } from '../context/ThemeContext';
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_placeholder_key_for_dev_mode';
+const PUBLISHABLE_KEY =
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_placeholder_key_for_dev_mode';
 
 export const ClerkProviderWithTheme: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { darkMode } = useTheme();
@@ -42,9 +43,7 @@ export const ClerkProviderWithTheme: React.FC<{ children: React.ReactNode }> = (
         userButtonPopoverActionButton: darkMode
           ? 'hover:bg-slate-800 text-slate-200'
           : 'hover:bg-slate-100 text-slate-700',
-        userButtonPopoverActionButtonText: darkMode
-          ? 'text-slate-200'
-          : 'text-slate-700',
+        userButtonPopoverActionButtonText: darkMode ? 'text-slate-200' : 'text-slate-700',
         userButtonPopoverFooter: darkMode
           ? 'border-t border-slate-800 bg-slate-900/50'
           : 'border-t border-slate-100 bg-slate-50/50',

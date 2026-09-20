@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Calendar,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  Sparkles,
-  TrendingUp,
-} from 'lucide-react';
+import { Calendar, CheckCircle2, ChevronDown, ChevronUp, Sparkles, TrendingUp } from 'lucide-react';
 import type { PlanCalculationResult, PlanConfig } from '../types/plan';
 import { formatCurrency } from '../utils/currency';
 
@@ -15,10 +8,7 @@ interface MilestoneTimelineProps {
   result: PlanCalculationResult;
 }
 
-export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
-  config,
-  result,
-}) => {
+export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ config, result }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (result.activeItems.length === 0) return null;
@@ -80,9 +70,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
               <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-3 sm:p-4 border border-slate-200/60 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-xs font-bold text-slate-400">
-                      #{idx + 1}
-                    </span>
+                    <span className="font-mono text-xs font-bold text-slate-400">#{idx + 1}</span>
                     <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
                       {item.title}
                     </h4>
@@ -92,7 +80,8 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
                     <span>
-                      Cumulative target: <strong>{formatCurrency(item.cumulativeTarget, config.currency)}</strong>
+                      Cumulative target:{' '}
+                      <strong>{formatCurrency(item.cumulativeTarget, config.currency)}</strong>
                     </span>
                     {item.deficit > 0 && (
                       <span className="text-amber-600 dark:text-amber-400">
@@ -152,7 +141,10 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {result.milestones.map((m, idx) => (
-                  <tr key={idx} className="hover:bg-slate-100/50 dark:hover:bg-slate-800/40 transition-colors">
+                  <tr
+                    key={idx}
+                    className="hover:bg-slate-100/50 dark:hover:bg-slate-800/40 transition-colors"
+                  >
                     <td className="py-2 px-3 font-bold text-slate-700 dark:text-slate-300">
                       #{m.depositNumber}
                     </td>

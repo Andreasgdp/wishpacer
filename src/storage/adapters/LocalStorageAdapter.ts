@@ -1,11 +1,11 @@
-import type { AppStoreData } from "../../types/plan.js";
-import { DEFAULT_STORE_DATA } from "../../utils/defaults.js";
-import { migrateToMultiPlan } from "../migrations.js";
-import type { SaveResult, StorageRepository } from "../types.js";
+import type { AppStoreData } from '../../types/plan.js';
+import { DEFAULT_STORE_DATA } from '../../utils/defaults.js';
+import { migrateToMultiPlan } from '../migrations.js';
+import type { SaveResult, StorageRepository } from '../types.js';
 
-const LOCAL_STORAGE_KEY = "saving_plan_app_store_v3";
-const LEGACY_V2_STORAGE_KEY = "saving_plan_app_store_v2";
-const LEGACY_STORAGE_KEY = "saving_plan_app_data_v1";
+const LOCAL_STORAGE_KEY = 'saving_plan_app_store_v3';
+const LEGACY_V2_STORAGE_KEY = 'saving_plan_app_store_v2';
+const LEGACY_STORAGE_KEY = 'saving_plan_app_data_v1';
 
 /**
  * Fast local browser storage adapter using localStorage and multi-version schema migration.
@@ -13,7 +13,9 @@ const LEGACY_STORAGE_KEY = "saving_plan_app_data_v1";
 export class LocalStorageAdapter implements StorageRepository {
   constructor(
     private readonly storageKey: string = LOCAL_STORAGE_KEY,
-    private readonly storage: Storage | null = typeof window !== "undefined" && window.localStorage ? window.localStorage : null
+    private readonly storage: Storage | null = typeof window !== 'undefined' && window.localStorage
+      ? window.localStorage
+      : null
   ) {}
 
   public async load(): Promise<AppStoreData> {
@@ -28,7 +30,7 @@ export class LocalStorageAdapter implements StorageRepository {
         return migrateToMultiPlan(JSON.parse(raw));
       }
     } catch (err) {
-      console.warn("[LocalStorageAdapter] Failed to parse primary v3 storage", err);
+      console.warn('[LocalStorageAdapter] Failed to parse primary v3 storage', err);
     }
 
     // 2. Try legacy v2 key
@@ -56,7 +58,12 @@ export class LocalStorageAdapter implements StorageRepository {
 
   public async save(data: AppStoreData): Promise<SaveResult> {
     if (!this.storage) {
-      return { success: false, localSaved: false, remoteSaved: false, error: "localStorage unavailable" };
+      return {
+        success: false,
+        localSaved: false,
+        remoteSaved: false,
+        error: 'localStorage unavailable',
+      };
     }
 
     const payload: AppStoreData = {
@@ -69,8 +76,8 @@ export class LocalStorageAdapter implements StorageRepository {
       this.storage.setItem(this.storageKey, JSON.stringify(payload));
       return { success: true, localSaved: true, remoteSaved: false };
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to write to localStorage";
-      console.warn("[LocalStorageAdapter] Write error:", err);
+      const msg = err instanceof Error ? err.message : 'Failed to write to localStorage';
+      console.warn('[LocalStorageAdapter] Write error:', err);
       return { success: false, localSaved: false, remoteSaved: false, error: msg };
     }
   }

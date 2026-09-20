@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  Plus,
-  Edit2,
-  Trash2,
-  Copy,
-  Coins,
-  PiggyBank,
-} from 'lucide-react';
+import { X, Plus, Edit2, Trash2, Copy, Coins, PiggyBank } from 'lucide-react';
 import type { Plan, PlanConfig } from '../types/plan';
 import { PLAN_COLORS, PLAN_ICONS } from '../utils/defaults';
 import { getPlanIcon } from './PlanSwitcher';
@@ -283,7 +275,11 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    if (window.confirm(`Are you sure you want to delete the plan "${editingPlan.name}"?`)) {
+                    if (
+                      window.confirm(
+                        `Are you sure you want to delete the plan "${editingPlan.name}"?`
+                      )
+                    ) {
                       onDeletePlan(editingPlan.id);
                       onClose();
                     }

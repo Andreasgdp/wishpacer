@@ -7,7 +7,10 @@ import { ModalBackdrop } from './ModalBackdrop';
 interface WishModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (itemData: Omit<WishItem, 'id' | 'createdAt' | 'updatedAt' | 'isPurchased' | 'isPaused'>, existingId?: string) => void;
+  onSave: (
+    itemData: Omit<WishItem, 'id' | 'createdAt' | 'updatedAt' | 'isPurchased' | 'isPaused'>,
+    existingId?: string
+  ) => void;
   editingItem?: ComputedWishItem | null;
   currency: CurrencyConfig;
   currentCount: number;

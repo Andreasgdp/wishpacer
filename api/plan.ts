@@ -7,7 +7,9 @@ import type { AppStoreData } from '../src/types/plan.js';
 
 const clerkSecretKey = process.env.CLERK_SECRET_KEY;
 
-async function getUserIdFromReq(req: VercelRequest): Promise<{ userId: string | null; authAttempted: boolean }> {
+async function getUserIdFromReq(
+  req: VercelRequest
+): Promise<{ userId: string | null; authAttempted: boolean }> {
   const authHeader = req.headers.authorization || (req.headers.Authorization as string);
   if (!authHeader) {
     return { userId: null, authAttempted: false };
@@ -98,7 +100,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       const body = (typeof req.body === 'string' ? JSON.parse(req.body) : req.body) as AppStoreData;
 
       if (userId) {
-        console.log(`[API /api/plan] Saving DB store data for user: ${userId} (${body.plans?.length || 0} plans)`);
+        console.log(
+          `[API /api/plan] Saving DB store data for user: ${userId} (${body.plans?.length || 0} plans)`
+        );
         await saveUserStoreData(userId, body);
         res.status(200).json({ success: true, savedAt: new Date().toISOString(), storage: 'db' });
         return;
