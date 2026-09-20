@@ -6,6 +6,7 @@ import {
   isNewer,
   LocalStorageAdapter,
   migrateToMultiPlan,
+  type StorageRepository,
 } from './index.js';
 import type { AppStoreData } from '../types/plan.js';
 
@@ -236,7 +237,10 @@ describe('Storage Seam & Repository Adapters', () => {
 
     it('treats valid store data as newer than null, undefined, or default uninitialized store', () => {
       const validData: AppStoreData = { ...sampleStore, lastSaved: '2026-09-20T10:00:00.000Z' };
-      const uninitializedData: AppStoreData = { ...sampleStore, lastSaved: '1970-01-01T00:00:00.000Z' };
+      const uninitializedData: AppStoreData = {
+        ...sampleStore,
+        lastSaved: '1970-01-01T00:00:00.000Z',
+      };
 
       expect(isNewer(validData, null)).toBe(true);
       expect(isNewer(validData, undefined)).toBe(true);
@@ -247,8 +251,16 @@ describe('Storage Seam & Repository Adapters', () => {
 
   describe('HybridStorageAdapter Latest-Data Reconciliation', () => {
     it('overwrites local storage when remote data is newer', async () => {
-      const olderLocalStore: AppStoreData = { ...sampleStore, activePlanId: 'local-old', lastSaved: '2026-09-20T08:00:00.000Z' };
-      const newerRemoteStore: AppStoreData = { ...sampleStore, activePlanId: 'remote-new', lastSaved: '2026-09-20T12:00:00.000Z' };
+      const olderLocalStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'local-old',
+        lastSaved: '2026-09-20T08:00:00.000Z',
+      };
+      const newerRemoteStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'remote-new',
+        lastSaved: '2026-09-20T12:00:00.000Z',
+      };
 
       const localRepo = new InMemoryStorageRepository(olderLocalStore);
       const remoteRepo = new InMemoryStorageRepository(newerRemoteStore);
@@ -262,8 +274,16 @@ describe('Storage Seam & Repository Adapters', () => {
     });
 
     it('retains local storage and pushes to remote when local data is newer (e.g. offline edits)', async () => {
-      const newerLocalStore: AppStoreData = { ...sampleStore, activePlanId: 'local-offline-edits', lastSaved: '2026-09-20T14:00:00.000Z' };
-      const olderRemoteStore: AppStoreData = { ...sampleStore, activePlanId: 'remote-outdated', lastSaved: '2026-09-20T10:00:00.000Z' };
+      const newerLocalStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'local-offline-edits',
+        lastSaved: '2026-09-20T14:00:00.000Z',
+      };
+      const olderRemoteStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'remote-outdated',
+        lastSaved: '2026-09-20T10:00:00.000Z',
+      };
 
       const localRepo = new InMemoryStorageRepository(newerLocalStore);
       const remoteRepo = new InMemoryStorageRepository(olderRemoteStore);
@@ -280,8 +300,16 @@ describe('Storage Seam & Repository Adapters', () => {
     });
 
     it('notifies onDataUpdated subscribers when background remote sync completes', async () => {
-      const localStore: AppStoreData = { ...sampleStore, activePlanId: 'local-initial', lastSaved: '2026-09-20T08:00:00.000Z' };
-      const remoteStore: AppStoreData = { ...sampleStore, activePlanId: 'remote-device-a', lastSaved: '2026-09-20T11:00:00.000Z' };
+      const localStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'local-initial',
+        lastSaved: '2026-09-20T08:00:00.000Z',
+      };
+      const remoteStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'remote-device-a',
+        lastSaved: '2026-09-20T11:00:00.000Z',
+      };
 
       const localRepo = new InMemoryStorageRepository(localStore);
       const remoteRepo = new InMemoryStorageRepository(remoteStore);
@@ -294,7 +322,7 @@ describe('Storage Seam & Repository Adapters', () => {
 
       await hybrid.load();
       expect(notifiedData).not.toBeNull();
-      expect(notifiedData?.activePlanId).toBe('remote-device-a');
+      expect((notifiedData as AppStoreData | null)?.activePlanId).toBe('remote-device-a');
     });
 
     it('preserves local user data when remote load fails (returns null) and never overwrites with sample plan', async () => {
@@ -314,9 +342,14 @@ describe('Storage Seam & Repository Adapters', () => {
       const localRepo = new InMemoryStorageRepository(userLocalStore);
 
       // Mock remote repo whose load() fails and returns null (like ApiSyncAdapter on HTTP error)
-      const failingRemoteRepo = {
-        load: async () => null,
-        save: async () => ({ success: false, localSaved: false, remoteSaved: false, error: 'Network error' }),
+      const failingRemoteRepo: StorageRepository = {
+        load: async () => null as unknown as AppStoreData,
+        save: async () => ({
+          success: false,
+          localSaved: false,
+          remoteSaved: false,
+          error: 'Network error',
+        }),
       };
 
       const hybrid = new HybridStorageAdapter(localRepo, failingRemoteRepo);
