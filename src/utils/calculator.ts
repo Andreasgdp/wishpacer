@@ -11,16 +11,27 @@ import type {
 } from '../types/plan';
 import { CURRENCY_PRESETS } from './currency';
 
-export function formatHumanTimeRemaining(targetDate: Date | null, isAffordable: boolean): string {
+function toValidDate(date: Date | string | null | undefined): Date | null {
+  if (!date) return null;
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d && !isNaN(d.getTime()) ? d : null;
+}
+
+export function formatHumanTimeRemaining(
+  targetDate: Date | string | null | undefined,
+  isAffordable: boolean
+): string {
   if (isAffordable) {
     return 'Ready to buy now! ✨';
   }
-  if (!targetDate) {
+
+  const d = toValidDate(targetDate);
+  if (!d) {
     return 'Set a monthly savings amount to calculate';
   }
 
   const now = new Date();
-  const diffMs = targetDate.getTime() - now.getTime();
+  const diffMs = d.getTime() - now.getTime();
   if (diffMs <= 0) {
     return 'Ready to buy now! ✨';
   }
@@ -47,21 +58,23 @@ export function formatHumanTimeRemaining(targetDate: Date | null, isAffordable: 
   return `In ~${diffYears} yr${diffYears === 1 ? '' : 's'}, ${remainingMonths} mo${remainingMonths === 1 ? '' : 's'}`;
 }
 
-export function formatDateString(date: Date | null): string {
-  if (!date) return '—';
+export function formatDateString(date: Date | string | null | undefined): string {
+  const d = toValidDate(date);
+  if (!d) return '—';
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  }).format(date);
+  }).format(d);
 }
 
-export function formatMonthYear(date: Date | null): string {
-  if (!date) return '—';
+export function formatMonthYear(date: Date | string | null | undefined): string {
+  const d = toValidDate(date);
+  if (!d) return '—';
   return new Intl.DateTimeFormat('en-US', {
     month: 'long',
     year: 'numeric',
-  }).format(date);
+  }).format(d);
 }
 
 export function getNextDepositDate(

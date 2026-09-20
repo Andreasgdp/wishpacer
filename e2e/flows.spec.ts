@@ -121,9 +121,9 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     await page.getByPlaceholder('0.00').fill('350');
     await page.getByRole('button', { name: 'Add to Plan' }).click();
 
-    // Verify added wish item in list
+    // Verify added wish item in list and projected date/time indicators
     await expect(page.getByText('Sony Headphones Pro').first()).toBeVisible();
-
+    await expect(page.getByText(/Ready to buy now!|In \d+/i).first()).toBeVisible();
     // Trigger removal confirmation using direct button title locator
     const deleteBtn = page.getByTitle('Delete wish').last();
     await expect(deleteBtn).toBeVisible();

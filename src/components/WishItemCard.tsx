@@ -167,8 +167,15 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                 <Sparkles className="w-3 h-3" /> {item.humanTimeRemaining}
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800/60">
-                <Calendar className="w-3 h-3 text-brand-500" /> {item.humanTimeRemaining}
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800/60">
+                <Calendar className="w-3 h-3 text-brand-500 flex-shrink-0" />
+                {item.projectedDate && (
+                  <>
+                    <strong className="font-semibold">{item.formattedProjectedDate}</strong>
+                    <span className="mx-1 opacity-60">•</span>
+                  </>
+                )}
+                <span>{item.humanTimeRemaining}</span>
               </span>
             )}
           </div>
