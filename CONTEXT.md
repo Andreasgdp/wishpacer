@@ -26,3 +26,11 @@ A scenario projection that simulates altered monthly savings rates or lump-sum b
 
 ### `SavingsPlan` Domain Aggregate (`src/domain/SavingsPlan.ts`)
 The primary deep module encapsulating all plan business rules, priority contiguity enforcement, milestone calculations, and scenario projections behind a clean, immutable class interface.
+
+### `StorageRepository` Interface & Adapters (`src/storage/`)
+The persistence seam hiding storage technologies, Bearer token authentication, network retries, and local vs remote syncing behind a unified interface:
+- **`StorageRepository`**: Interface (`load(): Promise<AppStoreData>`, `save(data): Promise<SaveResult>`).
+- **`LocalStorageAdapter`**: Fast local browser persistence and legacy v1/v2/v3 schema migrations.
+- **`ApiSyncAdapter`**: Remote serverless database persistence with Clerk 401 Bearer token refresh retries.
+- **`HybridStorageAdapter`**: Composes `LocalStorageAdapter` and `ApiSyncAdapter` to guarantee local fast-path writes while syncing to backend database.
+- **`InMemoryStorageRepository`**: Fast headless fake adapter for unit and integration testing.

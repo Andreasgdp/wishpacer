@@ -14,7 +14,7 @@ import {
   exportStoreToJsonFile,
   exportActivePlanToCsvFile,
   importStoreFromJsonFile,
-} from '../utils/storage';
+} from '../utils/exporters/fileExporters';
 import { DEFAULT_STORE_DATA } from '../utils/defaults';
 import { ModalBackdrop } from './ModalBackdrop';
 
