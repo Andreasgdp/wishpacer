@@ -4,6 +4,7 @@ export * from './adapters/LocalStorageAdapter.js';
 export * from './adapters/ApiSyncAdapter.js';
 export * from './adapters/HybridStorageAdapter.js';
 export * from './adapters/InMemoryStorageRepository.js';
+export * from './utils.js';
 
 import type { GetTokenFn, StorageRepository } from './types.js';
 import { LocalStorageAdapter } from './adapters/LocalStorageAdapter.js';

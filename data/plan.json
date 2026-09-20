@@ -1,7 +1,14 @@
 {
   "version": 3,
-  "lastSaved": "2026-09-20T16:55:38.033Z",
   "activePlanId": "plan-personal-wants",
+  "settings": {
+    "currency": {
+      "code": "USD",
+      "symbol": "$",
+      "position": "prefix",
+      "decimals": 0
+    }
+  },
   "plans": [
     {
       "id": "plan-personal-wants",
@@ -119,12 +126,5 @@
       "updatedAt": "2026-09-20T16:55:37.210Z"
     }
   ],
-  "settings": {
-    "currency": {
-      "code": "USD",
-      "symbol": "$",
-      "position": "prefix",
-      "decimals": 0
-    }
-  }
+  "lastSaved": "2026-09-20T20:10:53.138Z"
 }

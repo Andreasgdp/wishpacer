@@ -113,5 +113,50 @@ describe('UI Custom Hooks Suite', () => {
       expect(result.current.activePlan.items[1].title).toBe('Monitor');
       expect(repo.saveCount).toBeGreaterThan(0);
     });
+
+    it('updates state automatically when repository notifies onDataUpdated with newer data', async () => {
+      class ObservableRepo extends InMemoryStorageRepository {
+        private listeners = new Set<(data: AppStoreData) => void>();
+
+        public onDataUpdated(cb: (data: AppStoreData) => void) {
+          this.listeners.add(cb);
+          return () => this.listeners.delete(cb);
+        }
+
+        public emitUpdate(data: AppStoreData) {
+          for (const l of this.listeners) {
+            l(data);
+          }
+        }
+      }
+
+      const repo = new ObservableRepo(sampleStore);
+      const { result } = renderHook(() => usePlanManager({ isAuthLoaded: true, repository: repo }));
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(result.current.activePlan.id).toBe('plan-test-1');
+
+      // Simulate Device A saving newer data to remote server
+      const newerRemoteStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'plan-test-1',
+        plans: [
+          {
+            ...sampleStore.plans[0],
+            name: 'Device A Updated Name',
+          },
+        ],
+        lastSaved: '2026-09-20T15:00:00.000Z',
+      };
+
+      await act(async () => {
+        repo.emitUpdate(newerRemoteStore);
+      });
+
+      expect(result.current.activePlan.name).toBe('Device A Updated Name');
+    });
   });
 });

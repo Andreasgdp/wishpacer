@@ -9,4 +9,5 @@ export type SaveResult =
 export interface StorageRepository {
   load(): Promise<AppStoreData>;
   save(data: AppStoreData): Promise<SaveResult>;
+  onDataUpdated?: (callback: (data: AppStoreData) => void) => () => void;
 }
