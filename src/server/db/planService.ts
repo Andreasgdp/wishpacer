@@ -43,42 +43,48 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
 
     for (const defPlan of DEFAULT_PLANS) {
       const planId = `${userId}-${defPlan.id}`;
-      await db.insert(plans).values({
-        id: planId,
-        userId,
-        name: defPlan.name,
-        description: defPlan.description,
-        icon: defPlan.icon,
-        color: defPlan.color,
-        currentAmountSaved: defPlan.config.currentAmountSaved,
-        amountToSave: defPlan.config.amountToSave,
-        frequency: defPlan.config.frequency,
-        savingsDayOfMonth: defPlan.config.savingsDayOfMonth,
-        firstSavingDate: defPlan.config.firstSavingDate,
-        emergencyBuffer: defPlan.config.emergencyBuffer,
-        annualInterestRate: defPlan.config.annualInterestRate,
-        createdAt: now,
-        updatedAt: now,
-      }).onConflictDoNothing();
-
-      for (const item of defPlan.items) {
-        await db.insert(wishItems).values({
-          id: `${userId}-${item.id}`,
-          planId,
-          title: item.title,
-          price: item.price,
-          category: item.category,
-          priority: item.priority,
-          url: item.url,
-          imageUrl: item.imageUrl,
-          notes: item.notes,
-          isPurchased: item.isPurchased,
-          purchasedAt: item.purchasedAt,
-          purchasedPrice: item.purchasedPrice,
-          isPaused: item.isPaused,
+      await db
+        .insert(plans)
+        .values({
+          id: planId,
+          userId,
+          name: defPlan.name,
+          description: defPlan.description,
+          icon: defPlan.icon,
+          color: defPlan.color,
+          currentAmountSaved: defPlan.config.currentAmountSaved,
+          amountToSave: defPlan.config.amountToSave,
+          frequency: defPlan.config.frequency,
+          savingsDayOfMonth: defPlan.config.savingsDayOfMonth,
+          firstSavingDate: defPlan.config.firstSavingDate,
+          emergencyBuffer: defPlan.config.emergencyBuffer,
+          annualInterestRate: defPlan.config.annualInterestRate,
           createdAt: now,
           updatedAt: now,
-        }).onConflictDoNothing();
+        })
+        .onConflictDoNothing();
+
+      for (const item of defPlan.items) {
+        await db
+          .insert(wishItems)
+          .values({
+            id: `${userId}-${item.id}`,
+            planId,
+            title: item.title,
+            price: item.price,
+            category: item.category,
+            priority: item.priority,
+            url: item.url,
+            imageUrl: item.imageUrl,
+            notes: item.notes,
+            isPurchased: item.isPurchased,
+            purchasedAt: item.purchasedAt,
+            purchasedPrice: item.purchasedPrice,
+            isPaused: item.isPaused,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoNothing();
       }
     }
 
@@ -152,7 +158,10 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
     });
   }
 
-  const currentUserRows = await db.select({ updatedAt: users.updatedAt }).from(users).where(eq(users.id, userId));
+  const currentUserRows = await db
+    .select({ updatedAt: users.updatedAt })
+    .from(users)
+    .where(eq(users.id, userId));
   const effectiveLastSaved = extractMaxTimestamp(currentUserRows[0]?.updatedAt, formattedPlans);
 
   return {
