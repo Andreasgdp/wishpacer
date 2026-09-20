@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { SavingsPlan } from '../domain/SavingsPlan.js';
-import { createStorageRepository, type StorageRepository } from '../storage/index.js';
+import { createStorageRepository, isNewer, type StorageRepository } from '../storage/index.js';
 import { LocalStorageAdapter } from '../storage/adapters/LocalStorageAdapter.js';
 import type {
   AppStoreData,
@@ -108,27 +108,73 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     return new SavingsPlan(activePlan);
   }, [activePlan]);
 
-  // Sync background remote store data if available
+  const applyNewerStoreData = useCallback((nextData: AppStoreData) => {
+    setStoreData(current => {
+      if (isNewer(nextData, current)) {
+        return nextData;
+      }
+      return current;
+    });
+  }, []);
+
+  const syncWithStorage = useCallback(async () => {
+    try {
+      const loaded = await storageRepo.load();
+      applyNewerStoreData(loaded);
+    } catch (err) {
+      console.warn('[usePlanManager] Background storage sync failed:', err);
+    }
+  }, [storageRepo, applyNewerStoreData]);
+
+  // Initial load and repository subscription
   useEffect(() => {
     let isMounted = true;
 
     storageRepo.load().then(loaded => {
       if (!isMounted) return;
-
-      setStoreData(loaded);
-      const current = loaded.plans.find(p => p.id === loaded.activePlanId) || loaded.plans[0];
-      if (current) {
-        setSimulatedSavingsRate(current.config.amountToSave);
-      }
+      applyNewerStoreData(loaded);
       setIsLoading(false);
     });
 
+    const unsubscribe = storageRepo.onDataUpdated
+      ? storageRepo.onDataUpdated(updatedData => applyNewerStoreData(updatedData))
+      : undefined;
+
     return () => {
       isMounted = false;
+      unsubscribe?.();
     };
-  }, [storageRepo]);
+  }, [storageRepo, applyNewerStoreData]);
 
-  // Sync simulated rate when active plan changes
+  // Event listeners for window focus, visibility change, and cross-tab storage updates
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleFocusOrVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        syncWithStorage();
+      }
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (!e.key || e.key === 'saving_plan_app_store_v3') {
+        syncWithStorage();
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleFocusOrVisibility);
+    window.addEventListener('focus', handleFocusOrVisibility);
+    window.addEventListener('storage', handleStorageChange);
+
+    const intervalId = setInterval(handleFocusOrVisibility, 30000);
+
+    return () => {
+      window.removeEventListener('visibilitychange', handleFocusOrVisibility);
+      window.removeEventListener('focus', handleFocusOrVisibility);
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(intervalId);
+    };
+  }, [syncWithStorage]);
   useEffect(() => {
     if (activePlan) {
       setSimulatedSavingsRate(activePlan.config.amountToSave);
@@ -140,8 +186,12 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   // Persist store data and notify user via sonner toast if save fails
   const persistStore = useCallback(
     async (nextStore: AppStoreData, successToast?: string) => {
-      setStoreData(nextStore);
-      const saveRes = await storageRepo.save(nextStore);
+      const timestampedStore: AppStoreData = {
+        ...nextStore,
+        lastSaved: new Date().toISOString(),
+      };
+      setStoreData(timestampedStore);
+      const saveRes = await storageRepo.save(timestampedStore);
 
       if (!saveRes.success) {
         toast.warning(`Failed to save to server (${saveRes.error || 'Sync error'})`);

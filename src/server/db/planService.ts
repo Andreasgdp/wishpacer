@@ -42,8 +42,9 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
     const now = new Date().toISOString();
 
     for (const defPlan of DEFAULT_PLANS) {
+      const planId = `${userId}-${defPlan.id}`;
       await db.insert(plans).values({
-        id: defPlan.id,
+        id: planId,
         userId,
         name: defPlan.name,
         description: defPlan.description,
@@ -58,12 +59,12 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
         annualInterestRate: defPlan.config.annualInterestRate,
         createdAt: now,
         updatedAt: now,
-      });
+      }).onConflictDoNothing();
 
       for (const item of defPlan.items) {
         await db.insert(wishItems).values({
-          id: item.id,
-          planId: defPlan.id,
+          id: `${userId}-${item.id}`,
+          planId,
           title: item.title,
           price: item.price,
           category: item.category,
@@ -77,15 +78,28 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
           isPaused: item.isPaused,
           createdAt: now,
           updatedAt: now,
-        });
+        }).onConflictDoNothing();
       }
     }
 
+    const userSeededPlans: Plan[] = DEFAULT_PLANS.map(defPlan => ({
+      ...defPlan,
+      id: `${userId}-${defPlan.id}`,
+      items: defPlan.items.map(item => ({
+        ...item,
+        id: `${userId}-${item.id}`,
+        createdAt: now,
+        updatedAt: now,
+      })),
+      createdAt: now,
+      updatedAt: now,
+    }));
+
     return {
       version: 3,
-      activePlanId: DEFAULT_PLANS[0].id,
+      activePlanId: userSeededPlans[0].id,
       settings: userSettings,
-      plans: DEFAULT_PLANS,
+      plans: userSeededPlans,
       lastSaved: now,
     };
   }
@@ -138,18 +152,34 @@ export async function getUserStoreData(userId: string): Promise<AppStoreData> {
     });
   }
 
+  const currentUserRows = await db.select({ updatedAt: users.updatedAt }).from(users).where(eq(users.id, userId));
+  const effectiveLastSaved = extractMaxTimestamp(currentUserRows[0]?.updatedAt, formattedPlans);
+
   return {
     version: 3,
     activePlanId: formattedPlans[0].id,
     settings: userSettings,
     plans: formattedPlans,
-    lastSaved: new Date().toISOString(),
+    lastSaved: effectiveLastSaved,
   };
+}
+
+function extractMaxTimestamp(userUpdatedAt?: string, plansList: Plan[] = []): string {
+  let max = userUpdatedAt && !isNaN(Date.parse(userUpdatedAt)) ? userUpdatedAt : '';
+
+  for (const p of plansList) {
+    if (p.updatedAt && p.updatedAt > max) max = p.updatedAt;
+    for (const w of p.items) {
+      if (w.updatedAt && w.updatedAt > max) max = w.updatedAt;
+    }
+  }
+
+  return max && !isNaN(Date.parse(max)) ? max : '1970-01-01T00:00:00.000Z';
 }
 
 export async function saveUserStoreData(userId: string, data: AppStoreData): Promise<void> {
   await ensureTablesExist();
-  const now = new Date().toISOString();
+  const saveTimestamp = data.lastSaved || new Date().toISOString();
 
   // 1. Update user settings
   await db
@@ -160,8 +190,8 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
       currencySymbol: data.settings.currency.symbol,
       currencyPosition: data.settings.currency.position,
       currencyDecimals: data.settings.currency.decimals,
-      createdAt: now,
-      updatedAt: now,
+      createdAt: saveTimestamp,
+      updatedAt: saveTimestamp,
     })
     .onConflictDoUpdate({
       target: users.id,
@@ -170,7 +200,7 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
         currencySymbol: data.settings.currency.symbol,
         currencyPosition: data.settings.currency.position,
         currencyDecimals: data.settings.currency.decimals,
-        updatedAt: now,
+        updatedAt: saveTimestamp,
       },
     });
 
@@ -203,12 +233,13 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
         firstSavingDate: p.config.firstSavingDate,
         emergencyBuffer: p.config.emergencyBuffer,
         annualInterestRate: p.config.annualInterestRate,
-        createdAt: p.createdAt || now,
-        updatedAt: now,
+        createdAt: p.createdAt || saveTimestamp,
+        updatedAt: p.updatedAt || saveTimestamp,
       })
       .onConflictDoUpdate({
         target: plans.id,
         set: {
+          userId,
           name: p.name,
           description: p.description,
           icon: p.icon || 'sparkles',
@@ -220,7 +251,7 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
           firstSavingDate: p.config.firstSavingDate,
           emergencyBuffer: p.config.emergencyBuffer,
           annualInterestRate: p.config.annualInterestRate,
-          updatedAt: now,
+          updatedAt: p.updatedAt || saveTimestamp,
         },
       });
 
@@ -252,8 +283,8 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
           purchasedAt: item.purchasedAt,
           purchasedPrice: item.purchasedPrice,
           isPaused: item.isPaused,
-          createdAt: item.createdAt || now,
-          updatedAt: now,
+          createdAt: item.createdAt || saveTimestamp,
+          updatedAt: item.updatedAt || saveTimestamp,
         })
         .onConflictDoUpdate({
           target: wishItems.id,
@@ -269,7 +300,7 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
             purchasedAt: item.purchasedAt,
             purchasedPrice: item.purchasedPrice,
             isPaused: item.isPaused,
-            updatedAt: now,
+            updatedAt: item.updatedAt || saveTimestamp,
           },
         });
     }

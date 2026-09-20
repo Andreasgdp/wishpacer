@@ -243,5 +243,5 @@ export const DEFAULT_STORE_DATA: AppStoreData = {
   activePlanId: 'plan-personal-wants',
   settings: DEFAULT_GLOBAL_SETTINGS,
   plans: DEFAULT_PLANS,
-  lastSaved: new Date().toISOString(),
+  lastSaved: '1970-01-01T00:00:00.000Z',
 };

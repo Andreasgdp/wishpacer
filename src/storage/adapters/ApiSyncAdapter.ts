@@ -21,14 +21,12 @@ export class ApiSyncAdapter implements StorageRepository {
       const headers: Record<string, string> = {};
       if (this.getToken) {
         try {
-          const tokenPromise = this.getToken();
-          const timeoutPromise = new Promise<null>(resolve => setTimeout(() => resolve(null), 300));
-          const token = await Promise.race([tokenPromise, timeoutPromise]);
+          const token = await this.getToken();
           if (token) {
             headers['Authorization'] = `Bearer ${token}`;
           }
         } catch {
-          // Token getter error or unauthenticated, proceed with guest fetch
+          // Token getter error or unauthenticated
         }
       }
 
@@ -37,9 +35,7 @@ export class ApiSyncAdapter implements StorageRepository {
       // Retry once on 401 with fresh token
       if (res.status === 401 && this.getToken) {
         try {
-          const freshTokenPromise = this.getToken({ skipCache: true });
-          const timeoutPromise = new Promise<null>(resolve => setTimeout(() => resolve(null), 300));
-          const freshToken = await Promise.race([freshTokenPromise, timeoutPromise]);
+          const freshToken = await this.getToken({ skipCache: true });
           if (freshToken) {
             headers['Authorization'] = `Bearer ${freshToken}`;
             res = await this.fetchFn(this.endpoint, { headers });
@@ -60,7 +56,6 @@ export class ApiSyncAdapter implements StorageRepository {
     } catch (err) {
       console.warn(`[ApiSyncAdapter] Failed to fetch ${this.endpoint}:`, err);
     }
-
     return DEFAULT_STORE_DATA;
   }
 
@@ -69,9 +64,7 @@ export class ApiSyncAdapter implements StorageRepository {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (this.getToken) {
         try {
-          const tokenPromise = this.getToken();
-          const timeoutPromise = new Promise<null>(resolve => setTimeout(() => resolve(null), 300));
-          const token = await Promise.race([tokenPromise, timeoutPromise]);
+          const token = await this.getToken();
           if (token) {
             headers['Authorization'] = `Bearer ${token}`;
           }
@@ -89,9 +82,7 @@ export class ApiSyncAdapter implements StorageRepository {
       // Retry once on 401 with fresh token
       if (res.status === 401 && this.getToken) {
         try {
-          const freshTokenPromise = this.getToken({ skipCache: true });
-          const timeoutPromise = new Promise<null>(resolve => setTimeout(() => resolve(null), 300));
-          const freshToken = await Promise.race([freshTokenPromise, timeoutPromise]);
+          const freshToken = await this.getToken({ skipCache: true });
           if (freshToken) {
             headers['Authorization'] = `Bearer ${freshToken}`;
             res = await this.fetchFn(this.endpoint, {
