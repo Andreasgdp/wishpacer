@@ -23,20 +23,14 @@ import { WhatIfSimulator } from './components/WhatIfSimulator';
 import { MilestoneTimeline } from './components/MilestoneTimeline';
 import { PurchasedHistoryModal } from './components/PurchasedHistoryModal';
 import { ExportImportModal } from './components/ExportImportModal';
+import { useTheme } from './context/ThemeContext';
 
 export const App: React.FC = () => {
+  const { darkMode, toggleDarkMode } = useTheme();
   const { getToken, userId, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
   const [storeData, setStoreData] = useState<AppStoreData>(DEFAULT_STORE_DATA);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isPortfolioView, setIsPortfolioView] = useState(false);
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('saving_plan_dark_mode');
-      if (saved !== null) return saved === 'true';
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return false;
-  });
 
   // Active plan lookup
   const activePlan = useMemo(() => {
@@ -75,15 +69,6 @@ export const App: React.FC = () => {
     }, 2500);
   }, []);
 
-  // Sync dark mode class
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('saving_plan_dark_mode', darkMode.toString());
-  }, [darkMode]);
 
   // Load store data (waits until Clerk auth state is fully resolved)
   useEffect(() => {
@@ -494,7 +479,7 @@ export const App: React.FC = () => {
         onSelectPortfolio={() => setIsPortfolioView(true)}
         onOpenNewPlanModal={handleOpenCreatePlanModal}
         onOpenManagePlanModal={() => handleOpenEditPlanModal(activePlan)}
-        onToggleDarkMode={() => setDarkMode(!darkMode)}
+        onToggleDarkMode={toggleDarkMode}
         onOpenAddWishModal={() => {
           setEditingWishItem(null);
           setIsAddWishModalOpen(true);
