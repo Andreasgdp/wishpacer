@@ -15,6 +15,7 @@ export default tseslint.config(
       'api/plan.js',
       '.jj/**',
       'coverage/**',
+      '.vercel/**',
     ],
   },
   js.configs.recommended,
