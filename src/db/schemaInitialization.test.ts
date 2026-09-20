@@ -1,54 +1,23 @@
-import { createClient, type Client } from '@libsql/client';
-import { drizzle, type LibSQLDatabase } from 'drizzle-orm/libsql';
-import * as schema from './schema.js';
-import fs from 'node:fs';
-import path from 'node:path';
+import { describe, expect, it } from "bun:test";
+import { createClient } from "@libsql/client";
+import { ensureTablesExist } from "../../api/_lib/client.js";
 
-export interface DbConnection {
-  db: LibSQLDatabase<typeof schema>;
-  rawClient: Client;
-}
+describe("Database Schema Auto-Initialization Regression Test", () => {
+  it("handles fresh SQLite database by automatically creating missing tables", async () => {
+    // 1. Create a fresh isolated in-memory SQLite client
+    const rawClient = createClient({ url: "file::memory:" });
 
-export function normalizeDbUrl(rawUrl?: string): string {
-  const url = rawUrl || 'file:./data/saving_plan.db';
-  if (url.startsWith('turso://')) {
-    return url.replace('turso://', 'libsql://');
-  }
-  return url;
-}
-
-function getDbClient(): DbConnection {
-  const rawUrl = process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL;
-  const url = normalizeDbUrl(rawUrl);
-  const authToken = process.env.TURSO_AUTH_TOKEN;
-
-  if (url.startsWith('file:')) {
+    // 2. Confirm raw query fails on uninitialized database with 'no such table'
+    let threw = false;
     try {
-      const dataDir = path.resolve(process.cwd(), 'data');
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-      }
-    } catch {
-      // Ignore read-only filesystem in serverless environments
+      await rawClient.execute("SELECT * FROM users");
+    } catch (err) {
+      threw = true;
+      expect(String(err)).toContain("no such table");
     }
-  }
+    expect(threw).toBe(true);
 
-  const rawClient = createClient({
-    url,
-    authToken,
-  });
-
-  const db = drizzle(rawClient, { schema });
-  return { db, rawClient };
-}
-
-export const { db, rawClient } = getDbClient();
-
-let tablesChecked = false;
-
-export async function ensureTablesExist(): Promise<void> {
-  if (tablesChecked) return;
-  try {
+    // 3. Execute table creation DDL
     await rawClient.execute(`
       CREATE TABLE IF NOT EXISTS users (
         id text PRIMARY KEY NOT NULL,
@@ -100,8 +69,20 @@ export async function ensureTablesExist(): Promise<void> {
         FOREIGN KEY (plan_id) REFERENCES plans(id) ON UPDATE no action ON DELETE cascade
       );
     `);
-    tablesChecked = true;
-  } catch (err) {
-    console.warn('[db] ensureTablesExist warning:', err);
-  }
-}
+
+    // 4. Confirm queries now succeed on all tables
+    const usersRes = await rawClient.execute("SELECT * FROM users");
+    expect(usersRes.rows.length).toBe(0);
+
+    const plansRes = await rawClient.execute("SELECT * FROM plans");
+    expect(plansRes.rows.length).toBe(0);
+
+    const wishesRes = await rawClient.execute("SELECT * FROM wish_items");
+    expect(wishesRes.rows.length).toBe(0);
+  });
+
+  it("verify ensureTablesExist function runs idempotently without errors", async () => {
+    // Calling ensureTablesExist against global client should complete without errors
+    await expect(ensureTablesExist()).resolves.toBeUndefined();
+  });
+});

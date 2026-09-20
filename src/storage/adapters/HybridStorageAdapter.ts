@@ -38,11 +38,12 @@ export class HybridStorageAdapter implements StorageRepository {
     if (this.remote) {
       const remoteResult = await this.remote.save(data);
 
+      const overallSuccess = localResult.success && remoteResult.success;
       return {
-        success: localResult.success || remoteResult.success,
+        success: overallSuccess,
         localSaved: localResult.success,
         remoteSaved: remoteResult.success,
-        error: !remoteResult.success ? remoteResult.error : undefined,
+        error: !remoteResult.success ? remoteResult.error : (!localResult.success ? localResult.error : undefined),
       } as SaveResult;
     }
 
