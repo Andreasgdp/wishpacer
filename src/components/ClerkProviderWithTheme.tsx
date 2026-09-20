@@ -8,8 +8,12 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_p
 export const ClerkProviderWithTheme: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { darkMode } = useTheme();
 
-  const appearance = useMemo(
-    () => ({
+  const appearance = useMemo(() => {
+    const cardStyle = darkMode
+      ? 'bg-slate-900 border border-slate-800 shadow-2xl'
+      : 'bg-white border border-slate-200 shadow-2xl';
+
+    return {
       baseTheme: darkMode ? dark : undefined,
       variables: {
         colorPrimary: '#7c3aed',
@@ -32,13 +36,9 @@ export const ClerkProviderWithTheme: React.FC<{ children: React.ReactNode }> = (
         borderRadius: '0.75rem',
       },
       elements: {
-        card: darkMode
-          ? 'bg-slate-900 border border-slate-800 shadow-2xl'
-          : 'bg-white border border-slate-200 shadow-2xl',
+        card: cardStyle,
         modalBackdrop: 'backdrop-blur-sm bg-slate-950/50',
-        userButtonPopoverCard: darkMode
-          ? 'bg-slate-900 border border-slate-800 shadow-2xl'
-          : 'bg-white border border-slate-200 shadow-2xl',
+        userButtonPopoverCard: cardStyle,
         userButtonPopoverActionButton: darkMode
           ? 'hover:bg-slate-800 text-slate-200'
           : 'hover:bg-slate-100 text-slate-700',
@@ -50,9 +50,8 @@ export const ClerkProviderWithTheme: React.FC<{ children: React.ReactNode }> = (
           : 'border-t border-slate-100 bg-slate-50/50',
         avatarBox: 'w-8 h-8 rounded-xl',
       },
-    }),
-    [darkMode]
-  );
+    };
+  }, [darkMode]);
 
   return (
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} appearance={appearance}>
