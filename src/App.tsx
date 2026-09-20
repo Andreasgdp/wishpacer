@@ -11,7 +11,7 @@ import type {
 import { SavingsPlan } from './domain/SavingsPlan';
 import { calculatePortfolioSummary } from './utils/calculator';
 import { DEFAULT_STORE_DATA } from './utils/defaults';
-import { loadStoreData, saveStoreData } from './utils/storage';
+import { createStorageRepository } from './storage';
 import { Header } from './components/Header';
 import { MetricsOverview } from './components/MetricsOverview';
 import { WishList } from './components/WishList';
@@ -28,7 +28,7 @@ import { useTheme } from './context/ThemeContext';
 
 export const App: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
-  const { getToken, userId, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
+  const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
   const [storeData, setStoreData] = useState<AppStoreData>(DEFAULT_STORE_DATA);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isPortfolioView, setIsPortfolioView] = useState(false);
@@ -71,6 +71,11 @@ export const App: React.FC = () => {
   }, []);
 
 
+  // Storage repository instance
+  const storageRepo = useMemo(() => {
+    return createStorageRepository(isSignedIn ? getToken : undefined);
+  }, [isSignedIn, getToken]);
+
   // Load store data (waits until Clerk auth state is fully resolved)
   useEffect(() => {
     if (!isAuthLoaded) return; // Wait for Clerk initialization
@@ -78,10 +83,9 @@ export const App: React.FC = () => {
     let isMounted = true;
     setIsLoaded(false);
 
-    loadStoreData(isSignedIn ? getToken : undefined).then(async loaded => {
+    storageRepo.load().then(loaded => {
       if (!isMounted) return;
 
-      // If user just signed in and their DB account is brand new, check if we should push local guest data
       setStoreData(loaded);
       const current = loaded.plans.find(p => p.id === loaded.activePlanId) || loaded.plans[0];
       if (current) {
@@ -93,7 +97,7 @@ export const App: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [isAuthLoaded, isSignedIn, userId, getToken]);
+  }, [isAuthLoaded, storageRepo]);
 
   // Sync simulated rate when active plan changes
   useEffect(() => {
@@ -107,12 +111,11 @@ export const App: React.FC = () => {
   // Persist store data
   const persistStore = useCallback(async (nextStore: AppStoreData) => {
     setStoreData(nextStore);
-    const saveRes = await saveStoreData(nextStore, isSignedIn ? getToken : undefined);
+    const saveRes = await storageRepo.save(nextStore);
     if (!saveRes.success && saveRes.error) {
       showToast(`Warning: ${saveRes.error}`);
     }
-  }, [isSignedIn, getToken, showToast]);
-
+  }, [storageRepo, showToast]);
   // Portfolio calculations
   const portfolioSummary = useMemo(() => {
     return calculatePortfolioSummary(storeData.plans, storeData.settings.currency);
