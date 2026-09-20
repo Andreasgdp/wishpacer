@@ -24,8 +24,8 @@ async function getUserIdFromReq(
     return { userId: null, authAttempted: true };
   }
 
-  if (!clerkSecretKey) {
-    console.warn('CLERK_SECRET_KEY is missing in environment variables');
+  if (!clerkSecretKey || clerkSecretKey.includes('placeholder')) {
+    console.warn('CLERK_SECRET_KEY is missing or placeholder in environment variables');
     return { userId: null, authAttempted: true };
   }
 

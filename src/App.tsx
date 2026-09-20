@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
 import { useModalRegistry, usePlanManager } from './hooks';
@@ -28,6 +28,15 @@ import { DEFAULT_PLANS } from './utils/defaults';
 export const AppContent: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
+
+  const [authTimedOut, setAuthTimedOut] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAuthTimedOut(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const modal = useModalRegistry();
   const [planManageMode, setPlanManageMode] = useState<'create' | 'edit'>('create');
@@ -108,7 +117,12 @@ export const AppContent: React.FC = () => {
     });
   };
 
-  if (isLoading || !isAuthLoaded) {
+  const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
+  const isPlaceholderKey =
+    !clerkKey || clerkKey.includes('placeholder') || clerkKey.includes('Y2xlcms');
+  const shouldBlockAuth = !isAuthLoaded && !authTimedOut && !isPlaceholderKey;
+
+  if (isLoading || shouldBlockAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <ThinkingOrbLoader
@@ -362,14 +376,16 @@ export const AppContent: React.FC = () => {
 
       <SupportModal isOpen={modal.isOpen('support')} onClose={modal.close} />
 
-      <OnboardingModal
-        isOpen={!hasSeenOnboarding || modal.isOpen('onboarding')}
-        onClose={handleCloseOnboarding}
-        onLoadSamplePlan={() => {
-          handleCloseOnboarding();
-          handleConfirmLoadSamplePlan();
-        }}
-      />
+      {isActivated && (
+        <OnboardingModal
+          isOpen={!hasSeenOnboarding || modal.isOpen('onboarding')}
+          onClose={handleCloseOnboarding}
+          onLoadSamplePlan={() => {
+            handleCloseOnboarding();
+            handleConfirmLoadSamplePlan();
+          }}
+        />
+      )}
 
       {modal.isOpen('confirmDialog') && modal.confirmPayload && (
         <ConfirmDialogModal

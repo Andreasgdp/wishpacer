@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { SavingsPlan } from '../domain/SavingsPlan.js';
 import { createStorageRepository, type StorageRepository } from '../storage/index.js';
+import { LocalStorageAdapter } from '../storage/adapters/LocalStorageAdapter.js';
 import type {
   AppStoreData,
   GlobalSettings,
@@ -44,6 +45,7 @@ export interface PlanManagerActions {
   moveWishDown: (itemId: string) => void;
   importStoreData: (data: AppStoreData) => void;
   deleteAccountData: () => Promise<void>;
+  // What-if simulator controls
   setSimulatedSavingsRate: (rate: number) => void;
   setSimulatedExtraBonus: (bonus: number) => void;
   setShowWhatIf: (show: boolean) => void;
@@ -61,7 +63,6 @@ export interface PlanManager {
   isLoading: boolean;
   isPortfolioView: boolean;
   setIsPortfolioView: (isPortfolio: boolean) => void;
-  // What-if simulation state
   showWhatIf: boolean;
   simulatedSavingsRate: number;
   simulatedExtraBonus: number;
@@ -69,14 +70,23 @@ export interface PlanManager {
 }
 
 export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
-  const { isAuthLoaded = true, isSignedIn = false, getToken, repository } = options;
+  const { getToken, repository } = options;
 
   const storageRepo = useMemo(() => {
-    return repository || createStorageRepository(isSignedIn ? getToken : undefined);
-  }, [repository, isSignedIn, getToken]);
+    return repository || createStorageRepository(getToken);
+  }, [repository, getToken]);
 
-  const [storeData, setStoreData] = useState<AppStoreData>(DEFAULT_STORE_DATA);
-  const [isLoading, setIsLoading] = useState(true);
+  // Synchronously load local store data on initial mount to eliminate loading flashes
+  const [storeData, setStoreData] = useState<AppStoreData>(() => {
+    try {
+      const localAdapter = new LocalStorageAdapter();
+      return localAdapter.loadSync();
+    } catch {
+      return DEFAULT_STORE_DATA;
+    }
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
   const [isPortfolioView, setIsPortfolioView] = useState(false);
 
   // What-if simulator state
@@ -98,12 +108,9 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     return new SavingsPlan(activePlan);
   }, [activePlan]);
 
-  // Load store data (waits until Clerk auth state is resolved)
+  // Sync background remote store data if available
   useEffect(() => {
-    if (!isAuthLoaded) return;
-
     let isMounted = true;
-    setIsLoading(true);
 
     storageRepo.load().then(loaded => {
       if (!isMounted) return;
@@ -119,7 +126,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     return () => {
       isMounted = false;
     };
-  }, [isAuthLoaded, storageRepo]);
+  }, [storageRepo]);
 
   // Sync simulated rate when active plan changes
   useEffect(() => {
@@ -145,25 +152,34 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     [storageRepo]
   );
 
-  // Helper to persist updated active SavingsPlan
   const updateActivePlanInStore = useCallback(
-    (nextPlan: SavingsPlan, toastMsg?: string) => {
-      const updatedPlans = storeData.plans.map(p => (p.id === nextPlan.id ? nextPlan.toJSON() : p));
-      persistStore({ ...storeData, plans: updatedPlans }, toastMsg);
+    (updatedPlan: SavingsPlan, toastMessage?: string) => {
+      const nextPlans = storeData.plans.map(p =>
+        p.id === updatedPlan.id ? updatedPlan.toJSON() : p
+      );
+      persistStore(
+        {
+          ...storeData,
+          plans: nextPlans,
+        },
+        toastMessage
+      );
     },
     [storeData, persistStore]
   );
 
-  // Effective config for active plan
-  const effectiveConfig = useMemo(() => {
-    if (!showWhatIf) return activeSavingsPlan.config;
-    return activeSavingsPlan.simulateScenario({
-      savingsRate: simulatedSavingsRate,
-      lumpSumBonus: simulatedExtraBonus,
-    }).config;
-  }, [activeSavingsPlan, showWhatIf, simulatedSavingsRate, simulatedExtraBonus]);
+  // Effective budget settings combining base config with what-if scenario overrides
+  const effectiveConfig = useMemo((): PlanConfig => {
+    return {
+      ...activePlan.config,
+      amountToSave: showWhatIf ? simulatedSavingsRate : activePlan.config.amountToSave,
+      currentAmountSaved: showWhatIf
+        ? activePlan.config.currentAmountSaved + simulatedExtraBonus
+        : activePlan.config.currentAmountSaved,
+    };
+  }, [activePlan.config, showWhatIf, simulatedSavingsRate, simulatedExtraBonus]);
 
-  // Calculation result for active plan using site-wide currency
+  // Active plan calculations using pure financial engine
   const activePlanCalculation = useMemo(() => {
     const planToCalculate = showWhatIf
       ? activeSavingsPlan.simulateScenario({
@@ -172,14 +188,8 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         })
       : activeSavingsPlan;
 
-    return planToCalculate.calculate(storeData.settings.currency);
-  }, [
-    activeSavingsPlan,
-    showWhatIf,
-    simulatedSavingsRate,
-    simulatedExtraBonus,
-    storeData.settings.currency,
-  ]);
+    return planToCalculate.calculate();
+  }, [activeSavingsPlan, showWhatIf, simulatedSavingsRate, simulatedExtraBonus]);
 
   // Portfolio summary
   const portfolioSummary = useMemo(() => {
@@ -222,13 +232,14 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         updatedAt: new Date().toISOString(),
       };
 
+      const updatedPlans = [...storeData.plans, newPlan];
       persistStore(
         {
           ...storeData,
+          plans: updatedPlans,
           activePlanId: newPlanId,
-          plans: [...storeData.plans, newPlan],
         },
-        `Created "${newPlan.name}" plan ✨`
+        `Created plan "${newPlan.name}"`
       );
       setIsPortfolioView(false);
     },
@@ -237,53 +248,72 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
 
   const updatePlanMetadata = useCallback(
     (planData: Partial<Plan> & { config?: Partial<PlanConfig> }, targetPlanId?: string) => {
-      const planIdToEdit = targetPlanId || activePlan.id;
+      const planIdToUpdate = targetPlanId || storeData.activePlanId;
       const updatedPlans = storeData.plans.map(p => {
-        if (p.id === planIdToEdit) {
-          const sp = new SavingsPlan(p);
-          const updatedSp = sp.updateMetadata({
-            name: planData.name,
+        if (p.id === planIdToUpdate) {
+          const updatedName = planData.name || p.name;
+          return {
+            ...p,
+            name: updatedName,
             description: planData.description,
-            icon: planData.icon,
-            color: planData.color,
-          });
-          return updatedSp.toJSON();
+            icon: planData.icon || p.icon,
+            color: planData.color || p.color,
+            config: {
+              ...p.config,
+              ...(planData.config || {}),
+              name: updatedName,
+            },
+            updatedAt: new Date().toISOString(),
+          };
         }
         return p;
       });
 
-      persistStore({ ...storeData, plans: updatedPlans }, 'Plan details updated');
+      persistStore(
+        {
+          ...storeData,
+          plans: updatedPlans,
+        },
+        'Plan details saved'
+      );
     },
-    [activePlan.id, storeData, persistStore]
+    [storeData, persistStore]
   );
 
   const duplicatePlan = useCallback(
     (planId: string) => {
-      const source = storeData.plans.find(p => p.id === planId);
-      if (!source) return;
+      const sourcePlan = storeData.plans.find(p => p.id === planId);
+      if (!sourcePlan) return;
 
-      const duplicatedId = `plan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+      const dupId = `plan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+      const now = new Date().toISOString();
+
       const duplicatedPlan: Plan = {
-        ...source,
-        id: duplicatedId,
-        name: `${source.name} (Copy)`,
-        items: source.items.map(item => ({
+        ...sourcePlan,
+        id: dupId,
+        name: `${sourcePlan.name} (Copy)`,
+        config: {
+          ...sourcePlan.config,
+          name: `${sourcePlan.name} (Copy)`,
+        },
+        items: sourcePlan.items.map(item => ({
           ...item,
-          id: `wish-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          id: `item-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          createdAt: now,
+          updatedAt: now,
         })),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: now,
+        updatedAt: now,
       };
 
       persistStore(
         {
           ...storeData,
-          activePlanId: duplicatedId,
           plans: [...storeData.plans, duplicatedPlan],
+          activePlanId: dupId,
         },
-        `Duplicated "${source.name}"`
+        `Duplicated "${sourcePlan.name}"`
       );
-      setIsPortfolioView(false);
     },
     [storeData, persistStore]
   );
@@ -295,13 +325,14 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         return;
       }
       const filtered = storeData.plans.filter(p => p.id !== planId);
-      const nextActiveId = filtered[0].id;
+      const nextActiveId =
+        storeData.activePlanId === planId ? filtered[0].id : storeData.activePlanId;
 
       persistStore(
         {
           ...storeData,
-          activePlanId: nextActiveId,
           plans: filtered,
+          activePlanId: nextActiveId,
         },
         'Plan deleted'
       );
@@ -363,7 +394,9 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   const toggleWishPurchased = useCallback(
     (itemId: string) => {
       const updatedPlan = activeSavingsPlan.toggleWishPurchased(itemId);
-      updateActivePlanInStore(updatedPlan);
+      const item = activeSavingsPlan.items.find(i => i.id === itemId);
+      const status = item?.isPurchased ? 'moved back to queue' : 'marked as purchased 🎉';
+      updateActivePlanInStore(updatedPlan, `Wish ${status}`);
     },
     [activeSavingsPlan, updateActivePlanInStore]
   );
@@ -371,7 +404,9 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   const toggleWishPaused = useCallback(
     (itemId: string) => {
       const updatedPlan = activeSavingsPlan.toggleWishPaused(itemId);
-      updateActivePlanInStore(updatedPlan);
+      const item = activeSavingsPlan.items.find(i => i.id === itemId);
+      const status = item?.isPaused ? 'resumed' : 'paused';
+      updateActivePlanInStore(updatedPlan, `Wish ${status}`);
     },
     [activeSavingsPlan, updateActivePlanInStore]
   );

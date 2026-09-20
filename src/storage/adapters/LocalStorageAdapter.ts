@@ -18,7 +18,7 @@ export class LocalStorageAdapter implements StorageRepository {
       : null
   ) {}
 
-  public async load(): Promise<AppStoreData> {
+  public loadSync(): AppStoreData {
     if (!this.storage) {
       return DEFAULT_STORE_DATA;
     }
@@ -54,6 +54,10 @@ export class LocalStorageAdapter implements StorageRepository {
     }
 
     return DEFAULT_STORE_DATA;
+  }
+
+  public async load(): Promise<AppStoreData> {
+    return this.loadSync();
   }
 
   public async save(data: AppStoreData): Promise<SaveResult> {

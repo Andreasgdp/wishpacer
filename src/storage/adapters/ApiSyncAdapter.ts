@@ -20,9 +20,15 @@ export class ApiSyncAdapter implements StorageRepository {
     try {
       const headers: Record<string, string> = {};
       if (this.getToken) {
-        const token = await this.getToken();
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
+        try {
+          const tokenPromise = this.getToken();
+          const timeoutPromise = new Promise<null>(resolve => setTimeout(() => resolve(null), 300));
+          const token = await Promise.race([tokenPromise, timeoutPromise]);
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+        } catch {
+          // Token getter error or unauthenticated, proceed with guest fetch
         }
       }
 
@@ -30,10 +36,16 @@ export class ApiSyncAdapter implements StorageRepository {
 
       // Retry once on 401 with fresh token
       if (res.status === 401 && this.getToken) {
-        const freshToken = await this.getToken({ skipCache: true });
-        if (freshToken) {
-          headers['Authorization'] = `Bearer ${freshToken}`;
-          res = await this.fetchFn(this.endpoint, { headers });
+        try {
+          const freshTokenPromise = this.getToken({ skipCache: true });
+          const timeoutPromise = new Promise<null>(resolve => setTimeout(() => resolve(null), 300));
+          const freshToken = await Promise.race([freshTokenPromise, timeoutPromise]);
+          if (freshToken) {
+            headers['Authorization'] = `Bearer ${freshToken}`;
+            res = await this.fetchFn(this.endpoint, { headers });
+          }
+        } catch {
+          // Ignore token refresh error
         }
       }
 
@@ -56,39 +68,45 @@ export class ApiSyncAdapter implements StorageRepository {
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (this.getToken) {
-        const token = await this.getToken();
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
+        try {
+          const tokenPromise = this.getToken();
+          const timeoutPromise = new Promise<null>(resolve => setTimeout(() => resolve(null), 300));
+          const token = await Promise.race([tokenPromise, timeoutPromise]);
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+        } catch {
+          // Proceed without auth header
         }
       }
-
-      const payload: AppStoreData = {
-        ...data,
-        version: 3,
-        lastSaved: new Date().toISOString(),
-      };
 
       let res = await this.fetchFn(this.endpoint, {
         method: 'POST',
         headers,
-        body: JSON.stringify(payload),
+        body: JSON.stringify(data),
       });
 
       // Retry once on 401 with fresh token
       if (res.status === 401 && this.getToken) {
-        const freshToken = await this.getToken({ skipCache: true });
-        if (freshToken) {
-          headers['Authorization'] = `Bearer ${freshToken}`;
-          res = await this.fetchFn(this.endpoint, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(payload),
-          });
+        try {
+          const freshTokenPromise = this.getToken({ skipCache: true });
+          const timeoutPromise = new Promise<null>(resolve => setTimeout(() => resolve(null), 300));
+          const freshToken = await Promise.race([freshTokenPromise, timeoutPromise]);
+          if (freshToken) {
+            headers['Authorization'] = `Bearer ${freshToken}`;
+            res = await this.fetchFn(this.endpoint, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(data),
+            });
+          }
+        } catch {
+          // Ignore refresh error
         }
       }
 
       if (res.ok) {
-        return { success: true, localSaved: false, remoteSaved: true };
+        return { success: true, localSaved: true, remoteSaved: true };
       }
 
       const errJson = (await res.json().catch(() => ({}))) as { error?: string };
