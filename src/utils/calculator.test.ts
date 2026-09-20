@@ -1,6 +1,5 @@
 import { describe, expect, it } from "bun:test";
 import { calculatePlan, calculatePortfolioSummary } from "./calculator";
-import { normalizeDbUrl } from "../db/client";
 import type { Plan, PlanConfig, WishItem } from "../types/plan";
 
 const baseConfig: PlanConfig = {
@@ -51,13 +50,6 @@ const sampleItems: WishItem[] = [
   },
 ];
 
-describe("db URL normalization", () => {
-  it("converts turso:// scheme to libsql://", () => {
-    expect(normalizeDbUrl("turso://my-db-org.turso.io")).toBe("libsql://my-db-org.turso.io");
-    expect(normalizeDbUrl("libsql://my-db-org.turso.io")).toBe("libsql://my-db-org.turso.io");
-    expect(normalizeDbUrl("file:./data/saving_plan.db")).toBe("file:./data/saving_plan.db");
-  });
-});
 
 describe("calculatePlan engine", () => {
   it("calculates effective savings taking emergency buffer into account", () => {

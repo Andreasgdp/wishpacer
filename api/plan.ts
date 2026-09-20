@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { verifyToken } from '@clerk/backend';
 import fs from 'node:fs';
 import path from 'node:path';
-import { getUserStoreData, saveUserStoreData } from './_lib/planService.js';
+import { getUserStoreData, saveUserStoreData } from '../src/server/db/planService.js';
 import type { AppStoreData } from '../src/types/plan.js';
 
 const clerkSecretKey = process.env.CLERK_SECRET_KEY;
