@@ -1,15 +1,15 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 
 interface ThemeContextType {
   darkMode: boolean;
-  setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
+  setDarkMode: (value: boolean | ((prev: boolean) => boolean)) => void;
   toggleDarkMode: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
+  const [darkMode, setDarkModeState] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('saving_plan_dark_mode');
       if (saved !== null) return saved === 'true';
@@ -18,35 +18,46 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return false;
   });
 
+  // Sync dark mode class on document element
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-    localStorage.setItem('saving_plan_dark_mode', darkMode.toString());
   }, [darkMode]);
 
-  // Sync with system preferences if user hasn't explicitly overridden
+  // Sync with system preferences if user has not explicitly saved a preference
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
       if (localStorage.getItem('saving_plan_dark_mode') === null) {
-        setDarkMode(e.matches);
+        setDarkModeState(e.matches);
       }
     };
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const toggleDarkMode = () => setDarkMode(prev => !prev);
+  const setDarkMode = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
+    setDarkModeState(prev => {
+      const next = typeof value === 'function' ? value(prev) : value;
+      localStorage.setItem('saving_plan_dark_mode', next.toString());
+      return next;
+    });
+  }, []);
 
-  return (
-    <ThemeContext.Provider value={{ darkMode, setDarkMode, toggleDarkMode }}>
-      {children}
-    </ThemeContext.Provider>
+  const toggleDarkMode = useCallback(() => {
+    setDarkMode(prev => !prev);
+  }, [setDarkMode]);
+
+  const value = useMemo(
+    () => ({ darkMode, setDarkMode, toggleDarkMode }),
+    [darkMode, setDarkMode, toggleDarkMode]
   );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 
 export const useTheme = (): ThemeContextType => {
