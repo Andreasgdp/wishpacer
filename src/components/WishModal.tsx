@@ -104,10 +104,7 @@ export const WishModal: React.FC<WishModalProps> = ({
         {/* Modal Form Body */}
 
         {/* Modal Body */}
-        <form
-          onSubmit={handleSubmit}
-          className="p-4 sm:p-6 space-y-4 overflow-y-auto overflow-x-hidden min-w-0 max-w-full"
-        >
+        <form onSubmit={handleSubmit} className="space-y-4 min-w-0 max-w-full">
           {error && (
             <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-medium">
               {error}
