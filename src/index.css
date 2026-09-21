@@ -3,6 +3,12 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: light;
+  }
+  :root.dark {
+    color-scheme: dark;
+  }
   * {
     border-color: theme('colors.slate.200');
   }
@@ -33,6 +39,35 @@ html {
 
 .pb-safe {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Native date input styling across WebKit, iOS Safari & Dark Mode */
+input[type='date'] {
+  min-width: 0;
+  color-scheme: light;
+}
+
+.dark input[type='date'] {
+  color-scheme: dark;
+}
+
+/* Native browser date picker calendar icon (e.g. WebKit/Chromium) */
+input[type='date']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+input[type='date']::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Fix WebKit / iOS Safari date value alignment & intrinsic size */
+input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.5em;
+  margin: 0;
 }
 
 .safe-area-bottom {
