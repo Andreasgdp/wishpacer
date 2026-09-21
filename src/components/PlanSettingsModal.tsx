@@ -90,10 +90,7 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
         </div>
 
         {/* Body */}
-        <form
-          onSubmit={handleSubmit}
-          className="p-4 sm:p-6 space-y-4 overflow-y-auto overflow-x-hidden min-w-0 max-w-full"
-        >
+        <form onSubmit={handleSubmit} className="space-y-4 min-w-0 max-w-full">
           {/* Plan Name */}
           <div className="min-w-0">
             <Label className="block mb-1.5">Plan Title</Label>

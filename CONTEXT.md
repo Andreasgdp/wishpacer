@@ -59,6 +59,13 @@ UI state orchestration and action handlers decoupled from layout components:
 - **`usePlanManager`**: Custom hook encapsulating store state loading, persistence, active plan lookup, what-if scenario overrides, and high-level domain action triggers with `sonner` toast notifications.
 - **`useModalRegistry`**: Type-safe modal visibility registry managing active modal selection (`createPlan`, `editPlan`, `addWish`, `editWish`, `settings`, `globalSettings`, `history`, `exportImport`, `privacy`, `support`, `activation`, `onboarding`, `confirmDialog`) and modal targets.
 
+### Responsive Overlay & Mobile Drawer Seam (`src/components/ResponsiveOverlay.tsx`, `src/components/ui/drawer.tsx`)
+
+Adaptive modal presentation layer switching between desktop Radix UI Dialog and mobile Vaul Drawer:
+
+- **Single Flex Scroll Container Invariant**: Mobile `DrawerContent` enforces a single flex column container (`max-h-[85dvh] flex flex-col`) with a non-shrinking header and single `flex-1 min-h-0 overflow-y-auto` scrollable body.
+- **Nested Scroll & Padding Prevention**: Modal children MUST NOT declare secondary `overflow-y-auto` containers or duplicate outer padding (`p-4 sm:p-6`), ensuring iOS Safari soft keyboard focus remains smoothly contained within the drawer viewport.
+
 ### Playwright E2E Test Suite (`e2e/flows.spec.ts`)
 
 End-to-end browser testing seam validating 7 complete user flows (Activation Gate, Onboarding Tour, Multi-Plan CRUD, Wishlist Priority Queue, What-If Simulator, Privacy/Support Modals, and Account Data Erasure). Required standard practice for all new features and changes; enforced in GitHub Actions CI and excluded from Vercel deployment builds (`prebuild`).

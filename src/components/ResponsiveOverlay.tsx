@@ -43,7 +43,7 @@ export const ResponsiveOverlay: React.FC<ResponsiveOverlayProps> = ({
       <Drawer open={isOpen} onOpenChange={handleOpenChange}>
         <DrawerContent className={className}>
           {(title || description) && (
-            <DrawerHeader className="px-1 py-2">
+            <DrawerHeader className="px-1 py-2 shrink-0">
               {title && <DrawerTitle>{title}</DrawerTitle>}
               {description && <DrawerDescription>{description}</DrawerDescription>}
             </DrawerHeader>
