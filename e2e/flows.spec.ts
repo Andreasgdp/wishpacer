@@ -47,7 +47,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     await page.getByRole('button', { name: 'Load Interactive Sample Plan' }).click();
 
     // Confirmation modal appears
-    await expect(page.getByText('Load Interactive Sample Plan')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Load Interactive Sample Plan' })).toBeVisible();
     await expect(
       page.getByText(
         'Loading the sample plan will replace your current savings plans and wishlists with sample data.'
@@ -97,7 +97,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     await page.getByRole('button', { name: 'Delete Plan' }).click();
 
     // Confirmation dialog appears
-    await expect(page.getByText('Delete Savings Plan')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Delete Savings Plan' })).toBeVisible();
     await page.getByRole('button', { name: 'Delete Plan' }).last().click();
 
     // Confirm delete

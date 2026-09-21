@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, CheckCircle2, ChevronDown, ChevronUp, Sparkles, TrendingUp } from 'lucide-react';
 import type { PlanCalculationResult, PlanConfig } from '../types/plan';
 import { formatCurrency } from '../utils/currency';
+import { AnimatedCurrency } from './AnimatedCurrency';
 
 interface MilestoneTimelineProps {
   config: PlanConfig;
@@ -75,13 +76,18 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ config, re
                       {item.title}
                     </h4>
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      {formatCurrency(item.price, config.currency)}
+                      <AnimatedCurrency value={item.price} currency={config.currency} />
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
                     <span>
                       Cumulative target:{' '}
-                      <strong>{formatCurrency(item.cumulativeTarget, config.currency)}</strong>
+                      <strong>
+                        <AnimatedCurrency
+                          value={item.cumulativeTarget}
+                          currency={config.currency}
+                        />
+                      </strong>
                     </span>
                     {item.deficit > 0 && (
                       <span className="text-amber-600 dark:text-amber-400">
@@ -152,7 +158,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ config, re
                       {m.dateString}
                     </td>
                     <td className="py-2 px-3 text-slate-600 dark:text-slate-400">
-                      {formatCurrency(m.startingBalance, config.currency)}
+                      <AnimatedCurrency value={m.startingBalance} currency={config.currency} />
                     </td>
                     <td className="py-2 px-3 text-emerald-600 dark:text-emerald-400 font-semibold">
                       +{formatCurrency(m.depositAmount, config.currency)}

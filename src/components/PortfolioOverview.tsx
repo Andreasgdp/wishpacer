@@ -3,6 +3,7 @@ import { Layers, ArrowRight, Plus, Settings, CheckCircle2, Calendar } from 'luci
 import type { Plan, PortfolioSummary } from '../types/plan';
 import { calculatePlan } from '../utils/calculator';
 import { formatCurrency } from '../utils/currency';
+import { AnimatedCurrency } from './AnimatedCurrency';
 import { PLAN_COLORS } from '../utils/defaults';
 import { getPlanIcon } from './PlanSwitcher';
 
@@ -38,7 +39,11 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
               Managing <strong>{plans.length} independent plans</strong> with a combined monthly
               savings rate of{' '}
               <strong className="text-emerald-400">
-                {formatCurrency(summary.totalMonthlyContribution, summary.currency)}/mo
+                <AnimatedCurrency
+                  value={summary.totalMonthlyContribution}
+                  currency={summary.currency}
+                />
+                /mo
               </strong>
               .
             </p>
@@ -47,7 +52,7 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
           <button
             type="button"
             onClick={onOpenNewPlanModal}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-semibold text-xs shadow-lg active:scale-95 transition-all self-start md:self-auto"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-semibold text-xs shadow-lg transition-all self-start md:self-auto"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Plan</span>
@@ -61,7 +66,10 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
               Total Saved
             </span>
             <span className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1 block">
-              {formatCurrency(summary.totalSavedAcrossAllPlans, summary.currency)}
+              <AnimatedCurrency
+                value={summary.totalSavedAcrossAllPlans}
+                currency={summary.currency}
+              />
             </span>
           </div>
 
@@ -70,7 +78,10 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
               Total Active Cost
             </span>
             <span className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-1 block">
-              {formatCurrency(summary.totalActiveCostAcrossAllPlans, summary.currency)}
+              <AnimatedCurrency
+                value={summary.totalActiveCostAcrossAllPlans}
+                currency={summary.currency}
+              />
             </span>
           </div>
 
@@ -269,7 +280,7 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
             onClick={onOpenNewPlanModal}
             className="p-8 rounded-3xl border-2 border-dashed border-slate-300 dark:border-slate-800 hover:border-brand-400 dark:hover:border-brand-600 bg-slate-50/50 dark:bg-slate-900/40 flex flex-col items-center justify-center text-center gap-3 transition-all group"
           >
-            <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center transition-colors">
               <Plus className="w-6 h-6" />
             </div>
             <div>

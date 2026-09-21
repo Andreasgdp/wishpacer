@@ -15,8 +15,11 @@ import {
 } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { Search, Plus, Filter, Sparkles, ListOrdered } from 'lucide-react';
+import * as m from 'motion/react-m';
+import { AnimatePresence } from 'motion/react';
 import type { ComputedWishItem, CurrencyConfig } from '../types/plan';
 import { WishItemCard } from './WishItemCard';
+import { Input } from './ui/input';
 import { CATEGORIES } from '../utils/defaults';
 
 interface WishListProps {
@@ -95,12 +98,12 @@ export const WishList: React.FC<WishListProps> = ({
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
+          <Input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search wishes by name, notes, or category..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+            className="pl-9 pr-12"
           />
           {searchQuery && (
             <button
@@ -202,21 +205,31 @@ export const WishList: React.FC<WishListProps> = ({
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-3">
-              {filteredItems.map((item, idx) => (
-                <WishItemCard
-                  key={item.id}
-                  item={item}
-                  currency={currency}
-                  index={idx}
-                  totalActive={filteredItems.length}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onTogglePurchased={onTogglePurchased}
-                  onTogglePaused={onTogglePaused}
-                  onMoveUp={onMoveUp}
-                  onMoveDown={onMoveDown}
-                />
-              ))}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {filteredItems.map((item, idx) => (
+                  <m.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  >
+                    <WishItemCard
+                      item={item}
+                      currency={currency}
+                      index={idx}
+                      totalActive={filteredItems.length}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      onTogglePurchased={onTogglePurchased}
+                      onTogglePaused={onTogglePaused}
+                      onMoveUp={onMoveUp}
+                      onMoveDown={onMoveDown}
+                    />
+                  </m.div>
+                ))}
+              </AnimatePresence>
             </div>
           </SortableContext>
         </DndContext>

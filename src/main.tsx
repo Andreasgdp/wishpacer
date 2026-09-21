@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClerkProviderWithTheme } from './components/ClerkProviderWithTheme';
+import { MotionProvider } from './components/MotionProvider';
 import { App } from './App';
 import './index.css';
 
@@ -13,9 +14,11 @@ if (!rootElement) {
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <ThemeProvider>
-      <ClerkProviderWithTheme>
-        <App />
-      </ClerkProviderWithTheme>
+      <MotionProvider>
+        <ClerkProviderWithTheme>
+          <App />
+        </ClerkProviderWithTheme>
+      </MotionProvider>
     </ThemeProvider>
   </React.StrictMode>
 );

@@ -17,6 +17,7 @@ import {
   User as UserIcon,
 } from 'lucide-react';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { Button } from './ui/button';
 import type { Plan, PlanCalculationResult } from '../types/plan';
 import { PlanSwitcher } from './PlanSwitcher';
 
@@ -199,15 +200,15 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {!isPortfolioView && (
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={onOpenSettingsModal}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                title="Edit Plan Budget Settings"
+                className="gap-1.5 h-8 text-xs font-semibold"
               >
                 <Settings className="w-3.5 h-3.5 text-slate-500" />
                 <span className="hidden lg:inline">Budget Settings</span>
-              </button>
+              </Button>
             )}
 
             {/* Dark Mode Toggle */}
@@ -227,23 +228,25 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Primary Add Action */}
             {isPortfolioView ? (
-              <button
-                type="button"
+              <Button
+                variant="default"
+                size="sm"
                 onClick={onOpenNewPlanModal}
-                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-xs active:scale-95 transition-all"
+                className="gap-1 h-8 text-xs font-semibold"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New Plan</span>
-              </button>
+              </Button>
             ) : (
-              <button
-                type="button"
+              <Button
+                variant="default"
+                size="sm"
                 onClick={onOpenAddWishModal}
-                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-xs active:scale-95 transition-all"
+                className="gap-1 h-8 text-xs font-semibold"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Wish</span>
-              </button>
+              </Button>
             )}
 
             {/* Clerk Authentication Controls */}
@@ -272,7 +275,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 type="button"
                 onClick={onOpenNewPlanModal}
-                className="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs active:scale-95 transition-all min-h-[38px]"
+                className="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs transition-all min-h-[38px]"
               >
                 <Plus className="w-4 h-4" />
                 <span>Plan</span>
@@ -281,7 +284,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 type="button"
                 onClick={onOpenAddWishModal}
-                className="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs active:scale-95 transition-all min-h-[38px]"
+                className="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs transition-all min-h-[38px]"
               >
                 <Plus className="w-4 h-4" />
                 <span>Wish</span>

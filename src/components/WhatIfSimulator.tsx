@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, RotateCcw, Sparkles } from 'lucide-react';
+import { Slider } from './ui/slider';
 import type { PlanCalculationResult, PlanConfig } from '../types/plan';
 import { formatCurrency } from '../utils/currency';
 
@@ -109,14 +110,12 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
             </div>
           </div>
 
-          <input
-            type="range"
+          <Slider
             min={0}
             max={Math.max(2000, config.amountToSave * 3 || 1000)}
             step={25}
-            value={simulatedSavingsRate}
-            onChange={e => onUpdateSimulation(Number(e.target.value), simulatedExtraBonus)}
-            className="w-full h-2 bg-amber-200 dark:bg-amber-900/50 rounded-lg appearance-none cursor-pointer accent-amber-500"
+            value={[simulatedSavingsRate]}
+            onValueChange={([val]) => onUpdateSimulation(val, simulatedExtraBonus)}
           />
 
           <div className="flex items-center gap-1.5 pt-1">
@@ -147,14 +146,12 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
             </span>
           </div>
 
-          <input
-            type="range"
+          <Slider
             min={0}
             max={5000}
             step={100}
-            value={simulatedExtraBonus}
-            onChange={e => onUpdateSimulation(simulatedSavingsRate, Number(e.target.value))}
-            className="w-full h-2 bg-amber-200 dark:bg-amber-900/50 rounded-lg appearance-none cursor-pointer accent-amber-500"
+            value={[simulatedExtraBonus]}
+            onValueChange={([val]) => onUpdateSimulation(simulatedSavingsRate, val)}
           />
 
           <div className="flex items-center gap-1.5 pt-1">

@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Link, Coins, Tag, FileText } from 'lucide-react';
+import { Sparkles, Link, Coins, FileText } from 'lucide-react';
 import type { ComputedWishItem, CurrencyConfig, WishItem } from '../types/plan';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { Label } from './ui/label';
+import { Button } from './ui/button';
 import { CATEGORIES } from '../utils/defaults';
-import { ModalBackdrop } from './ModalBackdrop';
+import { ResponsiveOverlay } from './ResponsiveOverlay';
 
 interface WishModalProps {
   isOpen: boolean;
@@ -79,26 +84,24 @@ export const WishModal: React.FC<WishModalProps> = ({
   };
 
   return (
-    <ModalBackdrop isOpen={isOpen} onClose={onClose}>
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[88vh] sm:max-h-[90vh]">
-        {/* Modal Header */}
-        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between min-w-0 shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
-              {editingItem ? 'Edit Wish Item' : 'Add New Wish Item'}
-            </h2>
+    <ResponsiveOverlay
+      isOpen={isOpen}
+      onClose={onClose}
+      title={editingItem ? 'Edit Wish Item' : 'Add New Wish Item'}
+    >
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4" />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 ml-2"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            {editingItem
+              ? 'Update target details and priority'
+              : 'Add a target item to your priority queue'}
+          </span>
         </div>
+
+        {/* Modal Form Body */}
 
         {/* Modal Body */}
         <form
@@ -113,29 +116,23 @@ export const WishModal: React.FC<WishModalProps> = ({
 
           {/* Title */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Item Title *
-            </label>
-            <input
+            <Label className="block mb-1.5">Item Title *</Label>
+            <Input
               type="text"
               required
-              autoFocus
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="e.g. Robotstøvsuger, Camera, Studio Display"
-              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
             />
           </div>
 
           {/* Price & Priority Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
             <div className="min-w-0">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Cost / Price ({currency.symbol}) *
-              </label>
+              <Label className="block mb-1.5">Cost / Price ({currency.symbol}) *</Label>
               <div className="relative min-w-0 w-full">
                 <Coins className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
-                <input
+                <Input
                   type="number"
                   step="any"
                   min="0.01"
@@ -143,98 +140,80 @@ export const WishModal: React.FC<WishModalProps> = ({
                   value={price}
                   onChange={e => setPrice(e.target.value)}
                   placeholder="0.00"
-                  className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="pl-9"
                 />
               </div>
             </div>
 
             <div className="min-w-0">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Priority Ranking (1 = Highest)
-              </label>
-              <input
+              <Label className="block mb-1.5">Priority Ranking (1 = Highest)</Label>
+              <Input
                 type="number"
                 min="1"
                 value={priority}
                 onChange={e => setPriority(Number(e.target.value))}
-                className="w-full min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
               />
             </div>
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Category
-            </label>
-            <div className="relative">
-              <Tag className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <select
-                value={category}
-                onChange={e => setCategory(e.target.value)}
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors appearance-none"
-              >
+            <Label className="block mb-1.5">Category</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
                 {Object.keys(CATEGORIES).map(cat => (
-                  <option key={cat} value={cat}>
+                  <SelectItem key={cat} value={cat}>
                     {cat}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
-            </div>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Product URL */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Product Link (Optional)
-            </label>
+            <Label className="block mb-1.5">Product Link (Optional)</Label>
             <div className="relative">
               <Link className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
+              <Input
                 type="url"
                 value={url}
                 onChange={e => setUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                className="pl-9"
               />
             </div>
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Notes & Thoughts (Optional)
-            </label>
+            <Label className="block mb-1.5">Notes & Thoughts (Optional)</Label>
             <div className="relative">
               <FileText className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-              <textarea
+              <Textarea
                 rows={2}
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
                 placeholder="Why do you want this item? Any model specs?"
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors resize-none"
+                className="pl-9"
               />
             </div>
           </div>
 
           {/* Footer Actions */}
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 text-xs font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
+            <Button type="button" variant="ghost" onClick={onClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2.5 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/20 active:scale-95 transition-all"
-            >
+            </Button>
+            <Button type="submit" variant="default">
               {editingItem ? 'Save Changes' : 'Add to Plan'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
-    </ModalBackdrop>
+    </ResponsiveOverlay>
   );
 };

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Edit2, Trash2, Copy, Coins, PiggyBank } from 'lucide-react';
+import { Trash2, Copy, PiggyBank } from 'lucide-react';
 import type { Plan, PlanConfig } from '../types/plan';
 import { PLAN_COLORS, PLAN_ICONS } from '../utils/defaults';
 import { getPlanIcon } from './PlanSwitcher';
-import { ModalBackdrop } from './ModalBackdrop';
+import { ResponsiveOverlay } from './ResponsiveOverlay';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Button } from './ui/button';
 
 interface PlanManagementModalProps {
   isOpen: boolean;
@@ -28,29 +31,27 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [icon, setIcon] = useState<string>('sparkles');
-  const [color, setColor] = useState<string>('violet');
-
-  // Initial financial settings for create mode
-  const [initialSaved, setInitialSaved] = useState('500');
+  const [icon, setIcon] = useState('Wallet');
+  const [color, setColor] = useState('indigo');
+  const [initialSaved, setInitialSaved] = useState('0');
   const [monthlyContribution, setMonthlyContribution] = useState('300');
-  const [savingsDay, setSavingsDay] = useState('25');
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (mode === 'edit' && editingPlan) {
       setName(editingPlan.name);
       setDescription(editingPlan.description || '');
-      setIcon(editingPlan.icon || 'sparkles');
-      setColor(editingPlan.color || 'violet');
+      setIcon(editingPlan.icon || 'Wallet');
+      setColor(editingPlan.color || 'indigo');
+      setInitialSaved(editingPlan.config.currentAmountSaved.toString());
+      setMonthlyContribution(editingPlan.config.amountToSave.toString());
     } else {
       setName('');
       setDescription('');
-      setIcon('sparkles');
-      setColor('violet');
-      setInitialSaved('500');
+      setIcon('Wallet');
+      setColor('indigo');
+      setInitialSaved('0');
       setMonthlyContribution('300');
-      setSavingsDay('25');
     }
     setError('');
   }, [mode, editingPlan, isOpen]);
@@ -58,116 +59,71 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError('Please provide a name for the plan.');
+      setError('Please enter a valid plan name.');
       return;
     }
-
-    if (mode === 'create') {
-      const numSaved = Math.max(0, Number(initialSaved) || 0);
-      const numContribution = Math.max(0, Number(monthlyContribution) || 0);
-      const numDay = Math.min(31, Math.max(1, Number(savingsDay) || 25));
-
-      const newConfig: PlanConfig = {
-        name: name.trim(),
-        currentAmountSaved: numSaved,
-        amountToSave: numContribution,
-        frequency: 'monthly',
-        savingsDayOfMonth: numDay,
-        firstSavingDate: new Date().toISOString().split('T')[0],
-        emergencyBuffer: 0,
-        annualInterestRate: 0,
-      };
-
-      onSavePlan({
-        name: name.trim(),
-        description: description.trim() || undefined,
-        icon,
-        color,
-        config: newConfig,
-        items: [],
-      });
-    } else {
-      onSavePlan({
-        name: name.trim(),
-        description: description.trim() || undefined,
-        icon,
-        color,
-      });
-    }
+    onSavePlan({
+      id: editingPlan?.id,
+      name: name.trim(),
+      description: description.trim() || undefined,
+      icon,
+      color,
+      config: editingPlan
+        ? {
+            ...editingPlan.config,
+            currentAmountSaved: Math.max(0, Number(initialSaved) || 0),
+            amountToSave: Math.max(0, Number(monthlyContribution) || 0),
+          }
+        : undefined,
+    });
 
     onClose();
   };
 
   return (
-    <ModalBackdrop isOpen={isOpen} onClose={onClose}>
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[88vh] sm:max-h-[90vh]">
-        {/* Header */}
-        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between min-w-0 shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
-              {mode === 'create' ? <Plus className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
-            </div>
-            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
-              {mode === 'create' ? 'Create New Savings Plan' : `Edit Plan: ${editingPlan?.name}`}
-            </h2>
+    <ResponsiveOverlay
+      isOpen={isOpen}
+      onClose={onClose}
+      title={mode === 'create' ? 'Create New Savings Plan' : 'Edit Plan Details'}
+      description={
+        mode === 'create'
+          ? 'Set up a distinct budget, icon, and wish targets'
+          : 'Update plan title, theme icon, and settings'
+      }
+    >
+      <div className="flex flex-col space-y-4">
+        {error && (
+          <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-medium">
+            {error}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 ml-2"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        )}
 
-        {/* Body */}
-        <form
-          onSubmit={handleSubmit}
-          className="p-4 sm:p-6 space-y-4 overflow-y-auto overflow-x-hidden min-w-0 max-w-full"
-        >
-          {error && (
-            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-medium">
-              {error}
-            </div>
-          )}
-
-          {/* Plan Name */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Plan Name *
-            </label>
-            <input
+            <Label className="block mb-1.5">Plan Name *</Label>
+            <Input
               type="text"
               required
-              autoFocus
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. House & Living Needs, Dream Vacation, New Car"
-              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
             />
           </div>
 
-          {/* Description */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Description / Goal (Optional)
-            </label>
-            <input
+            <Label className="block mb-1.5">Description / Goal (Optional)</Label>
+            <Input
               type="text"
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="e.g. Home improvements, furniture, and kitchen upgrades."
-              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
             />
           </div>
 
           {/* Icon & Color Selector */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-            {/* Icons */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Plan Icon
-              </label>
+              <Label className="block mb-1.5">Plan Icon</Label>
               <div className="flex flex-wrap gap-1.5">
                 {PLAN_ICONS.map(iName => (
                   <button
@@ -176,7 +132,7 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
                     onClick={() => setIcon(iName)}
                     className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
                       icon === iName
-                        ? 'bg-brand-600 text-white shadow-xs scale-105 ring-2 ring-brand-400'
+                        ? 'bg-brand-600 text-white shadow-xs ring-2 ring-brand-400'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
@@ -186,11 +142,8 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
               </div>
             </div>
 
-            {/* Colors */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Theme Accent
-              </label>
+              <Label className="block mb-1.5">Theme Accent</Label>
               <div className="flex flex-wrap gap-2 pt-1">
                 {Object.keys(PLAN_COLORS).map(cKey => {
                   const cMeta = PLAN_COLORS[cKey];
@@ -201,7 +154,7 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
                       onClick={() => setColor(cKey)}
                       className={`w-7 h-7 rounded-full transition-all ${cMeta.bg} ${
                         color === cKey
-                          ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 ring-slate-900 dark:ring-white scale-110'
+                          ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 ring-slate-900 dark:ring-white'
                           : 'opacity-70 hover:opacity-100'
                       }`}
                       title={cMeta.label}
@@ -221,35 +174,31 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Initial Saved Balance
-                  </label>
+                  <Label className="block mb-1">Initial Saved Balance</Label>
                   <div className="relative">
                     <PiggyBank className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
+                    <Input
                       type="number"
                       step="any"
                       min="0"
                       value={initialSaved}
                       onChange={e => setInitialSaved(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white"
+                      className="pl-9"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Monthly Contribution
-                  </label>
+                  <Label className="block mb-1">Monthly Contribution</Label>
                   <div className="relative">
-                    <Coins className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
+                    <PiggyBank className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Input
                       type="number"
                       step="any"
                       min="0"
                       value={monthlyContribution}
                       onChange={e => setMonthlyContribution(e.target.value)}
-                      className="w-full pl-9 pr-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white"
+                      className="pl-9"
                     />
                   </div>
                 </div>
@@ -257,56 +206,53 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
             </div>
           )}
 
-          {/* Extra Actions in Edit Mode: Duplicate / Delete */}
-          {mode === 'edit' && editingPlan && (
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              {onDuplicatePlan && (
-                <button
+          {/* Actions */}
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {mode === 'edit' && editingPlan && onDuplicatePlan && (
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={() => {
                     onDuplicatePlan(editingPlan.id);
                     onClose();
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="gap-1.5"
                 >
-                  <Copy className="w-3.5 h-3.5 text-brand-500" />
+                  <Copy className="w-3.5 h-3.5 text-indigo-500" />
                   <span>Duplicate Plan</span>
-                </button>
+                </Button>
               )}
 
-              {onDeletePlan && plansCount > 1 && (
-                <button
+              {mode === 'edit' && editingPlan && onDeletePlan && plansCount > 1 && (
+                <Button
                   type="button"
+                  variant="destructive"
+                  size="sm"
                   onClick={() => {
                     onDeletePlan(editingPlan.id);
+                    onClose();
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors ml-auto"
+                  className="gap-1.5"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete Plan</span>
-                </button>
+                </Button>
               )}
             </div>
-          )}
 
-          {/* Footer */}
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/20 active:scale-95 transition-all"
-            >
-              {mode === 'create' ? 'Create Plan' : 'Save Plan Settings'}
-            </button>
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm">
+                {mode === 'create' ? 'Create Plan' : 'Save Plan'}
+              </Button>
+            </div>
           </div>
         </form>
       </div>
-    </ModalBackdrop>
+    </ResponsiveOverlay>
   );
 };

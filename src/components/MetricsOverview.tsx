@@ -2,6 +2,7 @@ import React from 'react';
 import { Wallet, Calendar, PiggyBank, CheckCircle2, ShieldCheck, Target } from 'lucide-react';
 import type { PlanCalculationResult, PlanConfig } from '../types/plan';
 import { formatCurrency } from '../utils/currency';
+import { AnimatedCurrency } from './AnimatedCurrency';
 
 interface MetricsOverviewProps {
   config: PlanConfig;
@@ -39,7 +40,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
           </div>
           <div className="mt-1.5 sm:mt-2 flex items-baseline gap-2">
             <span className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              {formatCurrency(result.effectiveSaved, result.currency)}
+              <AnimatedCurrency value={result.effectiveSaved} currency={result.currency} />
             </span>
           </div>
           <div className="mt-1 flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
@@ -70,7 +71,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
           </div>
           <div className="mt-1.5 sm:mt-2 flex items-baseline gap-2">
             <span className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              {formatCurrency(result.totalActiveCost, result.currency)}
+              <AnimatedCurrency value={result.totalActiveCost} currency={result.currency} />
             </span>
           </div>
           <div className="mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
@@ -105,7 +106,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
           </div>
           <div className="mt-1.5 sm:mt-2 flex items-baseline gap-1.5">
             <span className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              {formatCurrency(config.amountToSave, result.currency)}
+              <AnimatedCurrency value={config.amountToSave} currency={result.currency} />
             </span>
             <span className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
               / {frequencyLabel.toLowerCase()}
