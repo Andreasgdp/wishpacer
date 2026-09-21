@@ -1,7 +1,14 @@
 {
   "version": 3,
-  "lastSaved": "2026-09-21T14:36:59.190Z",
   "activePlanId": "plan-personal-wants",
+  "settings": {
+    "currency": {
+      "code": "USD",
+      "symbol": "$",
+      "position": "prefix",
+      "decimals": 0
+    }
+  },
   "plans": [
     {
       "id": "plan-personal-wants",
@@ -30,8 +37,8 @@
           "notes": "For focused coding and peaceful travel.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-21T14:36:57.138Z",
-          "updatedAt": "2026-09-21T14:36:57.138Z"
+          "createdAt": "2026-09-21T16:04:11.658Z",
+          "updatedAt": "2026-09-21T16:04:11.658Z"
         },
         {
           "id": "wish-p2",
@@ -42,8 +49,8 @@
           "notes": "Custom tactile switches for daily programming.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-21T14:36:57.138Z",
-          "updatedAt": "2026-09-21T14:36:57.138Z"
+          "createdAt": "2026-09-21T16:04:11.658Z",
+          "updatedAt": "2026-09-21T16:04:11.658Z"
         },
         {
           "id": "wish-p3",
@@ -54,12 +61,12 @@
           "notes": "Hiking getaway in nature.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-21T14:36:57.138Z",
-          "updatedAt": "2026-09-21T14:36:57.138Z"
+          "createdAt": "2026-09-21T16:04:11.658Z",
+          "updatedAt": "2026-09-21T16:04:11.658Z"
         }
       ],
-      "createdAt": "2026-09-21T14:36:57.138Z",
-      "updatedAt": "2026-09-21T14:36:57.138Z"
+      "createdAt": "2026-09-21T16:04:11.658Z",
+      "updatedAt": "2026-09-21T16:04:11.658Z"
     },
     {
       "id": "plan-house-needs",
@@ -87,8 +94,8 @@
           "notes": "Automate heating and reduce winter energy bills.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-21T14:36:57.138Z",
-          "updatedAt": "2026-09-21T14:36:57.138Z"
+          "createdAt": "2026-09-21T16:04:11.658Z",
+          "updatedAt": "2026-09-21T16:04:11.658Z"
         },
         {
           "id": "wish-h2",
@@ -99,8 +106,8 @@
           "notes": "Quiet, energy-efficient model for the kitchen.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-21T14:36:57.138Z",
-          "updatedAt": "2026-09-21T14:36:57.138Z"
+          "createdAt": "2026-09-21T16:04:11.658Z",
+          "updatedAt": "2026-09-21T16:04:11.658Z"
         },
         {
           "id": "wish-h3",
@@ -111,20 +118,13 @@
           "notes": "Storage for books, plants, and records.",
           "isPurchased": false,
           "isPaused": false,
-          "createdAt": "2026-09-21T14:36:57.138Z",
-          "updatedAt": "2026-09-21T14:36:57.138Z"
+          "createdAt": "2026-09-21T16:04:11.658Z",
+          "updatedAt": "2026-09-21T16:04:11.658Z"
         }
       ],
-      "createdAt": "2026-09-21T14:36:57.138Z",
-      "updatedAt": "2026-09-21T14:36:57.138Z"
+      "createdAt": "2026-09-21T16:04:11.658Z",
+      "updatedAt": "2026-09-21T16:04:11.658Z"
     }
   ],
-  "settings": {
-    "currency": {
-      "code": "USD",
-      "symbol": "$",
-      "position": "prefix",
-      "decimals": 0
-    }
-  }
+  "lastSaved": "2026-09-21T16:04:32.137Z"
 }
