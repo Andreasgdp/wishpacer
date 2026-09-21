@@ -64,28 +64,31 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
     <ModalBackdrop isOpen={isOpen} onClose={onClose}>
       <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[88vh] sm:max-h-[90vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between min-w-0 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
               <Settings className="w-4 h-4" />
             </div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
               Budget & Schedule Configuration
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 ml-2"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="p-4 sm:p-6 space-y-4 overflow-y-auto overflow-x-hidden min-w-0 max-w-full"
+        >
           {/* Plan Name */}
-          <div>
+          <div className="min-w-0">
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Plan Title
             </label>
@@ -94,25 +97,25 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. Personal Wants, House & Living"
-              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+              className="w-full min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
             />
           </div>
 
           {/* Current Saved & Emergency Buffer */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
+            <div className="min-w-0">
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Current Total Saved
               </label>
-              <div className="relative">
-                <PiggyBank className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <div className="relative min-w-0 w-full">
+                <PiggyBank className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
                 <input
                   type="number"
                   step="any"
                   min="0"
                   value={currentAmountSaved}
                   onChange={e => setCurrentAmountSaved(e.target.value)}
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                 />
               </div>
               <span className="text-[11px] text-slate-500 mt-1 block">
@@ -120,19 +123,19 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
               </span>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Emergency Buffer Cushion
               </label>
-              <div className="relative">
-                <ShieldAlert className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500" />
+              <div className="relative min-w-0 w-full">
+                <ShieldAlert className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none z-10" />
                 <input
                   type="number"
                   step="any"
                   min="0"
                   value={emergencyBuffer}
                   onChange={e => setEmergencyBuffer(e.target.value)}
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                 />
               </div>
               <span className="text-[11px] text-slate-500 mt-1 block">
@@ -142,20 +145,20 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
           </div>
 
           {/* Regular Savings Amount & Frequency */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
+            <div className="min-w-0">
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Savings Deposit Amount
               </label>
-              <div className="relative">
-                <Coins className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <div className="relative min-w-0 w-full">
+                <Coins className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
                 <input
                   type="number"
                   step="any"
                   min="0"
                   value={amountToSave}
                   onChange={e => setAmountToSave(e.target.value)}
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                 />
               </div>
               <span className="text-[11px] text-slate-500 mt-1 block">
@@ -163,14 +166,14 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
               </span>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                 Savings Frequency
               </label>
               <select
                 value={frequency}
                 onChange={e => setFrequency(e.target.value as PlanConfig['frequency'])}
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                className="w-full min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
               >
                 <option value="monthly">Monthly (e.g. Payday)</option>
                 <option value="biweekly">Every 14 Days (Bi-weekly)</option>
@@ -182,8 +185,8 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
 
           {/* Monthly Payday / Schedule Details */}
           {frequency === 'monthly' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
+              <div className="min-w-0">
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Deposit Day of Month
                 </label>
@@ -193,24 +196,24 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
                   max="31"
                   value={savingsDayOfMonth}
                   onChange={e => setSavingsDayOfMonth(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="w-full min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                 />
                 <span className="text-[11px] text-slate-500 mt-1 block">
                   e.g. 25 for salary day or 1 for 1st of month.
                 </span>
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Timeline Start Date
                 </label>
-                <div className="relative">
-                  <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <div className="relative min-w-0 w-full">
+                  <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
                   <input
                     type="date"
                     value={firstSavingDate}
                     onChange={e => setFirstSavingDate(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                    className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                   />
                 </div>
               </div>
@@ -218,12 +221,12 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
           )}
 
           {/* Annual Yield / APY (Optional) */}
-          <div>
+          <div className="min-w-0">
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Savings APY Yield % (Optional)
             </label>
-            <div className="relative">
-              <Percent className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div className="relative min-w-0 w-full">
+              <Percent className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
               <input
                 type="number"
                 step="0.1"
@@ -232,7 +235,7 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
                 value={annualInterestRate}
                 onChange={e => setAnnualInterestRate(e.target.value)}
                 placeholder="0.0"
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
               />
             </div>
             <span className="text-[11px] text-slate-500 mt-1 block">
@@ -241,7 +244,7 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 min-w-0">
             <button
               type="button"
               onClick={onClose}
