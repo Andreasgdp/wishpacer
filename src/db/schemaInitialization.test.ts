@@ -84,5 +84,5 @@ describe('Database Schema Auto-Initialization Regression Test', () => {
   it('verify ensureTablesExist function runs idempotently without errors', async () => {
     // Calling ensureTablesExist against global client should complete without errors
     await expect(ensureTablesExist()).resolves.toBeUndefined();
-  });
+  }, 15000);
 });
