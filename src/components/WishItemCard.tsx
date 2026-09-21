@@ -18,6 +18,8 @@ import {
 import confetti from 'canvas-confetti';
 import type { ComputedWishItem, CurrencyConfig } from '../types/plan';
 import { formatCurrency } from '../utils/currency';
+import { AnimatedCurrency } from './AnimatedCurrency';
+import { Progress } from './ui/progress';
 import { CATEGORIES } from '../utils/defaults';
 
 interface WishItemCardProps {
@@ -137,8 +139,8 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
 
           {/* Price header on mobile (shown on right side of top row on mobile) */}
           <div className="sm:hidden text-right">
-            <span className="text-base font-bold text-slate-900 dark:text-white">
-              {formatCurrency(item.price, currency)}
+            <span className="text-base font-bold text-slate-900 dark:text-white font-mono">
+              <AnimatedCurrency value={item.price} currency={currency} />
             </span>
           </div>
         </div>
@@ -220,7 +222,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                   <span className="truncate">
                     Allocated:{' '}
                     <strong className="text-slate-700 dark:text-slate-300">
-                      {formatCurrency(item.availableSavings, currency)}
+                      <AnimatedCurrency value={item.availableSavings} currency={currency} />
                     </strong>{' '}
                     of {formatCurrency(item.price, currency)}
                   </span>
@@ -237,18 +239,12 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
               </div>
 
               {/* Bar */}
-              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    item.isAffordable
-                      ? 'bg-emerald-500'
-                      : item.progressPercent > 0
-                        ? 'bg-brand-500'
-                        : 'bg-transparent'
-                  }`}
-                  style={{ width: `${Math.min(100, Math.max(0, item.progressPercent))}%` }}
-                />
-              </div>
+              <Progress
+                value={Math.min(100, Math.max(0, item.progressPercent))}
+                indicatorClassName={
+                  item.isAffordable ? 'bg-emerald-500' : 'bg-brand-600 dark:bg-brand-500'
+                }
+              />
             </div>
           )}
         </div>
@@ -256,17 +252,17 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
         {/* Right Financial Price (Desktop) & Action Buttons */}
         <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2.5 flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
           <div className="text-right hidden sm:block">
-            <span className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white">
-              {formatCurrency(item.price, currency)}
+            <span className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+              <AnimatedCurrency value={item.price} currency={currency} />
             </span>
             <div className="text-[10px] sm:text-[11px] text-slate-400 font-mono">
-              Cumulative: {formatCurrency(item.cumulativeTarget, currency)}
+              Cumulative: <AnimatedCurrency value={item.cumulativeTarget} currency={currency} />
             </div>
           </div>
 
           {/* Cumulative on Mobile */}
           <div className="sm:hidden text-xs text-slate-400 font-mono">
-            Cumulative: {formatCurrency(item.cumulativeTarget, currency)}
+            Cumulative: <AnimatedCurrency value={item.cumulativeTarget} currency={currency} />
           </div>
 
           {/* Action Row */}

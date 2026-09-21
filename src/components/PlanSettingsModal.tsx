@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { X, Settings, Coins, Calendar, ShieldAlert, Percent, PiggyBank } from 'lucide-react';
+import {
+  Settings,
+  Coins,
+  Calendar as CalendarIcon,
+  ShieldAlert,
+  Percent,
+  PiggyBank,
+} from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
+import { Calendar } from './ui/calendar';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 import type { PlanConfig } from '../types/plan';
-import { ModalBackdrop } from './ModalBackdrop';
+import { ResponsiveOverlay } from './ResponsiveOverlay';
 
 interface PlanSettingsModalProps {
   isOpen: boolean;
@@ -61,25 +75,15 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
   };
 
   return (
-    <ModalBackdrop isOpen={isOpen} onClose={onClose}>
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[88vh] sm:max-h-[90vh]">
-        {/* Header */}
-        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between min-w-0 shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
-              <Settings className="w-4 h-4" />
-            </div>
-            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
-              Budget & Schedule Configuration
-            </h2>
+    <ResponsiveOverlay isOpen={isOpen} onClose={onClose} title="Budget & Schedule Configuration">
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
+            <Settings className="w-4 h-4" />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 ml-2"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Adjust savings rate, emergency buffer, and deposit schedule
+          </span>
         </div>
 
         {/* Body */}
@@ -89,33 +93,28 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
         >
           {/* Plan Name */}
           <div className="min-w-0">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Plan Title
-            </label>
-            <input
+            <Label className="block mb-1.5">Plan Title</Label>
+            <Input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g. Personal Wants, House & Living"
-              className="w-full min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
             />
           </div>
 
           {/* Current Saved & Emergency Buffer */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
             <div className="min-w-0">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Current Total Saved
-              </label>
+              <Label className="block mb-1.5">Current Total Saved</Label>
               <div className="relative min-w-0 w-full">
                 <PiggyBank className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
-                <input
+                <Input
                   type="number"
                   step="any"
                   min="0"
                   value={currentAmountSaved}
                   onChange={e => setCurrentAmountSaved(e.target.value)}
-                  className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="pl-9"
                 />
               </div>
               <span className="text-[11px] text-slate-500 mt-1 block">
@@ -124,18 +123,16 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
             </div>
 
             <div className="min-w-0">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Emergency Buffer Cushion
-              </label>
+              <Label className="block mb-1.5">Emergency Buffer Cushion</Label>
               <div className="relative min-w-0 w-full">
                 <ShieldAlert className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none z-10" />
-                <input
+                <Input
                   type="number"
                   step="any"
                   min="0"
                   value={emergencyBuffer}
                   onChange={e => setEmergencyBuffer(e.target.value)}
-                  className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="pl-9"
                 />
               </div>
               <span className="text-[11px] text-slate-500 mt-1 block">
@@ -147,18 +144,16 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
           {/* Regular Savings Amount & Frequency */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
             <div className="min-w-0">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Savings Deposit Amount
-              </label>
+              <Label className="block mb-1.5">Savings Deposit Amount</Label>
               <div className="relative min-w-0 w-full">
                 <Coins className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
-                <input
+                <Input
                   type="number"
                   step="any"
                   min="0"
                   value={amountToSave}
                   onChange={e => setAmountToSave(e.target.value)}
-                  className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                  className="pl-9"
                 />
               </div>
               <span className="text-[11px] text-slate-500 mt-1 block">
@@ -167,19 +162,21 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
             </div>
 
             <div className="min-w-0">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Savings Frequency
-              </label>
-              <select
+              <Label className="block mb-1.5">Savings Frequency</Label>
+              <Select
                 value={frequency}
-                onChange={e => setFrequency(e.target.value as PlanConfig['frequency'])}
-                className="w-full min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                onValueChange={v => setFrequency(v as PlanConfig['frequency'])}
               >
-                <option value="monthly">Monthly (e.g. Payday)</option>
-                <option value="biweekly">Every 14 Days (Bi-weekly)</option>
-                <option value="weekly">Every Week</option>
-                <option value="daily">Every Day</option>
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly (e.g. Payday)</SelectItem>
+                  <SelectItem value="biweekly">Every 14 Days (Bi-weekly)</SelectItem>
+                  <SelectItem value="weekly">Every Week</SelectItem>
+                  <SelectItem value="daily">Every Day</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -187,16 +184,13 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
           {frequency === 'monthly' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
               <div className="min-w-0">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                  Deposit Day of Month
-                </label>
-                <input
+                <Label className="block mb-1.5">Deposit Day of Month</Label>
+                <Input
                   type="number"
                   min="1"
                   max="31"
                   value={savingsDayOfMonth}
                   onChange={e => setSavingsDayOfMonth(Number(e.target.value))}
-                  className="w-full min-w-0 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
                 />
                 <span className="text-[11px] text-slate-500 mt-1 block">
                   e.g. 25 for salary day or 1 for 1st of month.
@@ -204,30 +198,43 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
               </div>
 
               <div className="min-w-0">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                  Timeline Start Date
-                </label>
-                <div className="relative min-w-0 w-full overflow-hidden rounded-xl">
-                  <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
-                  <input
-                    type="date"
-                    value={firstSavingDate}
-                    onChange={e => setFirstSavingDate(e.target.value)}
-                    className="w-full min-w-0 max-w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors appearance-none block"
-                  />
-                </div>
+                <Label className="block mb-1.5">Timeline Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal h-10 rounded-xl"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
+                      {firstSavingDate ? (
+                        format(parseISO(firstSavingDate), 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={firstSavingDate ? parseISO(firstSavingDate) : undefined}
+                      onSelect={date => {
+                        if (date) {
+                          setFirstSavingDate(format(date, 'yyyy-MM-dd'));
+                        }
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           )}
 
           {/* Annual Yield / APY (Optional) */}
           <div className="min-w-0">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Savings APY Yield % (Optional)
-            </label>
+            <Label className="block mb-1.5">Savings APY Yield % (Optional)</Label>
             <div className="relative min-w-0 w-full">
               <Percent className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
-              <input
+              <Input
                 type="number"
                 step="0.1"
                 min="0"
@@ -235,32 +242,24 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
                 value={annualInterestRate}
                 onChange={e => setAnnualInterestRate(e.target.value)}
                 placeholder="0.0"
-                className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm font-mono text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                className="pl-9"
               />
             </div>
             <span className="text-[11px] text-slate-500 mt-1 block">
               HYSA interest rate compounded on balance.
             </span>
           </div>
-
           {/* Footer Actions */}
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3 min-w-0">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 text-xs font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
+            <Button type="button" variant="ghost" onClick={onClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2.5 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/20 active:scale-95 transition-all"
-            >
+            </Button>
+            <Button type="submit" variant="default">
               Save Configuration
-            </button>
+            </Button>
           </div>
         </form>
       </div>
-    </ModalBackdrop>
+    </ResponsiveOverlay>
   );
 };

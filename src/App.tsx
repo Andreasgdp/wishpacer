@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
+import confetti from 'canvas-confetti';
 import { useModalRegistry, usePlanManager } from './hooks';
 import type { Plan } from './types/plan';
 import { Header } from './components/Header';
@@ -238,7 +239,18 @@ export const AppContent: React.FC = () => {
                     },
                   });
                 }}
-                onTogglePurchased={actions.toggleWishPurchased}
+                onTogglePurchased={itemId => {
+                  const item = activePlanCalculation.items.find(i => i.id === itemId);
+                  if (item && !item.isPurchased) {
+                    confetti({
+                      particleCount: 80,
+                      spread: 60,
+                      origin: { y: 0.7 },
+                      colors: ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B'],
+                    });
+                  }
+                  actions.toggleWishPurchased(itemId);
+                }}
                 onTogglePaused={actions.toggleWishPaused}
                 onMoveUp={actions.moveWishUp}
                 onMoveDown={actions.moveWishDown}
@@ -318,16 +330,19 @@ export const AppContent: React.FC = () => {
           modal.close();
         }}
         onDeletePlan={planId => {
+          modal.close();
           const targetPlan = storeData.plans.find(p => p.id === planId);
-          modal.open('confirmDialog', {
-            confirm: {
-              title: 'Delete Savings Plan',
-              description: `Are you sure you want to delete "${targetPlan?.name || 'this plan'}"?`,
-              confirmLabel: 'Delete Plan',
-              variant: 'danger',
-              onConfirm: () => actions.deletePlan(planId),
-            },
-          });
+          setTimeout(() => {
+            modal.open('confirmDialog', {
+              confirm: {
+                title: 'Delete Savings Plan',
+                description: `Are you sure you want to delete "${targetPlan?.name || 'this plan'}"?`,
+                confirmLabel: 'Delete Plan',
+                variant: 'danger',
+                onConfirm: () => actions.deletePlan(planId),
+              },
+            });
+          }, 150);
         }}
       />
 

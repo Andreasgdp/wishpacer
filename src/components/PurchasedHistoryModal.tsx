@@ -1,10 +1,10 @@
 import React from 'react';
-import { X, CheckCircle2, History, Trash2, Undo2, Calendar } from 'lucide-react';
+import { History, Trash2, Undo2, Calendar } from 'lucide-react';
 import type { CurrencyConfig, WishItem } from '../types/plan';
-import { formatCurrency } from '../utils/currency';
+import { AnimatedCurrency } from './AnimatedCurrency';
 import { formatDateString } from '../utils/calculator';
 import { CATEGORIES } from '../utils/defaults';
-import { ModalBackdrop } from './ModalBackdrop';
+import { ResponsiveOverlay } from './ResponsiveOverlay';
 
 interface PurchasedHistoryModalProps {
   isOpen: boolean;
@@ -29,34 +29,21 @@ export const PurchasedHistoryModal: React.FC<PurchasedHistoryModalProps> = ({
   );
 
   return (
-    <ModalBackdrop isOpen={isOpen} onClose={onClose}>
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                Purchased Wishes Archive
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {purchasedItems.length} wish{purchasedItems.length === 1 ? '' : 'es'} fulfilled •
-                Total spent:{' '}
-                <strong className="text-slate-700 dark:text-slate-200 font-semibold">
-                  {formatCurrency(totalSpent, currency)}
-                </strong>
-              </p>
-            </div>
+    <ResponsiveOverlay
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Purchased History (${purchasedItems.length})`}
+      description={`Total fulfilled purchases: ${currency.symbol}${totalSpent}`}
+      className="max-w-2xl"
+    >
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <History className="w-4 h-4" />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Fulfilled goals and purchase history
+          </span>
         </div>
 
         {/* Content list */}
@@ -100,7 +87,10 @@ export const PurchasedHistoryModal: React.FC<PurchasedHistoryModalProps> = ({
 
                   <div className="flex items-center gap-3 flex-shrink-0">
                     <span className="text-sm font-mono font-bold text-slate-900 dark:text-white">
-                      {formatCurrency(item.purchasedPrice ?? item.price, currency)}
+                      <AnimatedCurrency
+                        value={item.purchasedPrice ?? item.price}
+                        currency={currency}
+                      />
                     </span>
 
                     <button
@@ -138,6 +128,6 @@ export const PurchasedHistoryModal: React.FC<PurchasedHistoryModalProps> = ({
           </button>
         </div>
       </div>
-    </ModalBackdrop>
+    </ResponsiveOverlay>
   );
 };

@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { X, Globe, Coins, ShieldCheck, HelpCircle, Trash2 } from 'lucide-react';
+import { Globe, ShieldCheck, HelpCircle, Trash2 } from 'lucide-react';
 import type { CurrencyConfig, GlobalSettings } from '../types/plan';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 import { CURRENCY_PRESETS } from '../utils/currency';
-import { ModalBackdrop } from './ModalBackdrop';
+import { ResponsiveOverlay } from './ResponsiveOverlay';
+import { Button } from './ui/button';
 
 interface GlobalSettingsModalProps {
   isOpen: boolean;
@@ -62,30 +66,20 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
   };
 
   return (
-    <ModalBackdrop isOpen={isOpen} onClose={onClose}>
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[88vh] sm:max-h-[90vh]">
-        {/* Header */}
-        <div className="px-4 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between min-w-0 shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
-              <Globe className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
-                Global App Settings
-              </h2>
-              <p className="text-xs text-slate-500 truncate">
-                Configure site-wide currency & preferences
-              </p>
-            </div>
+    <ResponsiveOverlay
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Global App Settings"
+      description="Configure site-wide currency & preferences"
+    >
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
+            <Globe className="w-4 h-4" />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 ml-2"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Select currency preset or custom formatting
+          </span>
         </div>
 
         {/* Body */}
@@ -94,31 +88,29 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
           className="p-4 sm:p-6 space-y-4 overflow-y-auto overflow-x-hidden min-w-0 max-w-full"
         >
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Global Currency
-            </label>
-            <div className="relative min-w-0 w-full">
-              <Coins className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
-              <select
-                value={selectedCurrencyCode}
-                onChange={e => {
-                  const code = e.target.value;
-                  setSelectedCurrencyCode(code);
-                  if (code in CURRENCY_PRESETS) {
-                    setPosition(CURRENCY_PRESETS[code].position);
-                    setCustomSymbol(CURRENCY_PRESETS[code].symbol);
-                  }
-                }}
-                className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
-              >
+            <Label className="block mb-1.5">Global Currency</Label>
+            <Select
+              value={selectedCurrencyCode}
+              onValueChange={code => {
+                setSelectedCurrencyCode(code);
+                if (code in CURRENCY_PRESETS) {
+                  setPosition(CURRENCY_PRESETS[code].position);
+                  setCustomSymbol(CURRENCY_PRESETS[code].symbol);
+                }
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent>
                 {Object.keys(CURRENCY_PRESETS).map(code => (
-                  <option key={code} value={code}>
+                  <SelectItem key={code} value={code}>
                     {code} ({CURRENCY_PRESETS[code].symbol})
-                  </option>
+                  </SelectItem>
                 ))}
-                <option value="CUSTOM">Custom Currency Symbol</option>
-              </select>
-            </div>
+                <SelectItem value="CUSTOM">Custom Currency Symbol</SelectItem>
+              </SelectContent>
+            </Select>
             <p className="text-[11px] text-slate-500 mt-1">
               Applies across all savings plans and calculations site-wide.
             </p>
@@ -127,31 +119,27 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
           {selectedCurrencyCode === 'CUSTOM' && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                  Currency Symbol
-                </label>
-                <input
+                <Label className="block mb-1.5">Currency Symbol</Label>
+                <Input
                   type="text"
                   required
                   value={customSymbol}
                   onChange={e => setCustomSymbol(e.target.value)}
                   placeholder="e.g. kr, $, €"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                  Symbol Position
-                </label>
-                <select
-                  value={position}
-                  onChange={e => setPosition(e.target.value as 'prefix' | 'suffix')}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white"
-                >
-                  <option value="suffix">Suffix (1,000 kr)</option>
-                  <option value="prefix">Prefix ($1,000)</option>
-                </select>
+                <Label className="block mb-1.5">Symbol Position</Label>
+                <Select value={position} onValueChange={v => setPosition(v as 'prefix' | 'suffix')}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Position" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="suffix">Suffix (1,000 kr)</SelectItem>
+                    <SelectItem value="prefix">Prefix ($1,000)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}
@@ -218,22 +206,15 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
 
           {/* Footer */}
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
+            <Button variant="ghost" size="sm" onClick={onClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-5 py-2 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/20 active:scale-95 transition-all"
-            >
+            </Button>
+            <Button variant="default" size="sm" type="submit">
               Save Settings
-            </button>
+            </Button>
           </div>
         </form>
       </div>
-    </ModalBackdrop>
+    </ResponsiveOverlay>
   );
 };
