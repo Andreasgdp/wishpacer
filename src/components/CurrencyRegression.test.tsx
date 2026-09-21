@@ -39,8 +39,28 @@ mock.module('./ui/dialog', () => ({
   DialogDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+mock.module('./ui/drawer', () => ({
+  Drawer: ({ children, open }: { children: React.ReactNode; open: boolean }) =>
+    open ? <div>{children}</div> : null,
+  DrawerContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DrawerHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DrawerTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DrawerDescription: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
 mock.module('./ui/slider', () => ({
   Slider: () => <div data-testid="slider" />,
+}));
+
+mock.module('@number-flow/react', () => ({
+  default: ({ value, prefix, suffix }: { value: number; prefix?: string; suffix?: string }) => (
+    <span>
+      {prefix}
+      {value.toLocaleString('en-US')}
+      {suffix}
+    </span>
+  ),
+  Format: {},
 }));
 afterEach(() => {
   cleanup();
