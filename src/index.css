@@ -41,14 +41,36 @@ html {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
-/* Native date input styling across WebKit, iOS Safari & Dark Mode */
+/* Fix WebKit / iOS Safari date, select, and number input bounds */
+input,
+select,
+textarea {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
 input[type='date'] {
+  -webkit-appearance: none;
+  appearance: none;
   min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   color-scheme: light;
 }
 
 .dark input[type='date'] {
   color-scheme: dark;
+}
+
+/* Fix WebKit / iOS Safari date value alignment & intrinsic shadow DOM size */
+input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+  width: 100%;
+  max-width: 100%;
+  min-height: 1.5em;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 /* Native browser date picker calendar icon (e.g. WebKit/Chromium) */
@@ -62,14 +84,6 @@ input[type='date']::-webkit-calendar-picker-indicator {
 input[type='date']::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
-
-/* Fix WebKit / iOS Safari date value alignment & intrinsic size */
-input[type='date']::-webkit-date-and-time-value {
-  text-align: left;
-  min-height: 1.5em;
-  margin: 0;
-}
-
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }

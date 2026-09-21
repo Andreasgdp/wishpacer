@@ -207,13 +207,13 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Timeline Start Date
                 </label>
-                <div className="relative min-w-0 w-full">
+                <div className="relative min-w-0 w-full overflow-hidden rounded-xl">
                   <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
                   <input
                     type="date"
                     value={firstSavingDate}
                     onChange={e => setFirstSavingDate(e.target.value)}
-                    className="w-full min-w-0 pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors"
+                    className="w-full min-w-0 max-w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-colors appearance-none block"
                   />
                 </div>
               </div>
