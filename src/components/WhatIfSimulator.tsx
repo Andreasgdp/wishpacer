@@ -93,7 +93,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
             </span>
             <div className="flex items-center gap-2">
               <span className="font-mono text-sm font-bold text-amber-700 dark:text-amber-300">
-                {formatCurrency(simulatedSavingsRate, config.currency)}
+                {formatCurrency(simulatedSavingsRate, result.currency)}
               </span>
               {rateDelta !== 0 && (
                 <span
@@ -104,7 +104,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                   }`}
                 >
                   ({rateDelta > 0 ? '+' : ''}
-                  {formatCurrency(rateDelta, config.currency)})
+                  {formatCurrency(rateDelta, result.currency)})
                 </span>
               )}
             </div>
@@ -142,7 +142,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
               One-Time Extra Cash Windfall / Bonus:
             </span>
             <span className="font-mono text-sm font-bold text-amber-700 dark:text-amber-300">
-              +{formatCurrency(simulatedExtraBonus, config.currency)}
+              +{formatCurrency(simulatedExtraBonus, result.currency)}
             </span>
           </div>
 

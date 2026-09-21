@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Copy, PiggyBank } from 'lucide-react';
-import type { Plan, PlanConfig } from '../types/plan';
-import { PLAN_COLORS, PLAN_ICONS } from '../utils/defaults';
+import type { CurrencyConfig, Plan, PlanConfig } from '../types/plan';
+import { DEFAULT_GLOBAL_SETTINGS, PLAN_COLORS, PLAN_ICONS } from '../utils/defaults';
 import { getPlanIcon } from './PlanSwitcher';
 import { ResponsiveOverlay } from './ResponsiveOverlay';
 import { Input } from './ui/input';
@@ -14,6 +14,7 @@ interface PlanManagementModalProps {
   mode: 'create' | 'edit';
   editingPlan?: Plan | null;
   plansCount: number;
+  currency?: CurrencyConfig;
   onSavePlan: (planData: Partial<Plan> & { config?: Partial<PlanConfig> }) => void;
   onDuplicatePlan?: (planId: string) => void;
   onDeletePlan?: (planId: string) => void;
@@ -25,6 +26,7 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
   mode,
   editingPlan,
   plansCount,
+  currency = DEFAULT_GLOBAL_SETTINGS.currency,
   onSavePlan,
   onDuplicatePlan,
   onDeletePlan,
@@ -174,7 +176,7 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <Label className="block mb-1">Initial Saved Balance</Label>
+                  <Label className="block mb-1">Initial Saved Balance ({currency.symbol})</Label>
                   <div className="relative">
                     <PiggyBank className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <Input
@@ -189,7 +191,7 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
                 </div>
 
                 <div>
-                  <Label className="block mb-1">Monthly Contribution</Label>
+                  <Label className="block mb-1">Monthly Contribution ({currency.symbol})</Label>
                   <div className="relative">
                     <PiggyBank className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <Input

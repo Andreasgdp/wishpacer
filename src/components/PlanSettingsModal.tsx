@@ -14,13 +14,15 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
-import type { PlanConfig } from '../types/plan';
+import type { CurrencyConfig, PlanConfig } from '../types/plan';
+import { DEFAULT_GLOBAL_SETTINGS } from '../utils/defaults';
 import { ResponsiveOverlay } from './ResponsiveOverlay';
 
 interface PlanSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   config: PlanConfig;
+  currency?: CurrencyConfig;
   onSave: (newConfig: PlanConfig) => void;
 }
 
@@ -28,6 +30,7 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
   isOpen,
   onClose,
   config,
+  currency = DEFAULT_GLOBAL_SETTINGS.currency,
   onSave,
 }) => {
   const [name, setName] = useState(config.name);
@@ -105,7 +108,7 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
           {/* Current Saved & Emergency Buffer */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
             <div className="min-w-0">
-              <Label className="block mb-1.5">Current Total Saved</Label>
+              <Label className="block mb-1.5">Current Total Saved ({currency.symbol})</Label>
               <div className="relative min-w-0 w-full">
                 <PiggyBank className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
                 <Input
@@ -123,7 +126,7 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
             </div>
 
             <div className="min-w-0">
-              <Label className="block mb-1.5">Emergency Buffer Cushion</Label>
+              <Label className="block mb-1.5">Emergency Buffer Cushion ({currency.symbol})</Label>
               <div className="relative min-w-0 w-full">
                 <ShieldAlert className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none z-10" />
                 <Input
@@ -144,7 +147,7 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
           {/* Regular Savings Amount & Frequency */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
             <div className="min-w-0">
-              <Label className="block mb-1.5">Savings Deposit Amount</Label>
+              <Label className="block mb-1.5">Savings Deposit Amount ({currency.symbol})</Label>
               <div className="relative min-w-0 w-full">
                 <Coins className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
                 <Input

@@ -238,8 +238,14 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         })
       : activeSavingsPlan;
 
-    return planToCalculate.calculate();
-  }, [activeSavingsPlan, showWhatIf, simulatedSavingsRate, simulatedExtraBonus]);
+    return planToCalculate.calculate(storeData.settings.currency);
+  }, [
+    activeSavingsPlan,
+    showWhatIf,
+    simulatedSavingsRate,
+    simulatedExtraBonus,
+    storeData.settings.currency,
+  ]);
 
   // Portfolio summary
   const portfolioSummary = useMemo(() => {
