@@ -7,10 +7,15 @@ import { Button } from './ui/button';
 
 interface ActivationWallModalProps {
   isOpen: boolean;
+  onClose?: () => void;
   onActivate: (code: string) => boolean;
 }
 
-export const ActivationWallModal: React.FC<ActivationWallModalProps> = ({ isOpen, onActivate }) => {
+export const ActivationWallModal: React.FC<ActivationWallModalProps> = ({
+  isOpen,
+  onClose,
+  onActivate,
+}) => {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
 
@@ -26,7 +31,7 @@ export const ActivationWallModal: React.FC<ActivationWallModalProps> = ({ isOpen
   return (
     <ResponsiveOverlay
       isOpen={isOpen}
-      onClose={() => {}}
+      onClose={onClose || (() => {})}
       title="Developer Preview — Activation Required"
       description="Private session gate active prior to production launch"
     >
@@ -57,16 +62,19 @@ export const ActivationWallModal: React.FC<ActivationWallModalProps> = ({ isOpen
                 required
                 value={code}
                 onChange={e => setCode(e.target.value)}
+                onInput={e => setCode((e.target as HTMLInputElement).value)}
                 placeholder="Enter developer invite code..."
                 className="pl-9"
               />
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              Hint: Default preview key is{' '}
-              <code className="font-mono font-bold text-brand-600 dark:text-brand-400">
-                SAVINGS2026
-              </code>
-            </p>
+            {!import.meta.env.PROD && (
+              <p className="text-[11px] text-slate-500 mt-1">
+                Hint: Default preview key is{' '}
+                <code className="font-mono font-bold text-brand-600 dark:text-brand-400">
+                  SAVINGS2026
+                </code>
+              </p>
+            )}
           </div>
 
           <Button type="submit" className="w-full gap-2">
