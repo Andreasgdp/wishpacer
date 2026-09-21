@@ -281,6 +281,7 @@ export const AppContent: React.FC = () => {
         isOpen={modal.isOpen('settings')}
         onClose={modal.close}
         config={activePlan.config}
+        currency={storeData.settings.currency}
         onSave={newConfig => {
           actions.updateBudgetSettings(newConfig);
           modal.close();
@@ -317,6 +318,7 @@ export const AppContent: React.FC = () => {
         mode={planManageMode}
         editingPlan={modal.editingPlanTarget}
         plansCount={storeData.plans.length}
+        currency={storeData.settings.currency}
         onSavePlan={planData => {
           if (planManageMode === 'create') {
             actions.createPlan(planData);

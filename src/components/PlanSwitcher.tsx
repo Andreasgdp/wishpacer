@@ -14,13 +14,15 @@ import {
   Check,
   FolderKanban,
 } from 'lucide-react';
-import type { Plan } from '../types/plan';
-import { PLAN_COLORS } from '../utils/defaults';
+import type { CurrencyConfig, Plan } from '../types/plan';
+import { formatCurrency } from '../utils/currency';
+import { DEFAULT_GLOBAL_SETTINGS, PLAN_COLORS } from '../utils/defaults';
 
 interface PlanSwitcherProps {
   plans: Plan[];
   activePlanId: string;
   isPortfolioView: boolean;
+  currency?: CurrencyConfig;
   onSelectPlan: (planId: string) => void;
   onSelectPortfolio: () => void;
   onOpenNewPlanModal: () => void;
@@ -53,6 +55,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
   plans,
   activePlanId,
   isPortfolioView,
+  currency = DEFAULT_GLOBAL_SETTINGS.currency,
   onSelectPlan,
   onSelectPortfolio,
   onOpenNewPlanModal,
@@ -157,8 +160,8 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
                         {plan.name}
                       </div>
                       <div className="text-[10px] text-slate-500 truncate">
-                        {activeCount} wish{activeCount === 1 ? '' : 'es'} • $
-                        {plan.config.amountToSave}/{plan.config.frequency}
+                        {activeCount} wish{activeCount === 1 ? '' : 'es'} •{' '}
+                        {formatCurrency(plan.config.amountToSave, currency)}/{plan.config.frequency}
                       </div>
                     </div>
                   </div>

@@ -76,7 +76,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ config, re
                       {item.title}
                     </h4>
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      <AnimatedCurrency value={item.price} currency={config.currency} />
+                      <AnimatedCurrency value={item.price} currency={result.currency} />
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
@@ -85,13 +85,13 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ config, re
                       <strong>
                         <AnimatedCurrency
                           value={item.cumulativeTarget}
-                          currency={config.currency}
+                          currency={result.currency}
                         />
                       </strong>
                     </span>
                     {item.deficit > 0 && (
                       <span className="text-amber-600 dark:text-amber-400">
-                        • {formatCurrency(item.deficit, config.currency)} deficit remaining
+                        • {formatCurrency(item.deficit, result.currency)} deficit remaining
                       </span>
                     )}
                   </div>
@@ -158,18 +158,18 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ config, re
                       {m.dateString}
                     </td>
                     <td className="py-2 px-3 text-slate-600 dark:text-slate-400">
-                      <AnimatedCurrency value={m.startingBalance} currency={config.currency} />
+                      <AnimatedCurrency value={m.startingBalance} currency={result.currency} />
                     </td>
                     <td className="py-2 px-3 text-emerald-600 dark:text-emerald-400 font-semibold">
-                      +{formatCurrency(m.depositAmount, config.currency)}
+                      +{formatCurrency(m.depositAmount, result.currency)}
                     </td>
                     {config.annualInterestRate > 0 && (
                       <td className="py-2 px-3 text-sky-600 dark:text-sky-400">
-                        +{formatCurrency(m.interestEarned, config.currency)}
+                        +{formatCurrency(m.interestEarned, result.currency)}
                       </td>
                     )}
                     <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">
-                      {formatCurrency(m.endingBalance, config.currency)}
+                      {formatCurrency(m.endingBalance, result.currency)}
                     </td>
                     <td className="py-2 px-3 font-sans">
                       {m.unlockedItems.length > 0 ? (
@@ -180,7 +180,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ config, re
                               className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
                             >
                               <Sparkles className="w-3 h-3" />
-                              {item.title} ({formatCurrency(item.price, config.currency)})
+                              {item.title} ({formatCurrency(item.price, result.currency)})
                             </span>
                           ))}
                         </div>

@@ -158,5 +158,24 @@ describe('UI Custom Hooks Suite', () => {
 
       expect(result.current.activePlan.name).toBe('Device A Updated Name');
     });
+
+    it('respects global currency settings in calculations and portfolio summary', async () => {
+      const repo = new InMemoryStorageRepository(sampleStore);
+      const { result } = renderHook(() => usePlanManager({ repository: repo }));
+
+      expect(result.current.activePlanCalculation.currency.code).toBe('USD');
+      expect(result.current.portfolioSummary.currency.code).toBe('USD');
+
+      await act(async () => {
+        result.current.actions.updateGlobalSettings({
+          currency: { code: 'EUR', symbol: '€', position: 'suffix', decimals: 2 },
+        });
+      });
+
+      expect(result.current.storeData.settings.currency.code).toBe('EUR');
+      expect(result.current.activePlanCalculation.currency.code).toBe('EUR');
+      expect(result.current.activePlanCalculation.currency.symbol).toBe('€');
+      expect(result.current.portfolioSummary.currency.code).toBe('EUR');
+    });
   });
 });

@@ -3,6 +3,7 @@ import { History, Trash2, Undo2, Calendar } from 'lucide-react';
 import type { CurrencyConfig, WishItem } from '../types/plan';
 import { AnimatedCurrency } from './AnimatedCurrency';
 import { formatDateString } from '../utils/calculator';
+import { formatCurrency } from '../utils/currency';
 import { CATEGORIES } from '../utils/defaults';
 import { ResponsiveOverlay } from './ResponsiveOverlay';
 
@@ -33,7 +34,7 @@ export const PurchasedHistoryModal: React.FC<PurchasedHistoryModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={`Purchased History (${purchasedItems.length})`}
-      description={`Total fulfilled purchases: ${currency.symbol}${totalSpent}`}
+      description={`Total fulfilled purchases: ${formatCurrency(totalSpent, currency)}`}
       className="max-w-2xl"
     >
       <div className="flex flex-col space-y-4">

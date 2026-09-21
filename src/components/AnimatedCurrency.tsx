@@ -16,12 +16,15 @@ export const AnimatedCurrency: React.FC<AnimatedCurrencyProps> = ({
   className,
   format,
 }) => {
+  const prefix = currency?.position === 'prefix' ? currency?.symbol : undefined;
+  const suffix = currency?.position === 'suffix' ? ` ${currency?.symbol}` : undefined;
+
   return (
     <NumberFlow
       value={value}
+      prefix={prefix}
+      suffix={suffix}
       format={{
-        style: 'currency',
-        currency: currency?.code || 'USD',
         maximumFractionDigits: currency?.decimals ?? 0,
         ...format,
       }}

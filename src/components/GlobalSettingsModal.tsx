@@ -4,7 +4,7 @@ import type { CurrencyConfig, GlobalSettings } from '../types/plan';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { CURRENCY_PRESETS } from '../utils/currency';
+import { CURRENCY_PRESETS, formatCurrency } from '../utils/currency';
 import { ResponsiveOverlay } from './ResponsiveOverlay';
 import { Button } from './ui/button';
 
@@ -148,13 +148,17 @@ export const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
           <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between">
             <span className="text-xs text-slate-500">Format Preview:</span>
             <span className="text-sm font-bold font-mono text-slate-900 dark:text-white">
-              {selectedCurrencyCode in CURRENCY_PRESETS
-                ? CURRENCY_PRESETS[selectedCurrencyCode].position === 'prefix'
-                  ? `${CURRENCY_PRESETS[selectedCurrencyCode].symbol}1,250`
-                  : `1,250 ${CURRENCY_PRESETS[selectedCurrencyCode].symbol}`
-                : position === 'prefix'
-                  ? `${customSymbol}1,250`
-                  : `1,250 ${customSymbol}`}
+              {formatCurrency(
+                1250,
+                selectedCurrencyCode in CURRENCY_PRESETS
+                  ? { ...CURRENCY_PRESETS[selectedCurrencyCode], decimals }
+                  : {
+                      code: selectedCurrencyCode.trim() || 'CUSTOM',
+                      symbol: customSymbol.trim() || 'kr',
+                      position,
+                      decimals,
+                    }
+              )}
             </span>
           </div>
           {/* Privacy, Support & Danger Zone */}

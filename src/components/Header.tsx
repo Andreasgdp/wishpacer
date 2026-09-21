@@ -89,6 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
               plans={plans}
               activePlanId={activePlanId}
               isPortfolioView={isPortfolioView}
+              currency={activePlanCalculation.currency}
               onSelectPlan={onSelectPlan}
               onSelectPortfolio={onSelectPortfolio}
               onOpenNewPlanModal={onOpenNewPlanModal}
