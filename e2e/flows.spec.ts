@@ -8,8 +8,16 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     await page.goto('/');
   });
 
-  test('Flow 1: Activation Gate and Session Unlock', async ({ page }) => {
-    // Unactivated session shows the Developer Activation Wall
+  test('Flow 1: Activation Gate on Login Attempt and Session Unlock', async ({ page }) => {
+    // Unactivated session loads app normally with onboarding tour
+    await expect(page.getByText('Welcome to Saving Plan')).toBeVisible();
+    await expect(page.getByText('Developer Preview — Activation Required')).not.toBeVisible();
+
+    // Dismiss onboarding tour modal so header buttons are clickable
+    await page.getByRole('button', { name: 'Close' }).first().click();
+
+    // Attempting to sign in triggers the Developer Activation Wall
+    await page.getByRole('button', { name: 'Sign In' }).first().click();
     await expect(page.getByText('Developer Preview — Activation Required')).toBeVisible();
 
     // Entering invalid code shows error
@@ -22,17 +30,12 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     await input.fill('SAVINGS2026');
     await page.getByRole('button', { name: 'Unlock Session' }).click();
 
-    // Activation modal disappears and onboarding tour is visible
+    // Activation modal disappears
     await expect(page.getByText('Developer Preview — Activation Required')).not.toBeVisible();
-    await expect(page.getByText('Welcome to Saving Plan')).toBeVisible();
   });
 
   test('Flow 2: Onboarding Tour and Interactive Sample Plan Load', async ({ page }) => {
-    // Unlock session first
-    await page.getByPlaceholder('Enter developer invite code...').fill('SAVINGS2026');
-    await page.getByRole('button', { name: 'Unlock Session' }).click();
-
-    // Onboarding modal is visible
+    // Onboarding modal is visible on initial load
     await expect(page.getByText('Welcome to Saving Plan')).toBeVisible();
     await expect(page.getByText('Multi-Plan Savings Strategy')).toBeVisible();
 
@@ -64,9 +67,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
   test('Flow 3: Plan Creation, Metadata Editing, Duplication and Confirmed Deletion', async ({
     page,
   }) => {
-    // Unlock session and skip onboarding by loading sample plan
-    await page.getByPlaceholder('Enter developer invite code...').fill('SAVINGS2026');
-    await page.getByRole('button', { name: 'Unlock Session' }).click();
+    // Skip onboarding by loading sample plan
     await page.getByRole('button', { name: 'Load Interactive Sample Plan' }).click();
     await page.getByRole('button', { name: 'Load Sample Data' }).click();
 
@@ -107,9 +108,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
   test('Flow 4: Wishlist Item Creation, Status Toggles, and Confirmed Removal', async ({
     page,
   }) => {
-    // Unlock session and load sample plan
-    await page.getByPlaceholder('Enter developer invite code...').fill('SAVINGS2026');
-    await page.getByRole('button', { name: 'Unlock Session' }).click();
+    // Load sample plan
     await page.getByRole('button', { name: 'Load Interactive Sample Plan' }).click();
     await page.getByRole('button', { name: 'Load Sample Data' }).click();
 
@@ -135,9 +134,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
   });
 
   test('Flow 5: What-If Feasibility Scenario Simulator', async ({ page }) => {
-    // Unlock session and load sample plan
-    await page.getByPlaceholder('Enter developer invite code...').fill('SAVINGS2026');
-    await page.getByRole('button', { name: 'Unlock Session' }).click();
+    // Load sample plan
     await page.getByRole('button', { name: 'Load Interactive Sample Plan' }).click();
     await page.getByRole('button', { name: 'Load Sample Data' }).click();
 
@@ -151,9 +148,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
   });
 
   test('Flow 6: Privacy Policy & Support Modals', async ({ page }) => {
-    // Unlock session and load sample plan
-    await page.getByPlaceholder('Enter developer invite code...').fill('SAVINGS2026');
-    await page.getByRole('button', { name: 'Unlock Session' }).click();
+    // Load sample plan
     await page.getByRole('button', { name: 'Load Interactive Sample Plan' }).click();
     await page.getByRole('button', { name: 'Load Sample Data' }).click();
 
@@ -168,9 +163,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
   });
 
   test('Flow 7: Global Settings and Confirmed Account Data Erasure', async ({ page }) => {
-    // Unlock session and load sample plan
-    await page.getByPlaceholder('Enter developer invite code...').fill('SAVINGS2026');
-    await page.getByRole('button', { name: 'Unlock Session' }).click();
+    // Load sample plan
     await page.getByRole('button', { name: 'Load Interactive Sample Plan' }).click();
     await page.getByRole('button', { name: 'Load Sample Data' }).click();
 
@@ -191,7 +184,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     // Reload page to simulate session reset after data erasure
     await page.reload();
 
-    // Session resets and presents Developer Activation Wall again
-    await expect(page.getByText('Developer Preview — Activation Required')).toBeVisible();
+    // Session resets and presents onboarding modal again
+    await expect(page.getByText('Welcome to Saving Plan')).toBeVisible();
   });
 });

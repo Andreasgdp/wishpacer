@@ -42,6 +42,8 @@ interface HeaderProps {
   onOpenOnboardingModal: () => void;
   showWhatIf: boolean;
   onToggleWhatIf: () => void;
+  isActivated?: boolean;
+  onSignInClick?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -65,6 +67,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenOnboardingModal,
   showWhatIf,
   onToggleWhatIf,
+  isActivated = true,
+  onSignInClick,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -256,15 +260,26 @@ export const Header: React.FC<HeaderProps> = ({
                 <UserButton userProfileMode="modal" />
               </SignedIn>
               <SignedOut>
-                <SignInButton mode="modal">
+                {isActivated ? (
+                  <SignInButton mode="modal">
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
+                    >
+                      <UserIcon className="w-3.5 h-3.5" />
+                      <span>Sign In</span>
+                    </button>
+                  </SignInButton>
+                ) : (
                   <button
                     type="button"
+                    onClick={onSignInClick}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
                   >
                     <UserIcon className="w-3.5 h-3.5" />
                     <span>Sign In</span>
                   </button>
-                </SignInButton>
+                )}
               </SignedOut>
             </div>
           </div>
@@ -317,15 +332,29 @@ export const Header: React.FC<HeaderProps> = ({
 
                 {/* Sign In Button if Signed Out */}
                 <SignedOut>
-                  <SignInButton mode="modal">
+                  {isActivated ? (
+                    <SignInButton mode="modal">
+                      <button
+                        type="button"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900 mb-2 shadow-xs"
+                      >
+                        <UserIcon className="w-4 h-4" />
+                        <span>Sign In / Create Account</span>
+                      </button>
+                    </SignInButton>
+                  ) : (
                     <button
                       type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        onSignInClick?.();
+                      }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900 mb-2 shadow-xs"
                     >
                       <UserIcon className="w-4 h-4" />
                       <span>Sign In / Create Account</span>
                     </button>
-                  </SignInButton>
+                  )}
                 </SignedOut>
 
                 {/* All Plans */}

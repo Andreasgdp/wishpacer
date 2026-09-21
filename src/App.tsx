@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useClerk } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
 import confetti from 'canvas-confetti';
 import { useModalRegistry, usePlanManager } from './hooks';
@@ -29,6 +29,7 @@ import { DEFAULT_PLANS } from './utils/defaults';
 export const AppContent: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
+  const clerk = useClerk();
 
   const [authTimedOut, setAuthTimedOut] = useState(false);
 
@@ -86,6 +87,12 @@ export const AppContent: React.FC = () => {
     if (code.toLowerCase() === validCode) {
       localStorage.setItem('saving_plan_activated', 'true');
       setIsActivated(true);
+      modal.close();
+      try {
+        clerk.openSignIn?.();
+      } catch {
+        // Ignore sign-in open errors if Clerk is unconfigured
+      }
       return true;
     }
     return false;
@@ -140,9 +147,6 @@ export const AppContent: React.FC = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
 
-      {/* Temporary Paywall / Dev Gate Modal */}
-      {!isActivated && <ActivationWallModal isOpen={!isActivated} onActivate={handleActivate} />}
-
       {/* Header */}
       <Header
         plans={storeData.plans}
@@ -165,6 +169,8 @@ export const AppContent: React.FC = () => {
         onOpenOnboardingModal={() => modal.open('onboarding')}
         showWhatIf={showWhatIf}
         onToggleWhatIf={() => actions.setShowWhatIf(!showWhatIf)}
+        isActivated={isActivated}
+        onSignInClick={() => modal.open('activation')}
       />
 
       <main className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full space-y-4 sm:space-y-6">
@@ -392,17 +398,20 @@ export const AppContent: React.FC = () => {
       <PrivacyModal isOpen={modal.isOpen('privacy')} onClose={modal.close} />
 
       <SupportModal isOpen={modal.isOpen('support')} onClose={modal.close} />
+      <ActivationWallModal
+        isOpen={modal.isOpen('activation')}
+        onClose={modal.close}
+        onActivate={handleActivate}
+      />
 
-      {isActivated && (
-        <OnboardingModal
-          isOpen={!hasSeenOnboarding || modal.isOpen('onboarding')}
-          onClose={handleCloseOnboarding}
-          onLoadSamplePlan={() => {
-            handleCloseOnboarding();
-            handleConfirmLoadSamplePlan();
-          }}
-        />
-      )}
+      <OnboardingModal
+        isOpen={!hasSeenOnboarding || modal.isOpen('onboarding')}
+        onClose={handleCloseOnboarding}
+        onLoadSamplePlan={() => {
+          handleCloseOnboarding();
+          handleConfirmLoadSamplePlan();
+        }}
+      />
 
       {modal.isOpen('confirmDialog') && modal.confirmPayload && (
         <ConfirmDialogModal

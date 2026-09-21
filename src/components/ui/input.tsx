@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Input as InputPrimitive } from '@base-ui/react/input';
 import { cn } from '../../utils/cn';
 
 export type InputProps = React.ComponentProps<'input'>;
@@ -7,7 +6,7 @@ export type InputProps = React.ComponentProps<'input'>;
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
     return (
-      <InputPrimitive
+      <input
         type={type}
         data-slot="input"
         className={cn(
