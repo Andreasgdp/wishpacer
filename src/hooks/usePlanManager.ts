@@ -24,9 +24,9 @@ export interface PlanManagerOptions {
 
 export interface PlanManagerActions {
   selectPlan: (planId: string) => void;
-  createPlan: (planData: Partial<Plan> & { config?: Partial<PlanConfig> }) => void;
+  createPlan: (planData: Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> }) => void;
   updatePlanMetadata: (
-    planData: Partial<Plan> & { config?: Partial<PlanConfig> },
+    planData: Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> },
     targetPlanId?: string
   ) => void;
   duplicatePlan: (planId: string) => void;
@@ -265,23 +265,25 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   );
 
   const createPlan = useCallback(
-    (planData: Partial<Plan> & { config?: Partial<PlanConfig> }) => {
+    (planData: Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> }) => {
       const newPlanId = `plan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+      const planName = planData.name || 'New Savings Plan';
       const newPlan: Plan = {
         id: newPlanId,
-        name: planData.name || 'New Savings Plan',
+        name: planName,
         description: planData.description,
         icon: planData.icon || 'sparkles',
         color: planData.color || 'violet',
-        config: (planData.config as PlanConfig) || {
-          name: planData.name || 'New Savings Plan',
-          currentAmountSaved: 0,
-          amountToSave: 100,
-          frequency: 'monthly',
-          savingsDayOfMonth: 1,
-          firstSavingDate: new Date().toISOString().split('T')[0],
-          emergencyBuffer: 0,
-          annualInterestRate: 0,
+        config: {
+          name: planData.config?.name || planName,
+          currentAmountSaved: planData.config?.currentAmountSaved ?? 0,
+          amountToSave: planData.config?.amountToSave ?? 100,
+          frequency: planData.config?.frequency || 'monthly',
+          savingsDayOfMonth: planData.config?.savingsDayOfMonth ?? 1,
+          firstSavingDate:
+            planData.config?.firstSavingDate || new Date().toISOString().split('T')[0],
+          emergencyBuffer: planData.config?.emergencyBuffer ?? 0,
+          annualInterestRate: planData.config?.annualInterestRate ?? 0,
         },
         items: [],
         createdAt: new Date().toISOString(),
@@ -303,7 +305,10 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   );
 
   const updatePlanMetadata = useCallback(
-    (planData: Partial<Plan> & { config?: Partial<PlanConfig> }, targetPlanId?: string) => {
+    (
+      planData: Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> },
+      targetPlanId?: string
+    ) => {
       const planIdToUpdate = targetPlanId || storeData.activePlanId;
       const updatedPlans = storeData.plans.map(p => {
         if (p.id === planIdToUpdate) {

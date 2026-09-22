@@ -177,5 +177,27 @@ describe('UI Custom Hooks Suite', () => {
       expect(result.current.activePlanCalculation.currency.symbol).toBe('€');
       expect(result.current.portfolioSummary.currency.code).toBe('EUR');
     });
+    it('creates a new plan with initial saved balance and monthly contribution preserved', async () => {
+      const repo = new InMemoryStorageRepository(sampleStore);
+      const { result } = renderHook(() => usePlanManager({ repository: repo }));
+
+      await act(async () => {
+        result.current.actions.createPlan({
+          name: 'House Savings',
+          description: 'Saving for down payment',
+          icon: 'home',
+          color: 'emerald',
+          config: {
+            currentAmountSaved: 5000,
+            amountToSave: 800,
+          },
+        });
+      });
+
+      expect(result.current.activePlan.name).toBe('House Savings');
+      expect(result.current.activePlan.config.currentAmountSaved).toBe(5000);
+      expect(result.current.activePlan.config.amountToSave).toBe(800);
+      expect(result.current.activePlan.description).toBe('Saving for down payment');
+    });
   });
 });

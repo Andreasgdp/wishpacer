@@ -80,13 +80,22 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     // Click "Create New Savings Plan..."
     await page.getByRole('button', { name: /Create New/i }).click();
 
-    // Fill in new plan modal
+    // Fill in new plan modal with initial saved balance and monthly contribution
     await page.getByPlaceholder(/House & Living Needs/i).fill('Japan Trip');
+    const initialSavedInput = page.locator('input[type="number"]').first();
+    const monthlyContributionInput = page.locator('input[type="number"]').nth(1);
+    await initialSavedInput.fill('2500');
+    await monthlyContributionInput.fill('500');
     await page.getByRole('button', { name: 'Create Plan' }).click();
 
     // Verify newly active plan
     await expect(page.getByText('Japan Trip').first()).toBeVisible();
 
+    // Verify initial saved balance ($2,500) and monthly contribution ($500) are preserved in UI via Budget Settings
+    await page.getByRole('button', { name: /Budget Settings/i }).click();
+    await expect(page.locator('input[type="number"]').first()).toHaveValue('2500');
+    await expect(page.locator('input[type="number"]').nth(2)).toHaveValue('500');
+    await page.getByRole('button', { name: 'Cancel' }).click();
     // Duplicate plan via Edit Plan Details modal
     await page.getByRole('button', { name: 'Edit Plan Details' }).click();
     await page.getByRole('button', { name: 'Duplicate Plan' }).click();
