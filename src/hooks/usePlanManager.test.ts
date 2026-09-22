@@ -114,6 +114,66 @@ describe('UI Custom Hooks Suite', () => {
       expect(repo.saveCount).toBeGreaterThan(0);
     });
 
+    it('saves a new wish item to a specified targetPlanId that is not the active plan', async () => {
+      const multiPlanStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'plan-test-1',
+        plans: [
+          sampleStore.plans[0],
+          {
+            id: 'plan-test-2',
+            name: 'Secondary Savings Plan',
+            description: 'Secondary Plan',
+            icon: 'target',
+            color: 'blue',
+            config: {
+              name: 'Secondary Savings Plan',
+              currentAmountSaved: 500,
+              amountToSave: 200,
+              frequency: 'monthly',
+              savingsDayOfMonth: 1,
+              firstSavingDate: '2026-09-01',
+              emergencyBuffer: 0,
+              annualInterestRate: 0,
+            },
+            items: [],
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      };
+
+      const repo = new InMemoryStorageRepository(multiPlanStore);
+      const { result } = renderHook(() => usePlanManager({ isAuthLoaded: true, repository: repo }));
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      act(() => {
+        result.current.actions.saveWishItem(
+          {
+            title: 'Headphones',
+            price: 250,
+            category: 'Tech',
+            priority: 1,
+          },
+          undefined,
+          'plan-test-2'
+        );
+      });
+
+      expect(result.current.activePlan.id).toBe('plan-test-1');
+      expect(result.current.activePlan.items.length).toBe(1);
+
+      const targetPlan = result.current.storeData.plans.find(p => p.id === 'plan-test-2');
+      expect(targetPlan).toBeDefined();
+      expect(targetPlan?.items.length).toBe(1);
+      expect(targetPlan?.items[0].title).toBe('Headphones');
+      expect(targetPlan?.items[0].price).toBe(250);
+      expect(repo.saveCount).toBeGreaterThan(0);
+    });
+
     it('updates state automatically when repository notifies onDataUpdated with newer data', async () => {
       class ObservableRepo extends InMemoryStorageRepository {
         private listeners = new Set<(data: AppStoreData) => void>();

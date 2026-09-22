@@ -33,7 +33,8 @@ export interface PlanManagerActions {
   updateGlobalSettings: (newSettings: GlobalSettings) => void;
   saveWishItem: (
     itemData: Omit<WishItem, 'id' | 'createdAt' | 'updatedAt' | 'isPurchased' | 'isPaused'>,
-    existingId?: string
+    existingId?: string,
+    targetPlanId?: string
   ) => void;
   deleteWishItem: (itemId: string) => void;
   toggleWishPurchased: (itemId: string) => void;
@@ -421,8 +422,38 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   const saveWishItem = useCallback(
     (
       itemData: Omit<WishItem, 'id' | 'createdAt' | 'updatedAt' | 'isPurchased' | 'isPaused'>,
-      existingId?: string
+      existingId?: string,
+      targetPlanId?: string
     ) => {
+      if (targetPlanId && targetPlanId !== storeData.activePlanId) {
+        const targetPlan = storeData.plans.find(p => p.id === targetPlanId);
+        if (targetPlan) {
+          const targetSavingsPlan = SavingsPlan.fromJSON(targetPlan);
+          let updatedPlan: SavingsPlan;
+          let toastMsg: string;
+
+          if (existingId) {
+            updatedPlan = targetSavingsPlan.updateWishItem(existingId, itemData);
+            toastMsg = 'Wish updated';
+          } else {
+            updatedPlan = targetSavingsPlan.addWishItem(itemData, itemData.priority);
+            toastMsg = `Added to "${targetPlan.name}" ✨`;
+          }
+
+          const nextPlans = storeData.plans.map(p =>
+            p.id === updatedPlan.id ? updatedPlan.toJSON() : p
+          );
+          persistStore(
+            {
+              ...storeData,
+              plans: nextPlans,
+            },
+            toastMsg
+          );
+        }
+        return;
+      }
+
       let updatedPlan: SavingsPlan;
       let toastMsg: string;
 
@@ -436,7 +467,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
 
       updateActivePlanInStore(updatedPlan, toastMsg);
     },
-    [activeSavingsPlan, updateActivePlanInStore]
+    [storeData, activeSavingsPlan, updateActivePlanInStore, persistStore]
   );
 
   const deleteWishItem = useCallback(

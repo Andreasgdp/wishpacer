@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Link, Coins, FileText } from 'lucide-react';
-import type { ComputedWishItem, CurrencyConfig, WishItem } from '../types/plan';
+import type { ComputedWishItem, CurrencyConfig, Plan, WishItem } from '../types/plan';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -15,11 +15,15 @@ interface WishModalProps {
   onClose: () => void;
   onSave: (
     itemData: Omit<WishItem, 'id' | 'createdAt' | 'updatedAt' | 'isPurchased' | 'isPaused'>,
-    existingId?: string
+    existingId?: string,
+    targetPlanId?: string
   ) => void;
   editingItem?: ComputedWishItem | null;
   currency: CurrencyConfig;
   currentCount: number;
+  plans?: Plan[];
+  activePlanId?: string;
+  isQuickAdd?: boolean;
 }
 
 export const WishModal: React.FC<WishModalProps> = ({
@@ -29,6 +33,9 @@ export const WishModal: React.FC<WishModalProps> = ({
   editingItem,
   currency,
   currentCount,
+  plans,
+  activePlanId,
+  isQuickAdd,
 }) => {
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
@@ -37,6 +44,15 @@ export const WishModal: React.FC<WishModalProps> = ({
   const [url, setUrl] = useState('');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
+  const [selectedPlanId, setSelectedPlanId] = useState<string>(
+    activePlanId || (plans && plans[0]?.id) || ''
+  );
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedPlanId(activePlanId || (plans && plans[0]?.id) || '');
+    }
+  }, [isOpen, activePlanId, plans]);
 
   useEffect(() => {
     if (editingItem) {
@@ -79,7 +95,8 @@ export const WishModal: React.FC<WishModalProps> = ({
         url: url.trim() || undefined,
         notes: notes.trim() || undefined,
       },
-      editingItem?.id
+      editingItem?.id,
+      selectedPlanId
     );
     onClose();
   };
@@ -109,6 +126,25 @@ export const WishModal: React.FC<WishModalProps> = ({
           {error && (
             <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-medium">
               {error}
+            </div>
+          )}
+
+          {/* Target Plan Selector */}
+          {!editingItem && !isQuickAdd && plans && plans.length > 0 && (
+            <div>
+              <Label className="block mb-1.5">Target Plan</Label>
+              <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select target plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {plans.map(p => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
