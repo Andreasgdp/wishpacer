@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth, useClerk } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
 import confetti from 'canvas-confetti';
+import { PlanActionsBar } from './components/PlanActionsBar';
 import { useModalRegistry, usePlanManager } from './hooks';
 import type { Plan } from './types/plan';
 import { Header } from './components/Header';
@@ -42,6 +43,7 @@ export const AppContent: React.FC = () => {
 
   const modal = useModalRegistry();
   const [planManageMode, setPlanManageMode] = useState<'create' | 'edit'>('create');
+  const [isQuickAdd, setIsQuickAdd] = useState(false);
 
   const [isActivated, setIsActivated] = useState<boolean>(() => {
     return localStorage.getItem('saving_plan_activated') === 'true';
@@ -159,16 +161,15 @@ export const AppContent: React.FC = () => {
         onOpenNewPlanModal={handleOpenCreatePlanModal}
         onOpenManagePlanModal={() => handleOpenEditPlanModal(activePlan)}
         onToggleDarkMode={toggleDarkMode}
-        onOpenAddWishModal={() => modal.open('addWish')}
-        onOpenSettingsModal={() => modal.open('settings')}
+        onOpenAddWishModal={() => {
+          setIsQuickAdd(false);
+          modal.open('addWish');
+        }}
         onOpenGlobalSettingsModal={() => modal.open('globalSettings')}
-        onOpenHistoryModal={() => modal.open('history')}
         onOpenExportModal={() => modal.open('exportImport')}
         onOpenPrivacyModal={() => modal.open('privacy')}
         onOpenSupportModal={() => modal.open('support')}
         onOpenOnboardingModal={() => modal.open('onboarding')}
-        showWhatIf={showWhatIf}
-        onToggleWhatIf={() => actions.setShowWhatIf(!showWhatIf)}
         isActivated={isActivated}
         onSignInClick={() => modal.open('activation')}
       />
@@ -199,6 +200,16 @@ export const AppContent: React.FC = () => {
                 onClose={() => actions.setShowWhatIf(false)}
               />
             )}
+            {/* Plan Action Header / Bar */}
+            <PlanActionsBar
+              activePlan={activePlan}
+              purchasedCount={activePlanCalculation.purchasedItems.length}
+              showWhatIf={showWhatIf}
+              onToggleWhatIf={() => actions.setShowWhatIf(!showWhatIf)}
+              onOpenSettings={() => modal.open('settings')}
+              onOpenHistory={() => modal.open('history')}
+              onEditPlan={() => handleOpenEditPlanModal(activePlan)}
+            />
 
             {/* Financial Metrics Overview */}
             <MetricsOverview
@@ -219,20 +230,16 @@ export const AppContent: React.FC = () => {
                     to recalibrate.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleOpenEditPlanModal(activePlan)}
-                  className="text-xs font-medium text-brand-600 dark:text-brand-400 hover:underline"
-                >
-                  Edit Plan Details
-                </button>
               </div>
 
               <WishList
                 items={activePlanCalculation.items}
                 currency={storeData.settings.currency}
                 onReorder={actions.reorderWishes}
-                onEdit={item => modal.open('editWish', { wishItem: item })}
+                onEdit={item => {
+                  setIsQuickAdd(false);
+                  modal.open('editWish', { wishItem: item });
+                }}
                 onDelete={itemId => {
                   const targetItem = activePlanCalculation.items.find(i => i.id === itemId);
                   modal.open('confirmDialog', {
@@ -260,7 +267,10 @@ export const AppContent: React.FC = () => {
                 onTogglePaused={actions.toggleWishPaused}
                 onMoveUp={actions.moveWishUp}
                 onMoveDown={actions.moveWishDown}
-                onOpenAddModal={() => modal.open('addWish')}
+                onOpenAddModal={() => {
+                  setIsQuickAdd(true);
+                  modal.open('addWish');
+                }}
               />
             </section>
 
@@ -274,13 +284,16 @@ export const AppContent: React.FC = () => {
       <WishModal
         isOpen={modal.isOpen('addWish') || modal.isOpen('editWish')}
         onClose={modal.close}
-        onSave={(itemData, existingId) => {
-          actions.saveWishItem(itemData, existingId);
+        onSave={(itemData, existingId, targetPlanId) => {
+          actions.saveWishItem(itemData, existingId, targetPlanId);
           modal.close();
         }}
         editingItem={modal.editingWishItem}
         currency={storeData.settings.currency}
         currentCount={activePlan.items.length}
+        plans={storeData.plans}
+        activePlanId={storeData.activePlanId}
+        isQuickAdd={isQuickAdd}
       />
 
       <PlanSettingsModal

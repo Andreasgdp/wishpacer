@@ -39,6 +39,10 @@ export class SavingsPlan {
     };
   }
 
+  public static fromJSON(planData: Plan): SavingsPlan {
+    return new SavingsPlan(planData);
+  }
+
   /**
    * Returns a clean JSON representation of the underlying Plan data.
    */

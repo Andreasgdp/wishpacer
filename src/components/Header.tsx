@@ -1,12 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Plus,
-  Settings,
   Download,
   Moon,
   Sun,
-  History,
-  TrendingUp,
   FolderKanban,
   Globe,
   MoreVertical,
@@ -33,15 +30,11 @@ interface HeaderProps {
   onOpenManagePlanModal: () => void;
   onToggleDarkMode: () => void;
   onOpenAddWishModal: () => void;
-  onOpenSettingsModal: () => void;
   onOpenGlobalSettingsModal: () => void;
-  onOpenHistoryModal: () => void;
   onOpenExportModal: () => void;
   onOpenPrivacyModal: () => void;
   onOpenSupportModal: () => void;
   onOpenOnboardingModal: () => void;
-  showWhatIf: boolean;
-  onToggleWhatIf: () => void;
   isActivated?: boolean;
   onSignInClick?: () => void;
 }
@@ -58,15 +51,11 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenManagePlanModal,
   onToggleDarkMode,
   onOpenAddWishModal,
-  onOpenSettingsModal,
   onOpenGlobalSettingsModal,
-  onOpenHistoryModal,
   onOpenExportModal,
   onOpenPrivacyModal,
   onOpenSupportModal,
   onOpenOnboardingModal,
-  showWhatIf,
-  onToggleWhatIf,
   isActivated = true,
   onSignInClick,
 }) => {
@@ -117,38 +106,6 @@ export const Header: React.FC<HeaderProps> = ({
               <FolderKanban className="w-3.5 h-3.5" />
               <span>All Plans</span>
             </button>
-
-            {/* What-If Simulator Button (active on single plan view) */}
-            {!isPortfolioView && (
-              <button
-                type="button"
-                onClick={onToggleWhatIf}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-xl transition-all border ${
-                  showWhatIf
-                    ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-                title="Toggle What-If Savings Scenario"
-              >
-                <TrendingUp className="w-3.5 h-3.5" />
-                <span>What-If</span>
-              </button>
-            )}
-
-            {/* History Button (if purchased items exist) */}
-            {!isPortfolioView && activePlanCalculation.purchasedItems.length > 0 && (
-              <button
-                type="button"
-                onClick={onOpenHistoryModal}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                title="Purchased items archive"
-              >
-                <History className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="hidden md:inline">
-                  Purchased ({activePlanCalculation.purchasedItems.length})
-                </span>
-              </button>
-            )}
 
             {/* Global Settings (Currency) */}
             <button
@@ -204,18 +161,6 @@ export const Header: React.FC<HeaderProps> = ({
               <Sparkles className="w-4 h-4 text-amber-500" />
             </button>
 
-            {!isPortfolioView && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onOpenSettingsModal}
-                className="gap-1.5 h-8 text-xs font-semibold"
-              >
-                <Settings className="w-3.5 h-3.5 text-slate-500" />
-                <span className="hidden lg:inline">Budget Settings</span>
-              </Button>
-            )}
-
             {/* Dark Mode Toggle */}
             <button
               type="button"
@@ -232,9 +177,9 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {/* Primary Add Action */}
-            {isPortfolioView ? (
+            {isPortfolioView && (
               <Button
-                variant="default"
+                variant="outline"
                 size="sm"
                 onClick={onOpenNewPlanModal}
                 className="gap-1 h-8 text-xs font-semibold"
@@ -242,17 +187,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <Plus className="w-3.5 h-3.5" />
                 <span>New Plan</span>
               </Button>
-            ) : (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={onOpenAddWishModal}
-                className="gap-1 h-8 text-xs font-semibold"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Wish</span>
-              </Button>
             )}
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onOpenAddWishModal}
+              className="gap-1 h-8 text-xs font-semibold"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Wish</span>
+            </Button>
 
             {/* Clerk Authentication Controls */}
             <div className="pl-1 border-l border-slate-200 dark:border-slate-800 flex items-center">
@@ -287,25 +231,24 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Mobile Actions Header (< 640px) */}
           <div className="flex sm:hidden items-center gap-2 flex-shrink-0" ref={mobileMenuRef}>
             {/* Primary Action Button on Mobile */}
-            {isPortfolioView ? (
+            {isPortfolioView && (
               <button
                 type="button"
                 onClick={onOpenNewPlanModal}
-                className="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs transition-all min-h-[38px]"
+                className="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-xs transition-all min-h-[38px]"
               >
                 <Plus className="w-4 h-4" />
                 <span>Plan</span>
               </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onOpenAddWishModal}
-                className="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs transition-all min-h-[38px]"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Wish</span>
-              </button>
             )}
+            <button
+              type="button"
+              onClick={onOpenAddWishModal}
+              className="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold rounded-xl bg-brand-600 text-white shadow-xs transition-all min-h-[38px]"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Wish</span>
+            </button>
 
             {/* Clerk User Button / Sign In on Mobile */}
             <SignedIn>
@@ -374,40 +317,6 @@ export const Header: React.FC<HeaderProps> = ({
                   <span>All Plans Portfolio</span>
                 </button>
 
-                {/* What-If Simulator */}
-                {!isPortfolioView && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onToggleWhatIf();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                      showWhatIf
-                        ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <TrendingUp className="w-4 h-4 text-amber-500" />
-                    <span>What-If Scenario Tester</span>
-                  </button>
-                )}
-
-                {/* Budget Settings */}
-                {!isPortfolioView && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onOpenSettingsModal();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    <Settings className="w-4 h-4 text-slate-400" />
-                    <span>Plan Budget Settings</span>
-                  </button>
-                )}
-
                 {/* Global Currency */}
                 <button
                   type="button"
@@ -433,21 +342,6 @@ export const Header: React.FC<HeaderProps> = ({
                   <Download className="w-4 h-4 text-sky-500" />
                   <span>Backup / Export / Import</span>
                 </button>
-
-                {/* Purchased Archive */}
-                {!isPortfolioView && activePlanCalculation.purchasedItems.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onOpenHistoryModal();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    <History className="w-4 h-4 text-emerald-500" />
-                    <span>Purchased ({activePlanCalculation.purchasedItems.length})</span>
-                  </button>
-                )}
 
                 {/* Theme Toggle */}
                 <button
