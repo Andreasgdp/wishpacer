@@ -124,9 +124,9 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     // Click "Add Wish" button
     await page.getByRole('button', { name: 'Add Wish' }).click();
 
-    // Fill wish form
+    // Fill wish form with localized price input containing thousand separator
     await page.getByPlaceholder(/Robotstøvsuger/i).fill('Sony Headphones Pro');
-    await page.getByPlaceholder('0.00').fill('350');
+    await page.getByPlaceholder('0.00').fill('1,200.5');
     await page.getByRole('button', { name: 'Add to Plan' }).click();
 
     // Verify added wish item in list and projected date/time indicators
