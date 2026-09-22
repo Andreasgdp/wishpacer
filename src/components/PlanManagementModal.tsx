@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Copy, PiggyBank } from 'lucide-react';
-import type { CurrencyConfig, Plan, PlanConfig } from '../types/plan';
+import type { CurrencyConfig, Plan, SavePlanInput } from '../types/plan';
+import { parsePriceInput } from '../utils/formatters';
 import { DEFAULT_GLOBAL_SETTINGS, PLAN_COLORS, PLAN_ICONS } from '../utils/defaults';
 import { getPlanIcon } from './PlanSwitcher';
 import { ResponsiveOverlay } from './ResponsiveOverlay';
@@ -15,7 +16,7 @@ interface PlanManagementModalProps {
   editingPlan?: Plan | null;
   plansCount: number;
   currency?: CurrencyConfig;
-  onSavePlan: (planData: Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> }) => void;
+  onSavePlan: (planData: SavePlanInput) => void;
   onDuplicatePlan?: (planId: string) => void;
   onDeletePlan?: (planId: string) => void;
 }
@@ -64,8 +65,8 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
       setError('Please enter a valid plan name.');
       return;
     }
-    const initialSavedNum = parseFloat(initialSaved);
-    const monthlyContribNum = parseFloat(monthlyContribution);
+    const initialSavedNum = parsePriceInput(initialSaved);
+    const monthlyContribNum = parsePriceInput(monthlyContribution);
 
     onSavePlan({
       id: editingPlan?.id,
@@ -109,7 +110,6 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
               required
               value={name}
               onChange={e => setName(e.target.value)}
-              onInput={e => setName((e.target as HTMLInputElement).value)}
               placeholder="e.g. House & Living Needs, Dream Vacation, New Car"
             />
           </div>
@@ -120,7 +120,6 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
               type="text"
               value={description}
               onChange={e => setDescription(e.target.value)}
-              onInput={e => setDescription((e.target as HTMLInputElement).value)}
               placeholder="e.g. Home improvements, furniture, and kitchen upgrades."
             />
           </div>
@@ -182,12 +181,10 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
                   <div className="relative">
                     <PiggyBank className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <Input
-                      type="number"
-                      step="any"
-                      min="0"
+                      type="text"
+                      inputMode="decimal"
                       value={initialSaved}
                       onChange={e => setInitialSaved(e.target.value)}
-                      onInput={e => setInitialSaved((e.target as HTMLInputElement).value)}
                       className="pl-9"
                     />
                   </div>
@@ -198,12 +195,10 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
                   <div className="relative">
                     <PiggyBank className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <Input
-                      type="number"
-                      step="any"
-                      min="0"
+                      type="text"
+                      inputMode="decimal"
                       value={monthlyContribution}
                       onChange={e => setMonthlyContribution(e.target.value)}
-                      onInput={e => setMonthlyContribution((e.target as HTMLInputElement).value)}
                       className="pl-9"
                     />
                   </div>
@@ -213,58 +208,59 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
           )}
 
           {/* Plan Actions in Edit Mode */}
-          {mode === 'edit' && editingPlan && onDuplicatePlan && (
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              <Label className="block text-xs font-medium text-slate-500 dark:text-slate-400">
-                Plan Actions
-              </Label>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  onDuplicatePlan(editingPlan.id);
-                  onClose();
-                }}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 min-h-[44px]"
-              >
-                <Copy className="w-4 h-4 text-indigo-500" />
-                <span>Duplicate Plan</span>
-              </Button>
-            </div>
-          )}
+          {mode === 'edit' &&
+            editingPlan &&
+            (onDuplicatePlan || (onDeletePlan && plansCount > 1)) && (
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                <Label className="block text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Plan Actions
+                </Label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {onDuplicatePlan && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        onDuplicatePlan(editingPlan.id);
+                        onClose();
+                      }}
+                      className="w-full sm:w-auto flex items-center justify-center gap-2 min-h-[44px]"
+                    >
+                      <Copy className="w-4 h-4 text-indigo-500" />
+                      <span>Duplicate Plan</span>
+                    </Button>
+                  )}
+                  {onDeletePlan && plansCount > 1 && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => {
+                        onDeletePlan(editingPlan.id);
+                        onClose();
+                      }}
+                      className="w-full sm:w-auto flex items-center justify-center gap-1.5 min-h-[44px]"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete Plan</span>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
 
           {/* Footer Actions */}
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              {mode === 'edit' && editingPlan && onDeletePlan && plansCount > 1 && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => {
-                    onDeletePlan(editingPlan.id);
-                    onClose();
-                  }}
-                  className="w-full sm:w-auto gap-1.5 min-h-[44px]"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span>Delete Plan</span>
-                </Button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={onClose}
-                className="flex-1 sm:flex-initial min-h-[44px]"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="flex-1 sm:flex-initial min-h-[44px]">
-                {mode === 'create' ? 'Create Plan' : 'Save Plan'}
-              </Button>
-            </div>
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onClose}
+              className="flex-1 sm:flex-initial min-h-[44px]"
+            >
+              Cancel
+            </Button>
+            <Button type="submit" className="flex-1 sm:flex-initial min-h-[44px]">
+              {mode === 'create' ? 'Create Plan' : 'Save Plan'}
+            </Button>
           </div>
         </form>
       </div>

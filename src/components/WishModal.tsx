@@ -119,7 +119,6 @@ export const WishModal: React.FC<WishModalProps> = ({
               type="text"
               value={title}
               onChange={e => setTitle(e.target.value)}
-              onInput={e => setTitle((e.target as HTMLInputElement).value)}
               placeholder="e.g. Robotstøvsuger, Camera, Studio Display"
             />
           </div>
@@ -136,7 +135,6 @@ export const WishModal: React.FC<WishModalProps> = ({
                   required
                   value={price}
                   onChange={e => setPrice(e.target.value)}
-                  onInput={e => setPrice((e.target as HTMLInputElement).value)}
                   placeholder="0.00"
                   className="pl-9"
                 />
