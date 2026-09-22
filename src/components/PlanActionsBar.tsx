@@ -26,15 +26,15 @@ export const PlanActionsBar: React.FC<PlanActionsBarProps> = ({
   const activePlanColor = PLAN_COLORS[activePlan.color || 'violet'] || PLAN_COLORS.violet;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 sm:p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-4">
       <div className="flex items-start sm:items-center gap-3.5 min-w-0">
         <div
-          className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl ${activePlanColor.bg} text-white flex items-center justify-center shrink-0 shadow-sm`}
+          className={`w-9 h-9 sm:w-12 sm:h-12 rounded-2xl ${activePlanColor.bg} text-white flex items-center justify-center shrink-0 shadow-sm`}
         >
           {getPlanIcon(activePlan.icon)}
         </div>
         <div className="min-w-0">
-          <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white truncate">
+          <h1 className="text-base sm:text-xl font-bold text-slate-900 dark:text-white truncate">
             {activePlan.name}
           </h1>
           {activePlan.description && (
@@ -49,6 +49,26 @@ export const PlanActionsBar: React.FC<PlanActionsBarProps> = ({
       <div className="flex items-center flex-wrap gap-2 shrink-0">
         <button
           type="button"
+          onClick={onOpenSettings}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 hover:bg-brand-100 dark:hover:bg-brand-900/60 transition-colors shadow-xs"
+          title="Budget Settings"
+        >
+          <Settings className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
+          <span>Budget Settings</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onEditPlan}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          title="Edit Plan Details"
+        >
+          <Pencil className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+          <span>Edit Plan</span>
+        </button>
+
+        <button
+          type="button"
           onClick={onToggleWhatIf}
           className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl transition-all border ${
             showWhatIf
@@ -59,16 +79,6 @@ export const PlanActionsBar: React.FC<PlanActionsBarProps> = ({
         >
           <TrendingUp className="w-3.5 h-3.5 text-amber-500" />
           <span>What-If</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-          title="Budget Settings"
-        >
-          <Settings className="w-3.5 h-3.5 text-slate-500" />
-          <span>Budget Settings</span>
         </button>
 
         {purchasedCount > 0 && (
@@ -82,16 +92,6 @@ export const PlanActionsBar: React.FC<PlanActionsBarProps> = ({
             <span>Purchased ({purchasedCount})</span>
           </button>
         )}
-
-        <button
-          type="button"
-          onClick={onEditPlan}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-          title="Edit Plan Details"
-        >
-          <Pencil className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
-          <span>Edit Plan</span>
-        </button>
       </div>
     </div>
   );

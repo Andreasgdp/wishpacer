@@ -92,7 +92,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     await expect(page.getByText('Japan Trip').first()).toBeVisible();
 
     // Verify initial saved balance ($2,500) and monthly contribution ($500) are preserved in UI via Budget Settings
-    await page.getByRole('button', { name: /Budget Settings/i }).click();
+    await page.getByRole('button', { name: 'Budget Settings', exact: true }).click();
     await expect(page.locator('input[type="number"]').first()).toHaveValue('2500');
     await expect(page.locator('input[type="number"]').nth(2)).toHaveValue('500');
     await page.getByRole('button', { name: 'Cancel' }).click();
