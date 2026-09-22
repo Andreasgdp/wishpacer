@@ -82,8 +82,8 @@ test.describe('Saving Plan End-to-End User Flows', () => {
 
     // Fill in new plan modal with initial saved balance and monthly contribution
     await page.getByPlaceholder(/House & Living Needs/i).fill('Japan Trip');
-    const initialSavedInput = page.locator('input[type="number"]').first();
-    const monthlyContributionInput = page.locator('input[type="number"]').nth(1);
+    const initialSavedInput = page.locator('input[inputmode="decimal"]').first();
+    const monthlyContributionInput = page.locator('input[inputmode="decimal"]').nth(1);
     await initialSavedInput.fill('2500');
     await monthlyContributionInput.fill('500');
     await page.getByRole('button', { name: 'Create Plan' }).click();

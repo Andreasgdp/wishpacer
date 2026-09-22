@@ -10,6 +10,7 @@ import type {
   PlanCalculationResult,
   PlanConfig,
   PortfolioSummary,
+  SavePlanInput,
   WishItem,
 } from '../types/plan.js';
 import { calculatePortfolioSummary } from '../utils/calculator.js';
@@ -24,11 +25,8 @@ export interface PlanManagerOptions {
 
 export interface PlanManagerActions {
   selectPlan: (planId: string) => void;
-  createPlan: (planData: Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> }) => void;
-  updatePlanMetadata: (
-    planData: Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> },
-    targetPlanId?: string
-  ) => void;
+  createPlan: (planData: SavePlanInput) => void;
+  updatePlanMetadata: (planData: SavePlanInput, targetPlanId?: string) => void;
   duplicatePlan: (planId: string) => void;
   deletePlan: (planId: string) => void;
   updateBudgetSettings: (newConfig: PlanConfig) => void;
@@ -265,7 +263,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   );
 
   const createPlan = useCallback(
-    (planData: Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> }) => {
+    (planData: SavePlanInput) => {
       const newPlanId = `plan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
       const planName = planData.name || 'New Savings Plan';
       const newPlan: Plan = {
@@ -305,10 +303,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   );
 
   const updatePlanMetadata = useCallback(
-    (
-      planData: Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> },
-      targetPlanId?: string
-    ) => {
+    (planData: SavePlanInput, targetPlanId?: string) => {
       const planIdToUpdate = targetPlanId || storeData.activePlanId;
       const updatedPlans = storeData.plans.map(p => {
         if (p.id === planIdToUpdate) {

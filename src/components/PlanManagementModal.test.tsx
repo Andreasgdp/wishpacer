@@ -1,10 +1,4 @@
-import { Window } from 'happy-dom';
-
-const win = new Window();
-globalThis.window = win as unknown as typeof globalThis.window;
-globalThis.document = win.document as unknown as typeof globalThis.document;
-globalThis.navigator = win.navigator as unknown as typeof globalThis.navigator;
-
+import '../test-setup';
 import { afterEach, describe, expect, it, mock } from 'bun:test';
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 
@@ -66,9 +60,9 @@ describe('PlanManagementModal Component', () => {
     }
 
     const nameInput = renderedByPlaceholder(/House & Living Needs/i) as HTMLInputElement;
-    const numberInputs = renderedContainer.querySelectorAll('input[type="number"]');
-    const initialSavedInput = numberInputs[0] as HTMLInputElement;
-    const monthlyContributionInput = numberInputs[1] as HTMLInputElement;
+    const decimalInputs = renderedContainer.querySelectorAll('input[inputmode="decimal"]');
+    const initialSavedInput = decimalInputs[0] as HTMLInputElement;
+    const monthlyContributionInput = decimalInputs[1] as HTMLInputElement;
 
     await act(async () => {
       changeInput(nameInput, 'Dream Vacation');
@@ -97,7 +91,7 @@ describe('PlanManagementModal Component', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('renders Duplicate Plan in modal body and Cancel/Save Plan in footer when editing', async () => {
+  it('renders Duplicate Plan and Delete Plan in modal body and ONLY Cancel/Save Plan in footer when editing', async () => {
     const onSavePlan = mock(() => {});
     const onDuplicatePlan = mock(() => {});
     const onDeletePlan = mock(() => {});
@@ -149,20 +143,95 @@ describe('PlanManagementModal Component', () => {
     // Verify "Plan Actions" label is present in body
     expect(renderedByText(/Plan Actions/i)).not.toBeNull();
 
-    // Verify "Duplicate Plan" button is inside the modal body action section
+    // Verify "Duplicate Plan" and "Delete Plan" buttons are inside the modal body action section
     const duplicateBtn = renderedByText('Duplicate Plan').closest('button');
-    expect(duplicateBtn).not.toBeNull();
-    expect(duplicateBtn?.className).toContain('min-h-[44px]');
+    const deleteBtn = renderedByText('Delete Plan').closest('button');
 
-    // Click Duplicate Plan
-    if (duplicateBtn) {
+    expect(duplicateBtn).not.toBeNull();
+    expect(deleteBtn).not.toBeNull();
+    expect(duplicateBtn?.className).toContain('min-h-[44px]');
+    expect(deleteBtn?.className).toContain('min-h-[44px]');
+
+    // Verify footer contains ONLY Cancel and Save Plan buttons
+    const cancelBtn = renderedByText('Cancel').closest('button');
+    const saveBtn = renderedByText('Save Plan').closest('button');
+    expect(cancelBtn).not.toBeNull();
+    expect(saveBtn).not.toBeNull();
+
+    const footerContainer = cancelBtn?.parentElement;
+    expect(footerContainer).not.toBeNull();
+    const footerButtons = footerContainer?.querySelectorAll('button');
+    expect(footerButtons?.length).toBe(2);
+    expect(footerButtons?.[0].textContent?.trim()).toBe('Cancel');
+    expect(footerButtons?.[1].textContent?.trim()).toBe('Save Plan');
+
+    // Click Delete Plan
+    if (deleteBtn) {
       await act(async () => {
-        fireEvent.click(duplicateBtn);
+        fireEvent.click(deleteBtn);
       });
     }
 
-    expect(onDuplicatePlan).toHaveBeenCalledTimes(1);
-    expect(onDuplicatePlan).toHaveBeenCalledWith('plan-1');
+    expect(onDeletePlan).toHaveBeenCalledTimes(1);
+    expect(onDeletePlan).toHaveBeenCalledWith('plan-1');
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles formatted currency values like "5,000" and "1,000" using parsePriceInput when creating a plan', async () => {
+    const onSavePlan = mock(() => {});
+    const onClose = mock(() => {});
+
+    let renderedByPlaceholder: ((text: RegExp) => HTMLElement) | undefined;
+    let renderedContainer: HTMLElement | undefined;
+
+    await act(async () => {
+      const { getByPlaceholderText, container } = render(
+        <PlanManagementModal
+          isOpen={true}
+          onClose={onClose}
+          mode="create"
+          plansCount={1}
+          onSavePlan={onSavePlan}
+        />
+      );
+      renderedByPlaceholder = getByPlaceholderText;
+      renderedContainer = container;
+    });
+
+    if (!renderedByPlaceholder || !renderedContainer) {
+      throw new Error('Component failed to render container');
+    }
+
+    const nameInput = renderedByPlaceholder(/House & Living Needs/i) as HTMLInputElement;
+    const decimalInputs = renderedContainer.querySelectorAll('input[inputmode="decimal"]');
+    const initialSavedInput = decimalInputs[0] as HTMLInputElement;
+    const monthlyContributionInput = decimalInputs[1] as HTMLInputElement;
+
+    await act(async () => {
+      changeInput(nameInput, 'Formatted Plan');
+      changeInput(initialSavedInput, '5,000');
+      changeInput(monthlyContributionInput, '1,000');
+    });
+
+    const form = renderedContainer.querySelector('form');
+    if (form) {
+      await act(async () => {
+        fireEvent.submit(form);
+      });
+    }
+
+    expect(onSavePlan).toHaveBeenCalledTimes(1);
+    expect(onSavePlan).toHaveBeenCalledWith({
+      id: undefined,
+      name: 'Formatted Plan',
+      description: undefined,
+      icon: 'Wallet',
+      color: 'indigo',
+      config: {
+        currentAmountSaved: 5000,
+        amountToSave: 1000,
+      },
+    });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -220,7 +289,7 @@ describe('PlanManagementModal Component', () => {
     expect(saveBtn?.className).toContain('min-h-[44px]');
 
     // Check footer wrapper class for responsive flex behavior
-    const footer = cancelBtn?.parentElement?.parentElement;
+    const footer = cancelBtn?.parentElement;
     expect(footer?.className).toContain('flex-col-reverse');
     expect(footer?.className).toContain('sm:flex-row');
   });

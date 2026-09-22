@@ -4,7 +4,7 @@ import { cn } from '../../utils/cn';
 export type InputProps = React.ComponentProps<'input'>;
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, onChange, onInput, ...props }, ref) => {
     return (
       <input
         type={type}
@@ -14,6 +14,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className
         )}
         ref={ref}
+        onChange={onChange}
+        onInput={onInput || (onChange as unknown as React.FormEventHandler<HTMLInputElement>)}
         {...props}
       />
     );

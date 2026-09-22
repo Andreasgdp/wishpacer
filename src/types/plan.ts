@@ -100,6 +100,7 @@ export interface Plan {
   createdAt: string;
   updatedAt: string;
 }
+export type SavePlanInput = Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> };
 
 export interface PortfolioSummary {
   totalPlansCount: number;

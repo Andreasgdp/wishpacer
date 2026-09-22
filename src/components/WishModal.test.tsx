@@ -1,10 +1,4 @@
-import { Window } from 'happy-dom';
-
-const win = new Window();
-globalThis.window = win as unknown as typeof globalThis.window;
-globalThis.document = win.document as unknown as typeof globalThis.document;
-globalThis.navigator = win.navigator as unknown as typeof globalThis.navigator;
-
+import '../test-setup';
 import { afterEach, describe, expect, it, mock } from 'bun:test';
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 
@@ -34,7 +28,6 @@ function changeInput(input: HTMLInputElement, value: string) {
   fireEvent.input(input, { target: { value } });
   fireEvent.change(input, { target: { value } });
 }
-
 afterEach(() => {
   cleanup();
 });
