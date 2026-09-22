@@ -15,7 +15,7 @@ interface PlanManagementModalProps {
   editingPlan?: Plan | null;
   plansCount: number;
   currency?: CurrencyConfig;
-  onSavePlan: (planData: Partial<Plan> & { config?: Partial<PlanConfig> }) => void;
+  onSavePlan: (planData: Omit<Partial<Plan>, 'config'> & { config?: Partial<PlanConfig> }) => void;
   onDuplicatePlan?: (planId: string) => void;
   onDeletePlan?: (planId: string) => void;
 }
@@ -64,19 +64,20 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
       setError('Please enter a valid plan name.');
       return;
     }
+    const initialSavedNum = parseFloat(initialSaved);
+    const monthlyContribNum = parseFloat(monthlyContribution);
+
     onSavePlan({
       id: editingPlan?.id,
       name: name.trim(),
       description: description.trim() || undefined,
       icon,
       color,
-      config: editingPlan
-        ? {
-            ...editingPlan.config,
-            currentAmountSaved: Math.max(0, Number(initialSaved) || 0),
-            amountToSave: Math.max(0, Number(monthlyContribution) || 0),
-          }
-        : undefined,
+      config: {
+        ...(editingPlan?.config || {}),
+        currentAmountSaved: Math.max(0, isNaN(initialSavedNum) ? 0 : initialSavedNum),
+        amountToSave: Math.max(0, isNaN(monthlyContribNum) ? 0 : monthlyContribNum),
+      },
     });
 
     onClose();
@@ -108,6 +109,7 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
               required
               value={name}
               onChange={e => setName(e.target.value)}
+              onInput={e => setName((e.target as HTMLInputElement).value)}
               placeholder="e.g. House & Living Needs, Dream Vacation, New Car"
             />
           </div>
@@ -118,10 +120,10 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
               type="text"
               value={description}
               onChange={e => setDescription(e.target.value)}
+              onInput={e => setDescription((e.target as HTMLInputElement).value)}
               placeholder="e.g. Home improvements, furniture, and kitchen upgrades."
             />
           </div>
-
           {/* Icon & Color Selector */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
             <div>
@@ -185,6 +187,7 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
                       min="0"
                       value={initialSaved}
                       onChange={e => setInitialSaved(e.target.value)}
+                      onInput={e => setInitialSaved((e.target as HTMLInputElement).value)}
                       className="pl-9"
                     />
                   </div>
@@ -200,6 +203,7 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
                       min="0"
                       value={monthlyContribution}
                       onChange={e => setMonthlyContribution(e.target.value)}
+                      onInput={e => setMonthlyContribution((e.target as HTMLInputElement).value)}
                       className="pl-9"
                     />
                   </div>
