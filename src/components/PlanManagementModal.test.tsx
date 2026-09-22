@@ -27,6 +27,7 @@ mock.module('./ui/drawer', () => ({
 }));
 
 import { PlanManagementModal } from './PlanManagementModal';
+import type { Plan } from '../types/plan';
 
 function changeInput(input: HTMLInputElement, value: string) {
   input.value = value;
@@ -94,5 +95,133 @@ describe('PlanManagementModal Component', () => {
       },
     });
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders Duplicate Plan in modal body and Cancel/Save Plan in footer when editing', async () => {
+    const onSavePlan = mock(() => {});
+    const onDuplicatePlan = mock(() => {});
+    const onDeletePlan = mock(() => {});
+    const onClose = mock(() => {});
+    const samplePlan: Plan = {
+      id: 'plan-1',
+      name: 'House Savings',
+      description: 'Goal for house',
+      icon: 'Wallet',
+      color: 'indigo',
+      config: {
+        name: 'House Savings',
+        currentAmountSaved: 5000,
+        amountToSave: 1000,
+        frequency: 'monthly',
+        savingsDayOfMonth: 1,
+        firstSavingDate: '2026-01-01',
+        emergencyBuffer: 0,
+        annualInterestRate: 0,
+      },
+      items: [],
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    };
+    let renderedByText: ((text: string | RegExp) => HTMLElement) | undefined;
+    let renderedContainer: HTMLElement | undefined;
+
+    await act(async () => {
+      const { getByText, container } = render(
+        <PlanManagementModal
+          isOpen={true}
+          onClose={onClose}
+          mode="edit"
+          editingPlan={samplePlan}
+          plansCount={2}
+          onSavePlan={onSavePlan}
+          onDuplicatePlan={onDuplicatePlan}
+          onDeletePlan={onDeletePlan}
+        />
+      );
+      renderedByText = getByText;
+      renderedContainer = container;
+    });
+
+    if (!renderedByText || !renderedContainer) {
+      throw new Error('Component failed to render container');
+    }
+
+    // Verify "Plan Actions" label is present in body
+    expect(renderedByText(/Plan Actions/i)).not.toBeNull();
+
+    // Verify "Duplicate Plan" button is inside the modal body action section
+    const duplicateBtn = renderedByText('Duplicate Plan').closest('button');
+    expect(duplicateBtn).not.toBeNull();
+    expect(duplicateBtn?.className).toContain('min-h-[44px]');
+
+    // Click Duplicate Plan
+    if (duplicateBtn) {
+      await act(async () => {
+        fireEvent.click(duplicateBtn);
+      });
+    }
+
+    expect(onDuplicatePlan).toHaveBeenCalledTimes(1);
+    expect(onDuplicatePlan).toHaveBeenCalledWith('plan-1');
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders Cancel and Save Plan in footer with responsive flex styling and touch targets', async () => {
+    const onSavePlan = mock(() => {});
+    const onClose = mock(() => {});
+    const samplePlan: Plan = {
+      id: 'plan-1',
+      name: 'Car Fund',
+      icon: 'Wallet',
+      color: 'indigo',
+      config: {
+        name: 'Car Fund',
+        currentAmountSaved: 1000,
+        amountToSave: 200,
+        frequency: 'monthly',
+        savingsDayOfMonth: 1,
+        firstSavingDate: '2026-01-01',
+        emergencyBuffer: 0,
+        annualInterestRate: 0,
+      },
+      items: [],
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    };
+
+    let renderedByText: ((text: string | RegExp) => HTMLElement) | undefined;
+    let renderedContainer: HTMLElement | undefined;
+
+    await act(async () => {
+      const { getByText, container } = render(
+        <PlanManagementModal
+          isOpen={true}
+          onClose={onClose}
+          mode="edit"
+          editingPlan={samplePlan}
+          plansCount={1}
+          onSavePlan={onSavePlan}
+        />
+      );
+      renderedByText = getByText;
+      renderedContainer = container;
+    });
+    if (!renderedByText || !renderedContainer) {
+      throw new Error('Component failed to render container');
+    }
+
+    const cancelBtn = renderedByText('Cancel').closest('button');
+    const saveBtn = renderedByText('Save Plan').closest('button');
+
+    expect(cancelBtn).not.toBeNull();
+    expect(saveBtn).not.toBeNull();
+
+    expect(cancelBtn?.className).toContain('min-h-[44px]');
+    expect(saveBtn?.className).toContain('min-h-[44px]');
+
+    // Check footer wrapper class for responsive flex behavior
+    const footer = cancelBtn?.parentElement?.parentElement;
+    expect(footer?.className).toContain('flex-col-reverse');
+    expect(footer?.className).toContain('sm:flex-row');
   });
 });

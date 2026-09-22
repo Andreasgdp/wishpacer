@@ -96,8 +96,9 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     await expect(page.locator('input[type="number"]').first()).toHaveValue('2500');
     await expect(page.locator('input[type="number"]').nth(2)).toHaveValue('500');
     await page.getByRole('button', { name: 'Cancel' }).click();
-    // Duplicate plan via Edit Plan Details modal
+    // Duplicate plan via Edit Plan Details modal body action
     await page.getByRole('button', { name: 'Edit Plan Details' }).click();
+    await expect(page.getByText('Plan Actions')).toBeVisible();
     await page.getByRole('button', { name: 'Duplicate Plan' }).click();
 
     await expect(page.getByText('Japan Trip (Copy)').first()).toBeVisible();

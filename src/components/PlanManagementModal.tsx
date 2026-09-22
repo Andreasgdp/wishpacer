@@ -212,47 +212,56 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
             </div>
           )}
 
-          {/* Actions */}
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {mode === 'edit' && editingPlan && onDuplicatePlan && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    onDuplicatePlan(editingPlan.id);
-                    onClose();
-                  }}
-                  className="gap-1.5"
-                >
-                  <Copy className="w-3.5 h-3.5 text-indigo-500" />
-                  <span>Duplicate Plan</span>
-                </Button>
-              )}
+          {/* Plan Actions in Edit Mode */}
+          {mode === 'edit' && editingPlan && onDuplicatePlan && (
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+              <Label className="block text-xs font-medium text-slate-500 dark:text-slate-400">
+                Plan Actions
+              </Label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  onDuplicatePlan(editingPlan.id);
+                  onClose();
+                }}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 min-h-[44px]"
+              >
+                <Copy className="w-4 h-4 text-indigo-500" />
+                <span>Duplicate Plan</span>
+              </Button>
+            </div>
+          )}
 
+          {/* Footer Actions */}
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
               {mode === 'edit' && editingPlan && onDeletePlan && plansCount > 1 && (
                 <Button
                   type="button"
                   variant="destructive"
-                  size="sm"
                   onClick={() => {
                     onDeletePlan(editingPlan.id);
                     onClose();
                   }}
-                  className="gap-1.5"
+                  className="w-full sm:w-auto gap-1.5 min-h-[44px]"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4 h-4" />
                   <span>Delete Plan</span>
                 </Button>
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onClose}
+                className="flex-1 sm:flex-initial min-h-[44px]"
+              >
                 Cancel
               </Button>
-              <Button type="submit" size="sm">
+              <Button type="submit" className="flex-1 sm:flex-initial min-h-[44px]">
                 {mode === 'create' ? 'Create Plan' : 'Save Plan'}
               </Button>
             </div>
