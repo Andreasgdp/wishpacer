@@ -8,6 +8,7 @@ import { Label } from './ui/label';
 import { Button } from './ui/button';
 import { CATEGORIES } from '../utils/defaults';
 import { ResponsiveOverlay } from './ResponsiveOverlay';
+import { parsePriceInput } from '../utils/formatters';
 
 interface WishModalProps {
   isOpen: boolean;
@@ -63,7 +64,7 @@ export const WishModal: React.FC<WishModalProps> = ({
       return;
     }
 
-    const numPrice = Number(price);
+    const numPrice = parsePriceInput(price);
     if (isNaN(numPrice) || numPrice <= 0) {
       setError('Please provide a valid price greater than zero.');
       return;
@@ -116,9 +117,9 @@ export const WishModal: React.FC<WishModalProps> = ({
             <Label className="block mb-1.5">Item Title *</Label>
             <Input
               type="text"
-              required
               value={title}
               onChange={e => setTitle(e.target.value)}
+              onInput={e => setTitle((e.target as HTMLInputElement).value)}
               placeholder="e.g. Robotstøvsuger, Camera, Studio Display"
             />
           </div>
@@ -130,12 +131,12 @@ export const WishModal: React.FC<WishModalProps> = ({
               <div className="relative min-w-0 w-full">
                 <Coins className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
                 <Input
-                  type="number"
-                  step="any"
-                  min="0.01"
+                  type="text"
+                  inputMode="decimal"
                   required
                   value={price}
                   onChange={e => setPrice(e.target.value)}
+                  onInput={e => setPrice((e.target as HTMLInputElement).value)}
                   placeholder="0.00"
                   className="pl-9"
                 />
