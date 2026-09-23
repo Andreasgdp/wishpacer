@@ -3,16 +3,18 @@ import { DEFAULT_STORE_DATA } from '../../utils/defaults.js';
 import { migrateToMultiPlan } from '../migrations.js';
 import type { SaveResult, StorageRepository } from '../types.js';
 
-const LOCAL_STORAGE_KEY = 'saving_plan_app_store_v3';
-const LEGACY_V2_STORAGE_KEY = 'saving_plan_app_store_v2';
-const LEGACY_STORAGE_KEY = 'saving_plan_app_data_v1';
+export const GUEST_STORAGE_KEY = 'saving_plan_guest_store_v3';
+export const USER_STORAGE_KEY = 'saving_plan_user_store_v3';
+export const LEGACY_V3_STORAGE_KEY = 'saving_plan_app_store_v3';
+export const LEGACY_V2_STORAGE_KEY = 'saving_plan_app_store_v2';
+export const LEGACY_STORAGE_KEY = 'saving_plan_app_data_v1';
 
 /**
  * Fast local browser storage adapter using localStorage and multi-version schema migration.
  */
 export class LocalStorageAdapter implements StorageRepository {
   constructor(
-    private readonly storageKey: string = LOCAL_STORAGE_KEY,
+    private readonly storageKey: string = GUEST_STORAGE_KEY,
     private readonly storage: Storage | null = typeof window !== 'undefined' && window.localStorage
       ? window.localStorage
       : null
@@ -23,34 +25,47 @@ export class LocalStorageAdapter implements StorageRepository {
       return DEFAULT_STORE_DATA;
     }
 
-    // 1. Try v3 primary storage key
+    // 1. Try primary storage key
     try {
       const raw = this.storage.getItem(this.storageKey);
       if (raw) {
         return migrateToMultiPlan(JSON.parse(raw));
       }
     } catch (err) {
-      console.warn('[LocalStorageAdapter] Failed to parse primary v3 storage', err);
+      console.warn(
+        `[LocalStorageAdapter] Failed to parse primary storage key "${this.storageKey}":`,
+        err
+      );
     }
 
-    // 2. Try legacy v2 key
-    try {
-      const rawV2 = this.storage.getItem(LEGACY_V2_STORAGE_KEY);
-      if (rawV2) {
-        return migrateToMultiPlan(JSON.parse(rawV2));
+    // 2. If guest storage key, try legacy keys for unauthenticated migration
+    if (this.storageKey === GUEST_STORAGE_KEY) {
+      try {
+        const rawV3 = this.storage.getItem(LEGACY_V3_STORAGE_KEY);
+        if (rawV3) {
+          return migrateToMultiPlan(JSON.parse(rawV3));
+        }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
-    }
 
-    // 3. Try legacy v1 key
-    try {
-      const rawV1 = this.storage.getItem(LEGACY_STORAGE_KEY);
-      if (rawV1) {
-        return migrateToMultiPlan(JSON.parse(rawV1));
+      try {
+        const rawV2 = this.storage.getItem(LEGACY_V2_STORAGE_KEY);
+        if (rawV2) {
+          return migrateToMultiPlan(JSON.parse(rawV2));
+        }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
+
+      try {
+        const rawV1 = this.storage.getItem(LEGACY_STORAGE_KEY);
+        if (rawV1) {
+          return migrateToMultiPlan(JSON.parse(rawV1));
+        }
+      } catch {
+        // ignore
+      }
     }
 
     return DEFAULT_STORE_DATA;
