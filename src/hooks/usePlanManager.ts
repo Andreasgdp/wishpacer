@@ -1,7 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { SavingsPlan } from '../domain/SavingsPlan.js';
-import { createStorageRepository, isNewer, type StorageRepository } from '../storage/index.js';
+import {
+  createStorageRepository,
+  GUEST_STORAGE_KEY,
+  isNewer,
+  USER_STORAGE_KEY,
+  type StorageRepository,
+} from '../storage/index.js';
 import { LocalStorageAdapter } from '../storage/adapters/LocalStorageAdapter.js';
 import type {
   AppStoreData,
@@ -69,16 +75,36 @@ export interface PlanManager {
 }
 
 export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
-  const { getToken, repository } = options;
+  const { getToken, repository, isSignedIn } = options;
+
+  const getTokenRef = useRef(getToken);
+  useEffect(() => {
+    getTokenRef.current = getToken;
+  }, [getToken]);
+
+  const stableGetToken = useCallback((opts?: { skipCache?: boolean }) => {
+    if (getTokenRef.current) {
+      return getTokenRef.current(opts);
+    }
+    return Promise.resolve(null);
+  }, []);
 
   const storageRepo = useMemo(() => {
-    return repository || createStorageRepository(getToken);
-  }, [repository, getToken]);
+    if (isSignedIn === false) {
+      return createStorageRepository({ getToken: stableGetToken, isSignedIn: false });
+    }
+    return (
+      repository ||
+      createStorageRepository({ getToken: stableGetToken, isSignedIn: Boolean(isSignedIn) })
+    );
+  }, [repository, isSignedIn, stableGetToken]);
 
   // Synchronously load local store data on initial mount to eliminate loading flashes
   const [storeData, setStoreData] = useState<AppStoreData>(() => {
     try {
-      const localAdapter = new LocalStorageAdapter();
+      const localAdapter = new LocalStorageAdapter(
+        isSignedIn ? USER_STORAGE_KEY : GUEST_STORAGE_KEY
+      );
       return localAdapter.loadSync();
     } catch {
       return DEFAULT_STORE_DATA;
@@ -124,14 +150,23 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       console.warn('[usePlanManager] Background storage sync failed:', err);
     }
   }, [storageRepo, applyNewerStoreData]);
+  const prevIsSignedInRef = useRef<boolean | undefined>(isSignedIn);
 
   // Initial load and repository subscription
   useEffect(() => {
     let isMounted = true;
+    setIsLoading(true);
+
+    const authStateChanged = prevIsSignedInRef.current !== isSignedIn;
+    prevIsSignedInRef.current = isSignedIn;
 
     storageRepo.load().then(loaded => {
       if (!isMounted) return;
-      applyNewerStoreData(loaded);
+      if (authStateChanged) {
+        setStoreData(loaded);
+      } else {
+        applyNewerStoreData(loaded);
+      }
       setIsLoading(false);
     });
 
@@ -143,9 +178,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       isMounted = false;
       unsubscribe?.();
     };
-  }, [storageRepo, applyNewerStoreData]);
-
-  // Event listeners for window focus, visibility change, and cross-tab storage updates
+  }, [storageRepo, isSignedIn, applyNewerStoreData]);
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -156,7 +189,12 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     };
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (!e.key || e.key === 'saving_plan_app_store_v3') {
+      if (
+        !e.key ||
+        e.key === 'saving_plan_app_store_v3' ||
+        e.key === GUEST_STORAGE_KEY ||
+        e.key === USER_STORAGE_KEY
+      ) {
         syncWithStorage();
       }
     };

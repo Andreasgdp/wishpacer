@@ -259,5 +259,102 @@ describe('UI Custom Hooks Suite', () => {
       expect(result.current.activePlan.config.amountToSave).toBe(800);
       expect(result.current.activePlan.description).toBe('Saving for down payment');
     });
+    it('isolates guest data from signed-in user data on sign out', async () => {
+      const signedInStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'user-plan-1',
+        plans: [
+          {
+            ...sampleStore.plans[0],
+            id: 'user-plan-1',
+            name: 'Secret User Private Plan',
+          },
+        ],
+      };
+
+      const repo = new InMemoryStorageRepository(signedInStore);
+      const isSignedIn = true;
+
+      const { result, rerender } = renderHook(
+        ({ signedIn }) =>
+          usePlanManager({
+            isAuthLoaded: true,
+            isSignedIn: signedIn,
+            getToken: async () => 'mock-token',
+            repository: repo,
+          }),
+        { initialProps: { signedIn: isSignedIn } }
+      );
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(result.current.activePlan.name).toBe('Secret User Private Plan');
+
+      // Sign out
+      rerender({ signedIn: false });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      // Content from when signed in should NOT be available when signed out
+      expect(result.current.activePlan.name).not.toBe('Secret User Private Plan');
+    });
+
+    it('transitions between signed-in and signed-out states cleanly without leaking data', async () => {
+      const { result, rerender } = renderHook(
+        ({ signedIn }) =>
+          usePlanManager({
+            isAuthLoaded: true,
+            isSignedIn: signedIn,
+            getToken: async () => 'mock-token',
+          }),
+        { initialProps: { signedIn: false } }
+      );
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      // Edit guest wishlist
+      await act(async () => {
+        result.current.actions.saveWishItem({
+          title: 'Guest Private Wish',
+          price: 1200,
+          category: 'tech',
+          priority: 1,
+        });
+      });
+
+      expect(
+        result.current.activePlanCalculation.items.some(i => i.title === 'Guest Private Wish')
+      ).toBe(true);
+
+      // Sign in
+      rerender({ signedIn: true });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      // Guest wish is hidden when signed in
+      expect(
+        result.current.activePlanCalculation.items.some(i => i.title === 'Guest Private Wish')
+      ).toBe(false);
+
+      // Sign out again
+      rerender({ signedIn: false });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      // Guest wish is restored when signed out
+      expect(
+        result.current.activePlanCalculation.items.some(i => i.title === 'Guest Private Wish')
+      ).toBe(true);
+    });
   });
 });

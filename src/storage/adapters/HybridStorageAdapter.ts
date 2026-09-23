@@ -1,7 +1,11 @@
 import type { AppStoreData } from '../../types/plan.js';
 import type { SaveResult, StorageRepository } from '../types.js';
 import { isNewer } from '../utils.js';
-import { LocalStorageAdapter } from './LocalStorageAdapter.js';
+import { GUEST_STORAGE_KEY, LocalStorageAdapter } from './LocalStorageAdapter.js';
+
+export interface HybridStorageAdapterOptions {
+  isSignedIn?: boolean;
+}
 
 /**
  * Composite repository adapter combining fast local browser persistence (LocalStorageAdapter)
@@ -9,11 +13,19 @@ import { LocalStorageAdapter } from './LocalStorageAdapter.js';
  */
 export class HybridStorageAdapter implements StorageRepository {
   private readonly listeners = new Set<(data: AppStoreData) => void>();
+  private readonly isSignedIn: boolean;
 
   constructor(
-    private readonly local: StorageRepository = new LocalStorageAdapter(),
-    private readonly remote?: StorageRepository
-  ) {}
+    private readonly local: StorageRepository = new LocalStorageAdapter(GUEST_STORAGE_KEY),
+    private readonly remote?: StorageRepository,
+    options?: HybridStorageAdapterOptions | boolean
+  ) {
+    if (typeof options === 'boolean') {
+      this.isSignedIn = options;
+    } else {
+      this.isSignedIn = options?.isSignedIn ?? Boolean(remote);
+    }
+  }
 
   public onDataUpdated(callback: (data: AppStoreData) => void): () => void {
     this.listeners.add(callback);
@@ -37,7 +49,7 @@ export class HybridStorageAdapter implements StorageRepository {
     const localData = await this.local.load();
 
     // 2. If remote API sync is enabled, fetch remote data with background resolution & fast fallback
-    if (this.remote) {
+    if (this.isSignedIn && this.remote) {
       const remotePromise = this.remote
         .load()
         .then(async remoteData => {
@@ -82,7 +94,7 @@ export class HybridStorageAdapter implements StorageRepository {
     const localResult = await this.local.save(timestampedData);
 
     // 2. If remote sync adapter is configured, persist to API/DB
-    if (this.remote) {
+    if (this.isSignedIn && this.remote) {
       const remoteResult = await this.remote.save(timestampedData);
 
       const overallSuccess = localResult.success && remoteResult.success;
