@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'bun:test';
 import {
   ApiSyncAdapter,
+  createStorageRepository,
+  GUEST_STORAGE_KEY,
   HybridStorageAdapter,
   InMemoryStorageRepository,
   isNewer,
+  LEGACY_V3_STORAGE_KEY,
   LocalStorageAdapter,
   migrateToMultiPlan,
+  USER_STORAGE_KEY,
   type StorageRepository,
 } from './index.js';
 import type { AppStoreData } from '../types/plan.js';
@@ -136,6 +140,82 @@ describe('Storage Seam & Repository Adapters', () => {
 
       const loaded = await adapter.load();
       expect(loaded.activePlanId).toBe('plan-test');
+    });
+
+    it('uses distinct storage keys for guest vs signed-in user and migrates legacy data only for guest', async () => {
+      const mockMap = new Map<string, string>();
+      const mockStorage: Storage = {
+        length: 0,
+        clear: () => mockMap.clear(),
+        getItem: k => mockMap.get(k) ?? null,
+        key: () => null,
+        removeItem: k => mockMap.delete(k),
+        setItem: (k, v) => {
+          mockMap.set(k, v);
+        },
+      };
+
+      // Legacy v3 data in old key
+      mockMap.set(LEGACY_V3_STORAGE_KEY, JSON.stringify(sampleStore));
+
+      const guestAdapter = new LocalStorageAdapter(GUEST_STORAGE_KEY, mockStorage);
+      const userAdapter = new LocalStorageAdapter(USER_STORAGE_KEY, mockStorage);
+
+      // Guest adapter loads legacy data
+      const guestLoaded = await guestAdapter.load();
+      expect(guestLoaded.activePlanId).toBe('plan-test');
+
+      // User adapter ignores legacy key and returns default store
+      const userLoaded = await userAdapter.load();
+      expect(userLoaded.activePlanId).not.toBe('plan-test');
+
+      // Saving as guest writes to GUEST_STORAGE_KEY
+      await guestAdapter.save({ ...sampleStore, activePlanId: 'guest-plan' });
+      expect(mockMap.has(GUEST_STORAGE_KEY)).toBe(true);
+      expect(mockMap.has(USER_STORAGE_KEY)).toBe(false);
+
+      // Saving as user writes to USER_STORAGE_KEY
+      await userAdapter.save({ ...sampleStore, activePlanId: 'user-plan' });
+      expect(mockMap.has(USER_STORAGE_KEY)).toBe(true);
+    });
+
+    it('instantiates guest storage when signed out and user storage when signed in via createStorageRepository', async () => {
+      const getToken = async () => 'mock-token';
+
+      const guestRepo = createStorageRepository({ getToken, isSignedIn: false });
+      const userRepo = createStorageRepository({ getToken, isSignedIn: true });
+
+      // Save to guest repo
+      await guestRepo.save({ ...sampleStore, activePlanId: 'guest-active-123' });
+
+      // User repo should not read guest data
+      const userLoaded = await userRepo.load();
+      expect(userLoaded.activePlanId).not.toBe('guest-active-123');
+    });
+
+    it('ensures guest local data does not overwrite remote user data on sign in', async () => {
+      const guestRepo = createStorageRepository({ isSignedIn: false });
+      const guestData = {
+        ...sampleStore,
+        activePlanId: 'guest-plan-edit',
+        lastSaved: '2026-09-23T12:00:00.000Z',
+      };
+      await guestRepo.save(guestData);
+
+      // Remote server user store
+      const remoteUserStore = {
+        ...sampleStore,
+        activePlanId: 'cloud-user-plan',
+        lastSaved: '2026-09-20T00:00:00.000Z',
+      };
+      const remoteRepo = new InMemoryStorageRepository(remoteUserStore);
+      const localUserRepo = new InMemoryStorageRepository(); // empty user local store
+
+      const userHybrid = new HybridStorageAdapter(localUserRepo, remoteRepo, { isSignedIn: true });
+      const loaded = await userHybrid.load();
+
+      // Cloud user data should be loaded, not guest data
+      expect(loaded.activePlanId).toBe('cloud-user-plan');
     });
   });
 

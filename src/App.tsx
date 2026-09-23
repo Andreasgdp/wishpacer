@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth, useClerk } from '@clerk/clerk-react';
+import { useClerk } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
 import confetti from 'canvas-confetti';
 import { PlanActionsBar } from './components/PlanActionsBar';
-import { useModalRegistry, usePlanManager } from './hooks';
+import { useAppAuth, useModalRegistry, usePlanManager } from './hooks';
 import type { Plan } from './types/plan';
 import { Header } from './components/Header';
 import { MetricsOverview } from './components/MetricsOverview';
@@ -29,7 +29,7 @@ import { DEFAULT_PLANS } from './utils/defaults';
 
 export const AppContent: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
-  const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
+  const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAppAuth();
   const clerk = useClerk();
 
   const [authTimedOut, setAuthTimedOut] = useState(false);
