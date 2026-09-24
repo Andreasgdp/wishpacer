@@ -12,7 +12,7 @@ export function exportStoreToJsonFile(data: AppStoreData): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `saving-plans-portfolio-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `wishpacing-portfolio-${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

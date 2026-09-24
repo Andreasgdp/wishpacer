@@ -18,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     res.setHeader('Cache-Control', 'no-store, max-age=0');
     res.status(200).json({
       status: 'ok',
-      service: 'saving-plan-api',
+      service: 'wishpacing-api',
       timestamp: new Date().toISOString(),
       database: 'connected',
       latencyMs: latency,
@@ -30,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
     res.status(503).json({
       status: 'error',
-      service: 'saving-plan-api',
+      service: 'wishpacing-api',
       timestamp: new Date().toISOString(),
       database: 'disconnected',
       error: errorMessage,

@@ -7,7 +7,7 @@ import handler from '../../api/plan';
 const port = Number(process.env.PORT) || 3000;
 const distDir = path.resolve(process.cwd(), 'dist');
 
-console.log(`Starting Saving Plan server on http://localhost:${port}`);
+console.log(`Starting Wish Pacing server on http://localhost:${port}`);
 
 serve({
   port,

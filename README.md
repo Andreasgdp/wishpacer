@@ -1,4 +1,4 @@
-# Saving Plan — Multi-Plan Wishlist & Savings Planner
+# Wish Pacing — Multi-Plan Wishlist & Savings Planner
 
 A fast, modern multi-user savings and wishlist feasibility planner built with **React**, **TypeScript**, **Drizzle ORM** (LibSQL / SQLite / Turso), **Clerk Authentication**, **Sonner Toast Notifications**, and **Vercel Serverless Functions**.
 
@@ -42,7 +42,7 @@ Open `http://localhost:3000` in your browser!
 The codebase is designed around **deep modules**, clean seams, and strong locality:
 
 ```
-saving-plan/
+wishpacing/
 ├── api/
 │   ├── health.ts                   # Serverless healthcheck & monitoring endpoint
 │   ├── plan.ts                     # Vercel Serverless API handler (Clerk auth + Drizzle DB)
@@ -122,15 +122,15 @@ This project deploys natively to **Vercel Serverless Functions** (`/api/plan`) b
 ### Step 1: Create a Production Database on Turso
 
 ```bash
-turso db create saving-plan-prod
-turso db show saving-plan-prod --url
-turso db tokens create saving-plan-prod
+turso db create wishpacing-prod
+turso db show wishpacing-prod --url
+turso db tokens create wishpacing-prod
 ```
 
 ### Step 2: Add Production Secrets to Doppler
 
 ```bash
-doppler secrets set TURSO_DATABASE_URL="libsql://saving-plan-prod-YOUR_ORG.turso.io" --config prd
+doppler secrets set TURSO_DATABASE_URL="libsql://wishpacing-prod-YOUR_ORG.turso.io" --config prd
 doppler secrets set TURSO_AUTH_TOKEN="YOUR_TURSO_TOKEN" --config prd
 doppler secrets set VITE_CLERK_PUBLISHABLE_KEY="pk_live_..." --config prd
 doppler secrets set CLERK_SECRET_KEY="sk_live_..." --config prd
@@ -160,7 +160,7 @@ vercel --prod
 | 10  | **Empty States**          | ✅ Completed                    | Polished empty state graphics and actionable CTA buttons across WishList, Portfolio, and History views.                                                                                |
 | 11  | **Real-Device Testing**   | ⏳ Planned                      | Mobile browser viewport audit checklist, PWA manifest, and touch target verification.                                                                                                  |
 | 12  | **App Store Screenshots** | ⏳ Planned                      | Playwright visual screenshot generation script for app showcase previews.                                                                                                              |
-| 13  | **Support Flow**          | ✅ Completed                    | In-app `SupportModal` with direct `mailto:support@savingplan.app` contact link and feedback form.                                                                                      |
+| 13  | **Support Flow**          | ✅ Completed                    | In-app `SupportModal` with direct `mailto:support@wishpacing.com` contact link and feedback form.                                                                                      |
 | 14  | **Monitoring**            | ✅ Completed                    | Serverless `/api/health` healthcheck endpoint reporting database connection status, timestamp, and latency.                                                                            |
 
 > **Note on Safety & Confirmation Flows**: All dangerous actions (deleting plans, removing wishlist items, wiping user account data) use a custom, type-safe `ConfirmDialogModal` rather than browser native `window.confirm` dialogs.
