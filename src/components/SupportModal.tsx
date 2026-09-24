@@ -29,7 +29,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
     >
       <div className="flex flex-col space-y-4">
         <a
-          href="mailto:support@savingplan.app?subject=Saving%20Plan%20Support%20Request"
+          href="mailto:support@wishpacing.com?subject=WishPacing%20Support%20Request"
           className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between hover:border-sky-500/50 transition-all group"
         >
           <div className="flex items-center gap-3">
@@ -40,7 +40,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
               <p className="text-xs font-semibold text-slate-900 dark:text-white">
                 Email Support Team
               </p>
-              <p className="text-[11px] text-slate-500">support@savingplan.app</p>
+              <p className="text-[11px] text-slate-500">support@wishpacing.com</p>
             </div>
           </div>
           <Send className="w-4 h-4 text-slate-400 group-hover:text-sky-500 group-hover:translate-x-0.5 transition-all" />
@@ -53,7 +53,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
               Feedback Received!
             </p>
             <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
-              Thank you for helping us improve Saving Plan.
+              Thank you for helping us improve Wish Pacing.
             </p>
           </div>
         ) : (

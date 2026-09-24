@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Saving Plan End-to-End User Flows', () => {
+test.describe('Wish Pacing End-to-End User Flows', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       window.localStorage.clear();
@@ -10,7 +10,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
 
   test('Flow 1: Activation Gate on Login Attempt and Session Unlock', async ({ page }) => {
     // Unactivated session loads app normally with onboarding tour
-    await expect(page.getByText('Welcome to Saving Plan')).toBeVisible();
+    await expect(page.getByText('Welcome to Wish Pacing')).toBeVisible();
     await expect(page.getByText('Developer Preview — Activation Required')).not.toBeVisible();
 
     // Dismiss onboarding tour modal so header buttons are clickable
@@ -36,7 +36,7 @@ test.describe('Saving Plan End-to-End User Flows', () => {
 
   test('Flow 2: Onboarding Tour and Interactive Sample Plan Load', async ({ page }) => {
     // Onboarding modal is visible on initial load
-    await expect(page.getByText('Welcome to Saving Plan')).toBeVisible();
+    await expect(page.getByText('Welcome to Wish Pacing')).toBeVisible();
     await expect(page.getByText('Multi-Plan Savings Strategy')).toBeVisible();
 
     // Step through onboarding tour
@@ -195,6 +195,6 @@ test.describe('Saving Plan End-to-End User Flows', () => {
     await page.reload();
 
     // Session resets and presents onboarding modal again
-    await expect(page.getByText('Welcome to Saving Plan')).toBeVisible();
+    await expect(page.getByText('Welcome to Wish Pacing')).toBeVisible();
   });
 });

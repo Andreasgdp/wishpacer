@@ -12,10 +12,10 @@ interface OnboardingModalProps {
 
 const STEPS = [
   {
-    title: 'Welcome to Saving Plan',
+    title: 'Welcome to Wish Pacing',
     subtitle: 'Multi-Plan Savings Strategy',
     description:
-      'Saving Plan turns abstract savings numbers into exact, calendar-projected purchase dates for your wishlist items.',
+      'Wish Pacing turns abstract savings numbers into exact, calendar-projected purchase dates for your wishlist items.',
     icon: Sparkles,
   },
   {

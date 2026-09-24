@@ -1,6 +1,6 @@
-# Domain Model: Saving Plan
+# Domain Model: Wish Pacing
 
-This document defines the core domain terms and invariants for the `saving-plan` application.
+This document defines the core domain terms and invariants for the `wishpacing` application.
 
 ## Glossary
 

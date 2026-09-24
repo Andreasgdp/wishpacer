@@ -1,5 +1,9 @@
 {
-  "name": "saving-plan",
+  "name": "wishpacing",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Andreasgdp/wishpacing.git"
+  },
   "private": true,
   "version": "1.0.0",
   "type": "module",
