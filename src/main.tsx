@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClerkProviderWithTheme } from './components/ClerkProviderWithTheme';
 import { MotionProvider } from './components/MotionProvider';
@@ -17,6 +18,7 @@ ReactDOM.createRoot(rootElement).render(
       <MotionProvider>
         <ClerkProviderWithTheme>
           <App />
+          <Analytics />
         </ClerkProviderWithTheme>
       </MotionProvider>
     </ThemeProvider>
