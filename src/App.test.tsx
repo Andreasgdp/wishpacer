@@ -1,6 +1,7 @@
 import './test-setup';
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import { cleanup, render } from '@testing-library/react';
+import * as hooks from './hooks';
 import { MemoryRouter } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClerkProviderWithTheme } from './components/ClerkProviderWithTheme';
@@ -32,11 +33,35 @@ const renderAppWithRoute = (initialRoute = '/') => {
 };
 
 describe('App Client-Side Routing', () => {
-  it('renders Landing Page on route "/"', async () => {
+  it('renders Landing Page on route "/" standalone without initializing app store data or modal registry', async () => {
+    const planManagerSpy = spyOn(hooks, 'usePlanManager');
+    const modalRegistrySpy = spyOn(hooks, 'useModalRegistry');
+
     const { findByText, findAllByText } = renderAppWithRoute('/');
     expect(await findByText(/Wish Pacing 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
     const launchButtons = await findAllByText(/Launch Planner App/i);
     expect(launchButtons.length).toBeGreaterThan(0);
+
+    expect(planManagerSpy).not.toHaveBeenCalled();
+    expect(modalRegistrySpy).not.toHaveBeenCalled();
+
+    planManagerSpy.mockRestore();
+    modalRegistrySpy.mockRestore();
+  });
+
+  it('initializes usePlanManager and useModalRegistry on route "/demo"', async () => {
+    const planManagerSpy = spyOn(hooks, 'usePlanManager');
+    const modalRegistrySpy = spyOn(hooks, 'useModalRegistry');
+
+    const { findByRole, findByText } = renderAppWithRoute('/demo');
+    expect(await findByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
+    expect(await findByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
+
+    expect(planManagerSpy).toHaveBeenCalled();
+    expect(modalRegistrySpy).toHaveBeenCalled();
+
+    planManagerSpy.mockRestore();
+    modalRegistrySpy.mockRestore();
   });
 
   it('renders Interactive Demo Dashboard on route "/demo"', async () => {

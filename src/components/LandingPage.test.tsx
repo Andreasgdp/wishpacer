@@ -59,4 +59,16 @@ describe('LandingPage Component', () => {
     expect(getByText(/Local-First Hybrid Sync/i)).not.toBeNull();
     expect(getByText(/How Wish Pacing Works/i)).not.toBeNull();
   });
+
+  it('renders as a standalone lightweight component using local state for the calculator', () => {
+    const { getByLabelText, getByText } = render(
+      <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />
+    );
+
+    expect(getByText(/Wish Pacing 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
+    expect(getByText(/Simulate Your Wish Pacing Timeline/i)).not.toBeNull();
+
+    const priceSlider = getByLabelText(/Target Item Price/i) as HTMLInputElement;
+    expect(priceSlider.value).toBe('2400');
+  });
 });
