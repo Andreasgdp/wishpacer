@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 
 declare global {
@@ -20,7 +20,50 @@ export interface AppAuthState {
   getToken: (options?: { skipCache?: boolean }) => Promise<string | null>;
 }
 
+let globalMockAuth: Window['__MOCK_AUTH__'] =
+  typeof window !== 'undefined' ? window.__MOCK_AUTH__ : undefined;
+
+const mockAuthListeners = new Set<() => void>();
+
+function subscribeMockAuth(callback: () => void) {
+  mockAuthListeners.add(callback);
+  return () => {
+    mockAuthListeners.delete(callback);
+  };
+}
+
+function getMockAuthSnapshot(): Window['__MOCK_AUTH__'] {
+  if (typeof window !== 'undefined' && window.__MOCK_AUTH__ !== undefined) {
+    return window.__MOCK_AUTH__;
+  }
+  return globalMockAuth;
+}
+
+function setGlobalMockAuth(newAuth: Window['__MOCK_AUTH__']) {
+  if (typeof window !== 'undefined') {
+    window.__MOCK_AUTH__ = newAuth;
+  }
+  globalMockAuth = newAuth ? { ...newAuth } : undefined;
+  for (const listener of mockAuthListeners) {
+    listener();
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.__SET_MOCK_AUTH__ = setGlobalMockAuth;
+}
+
 export function useAppAuth(): AppAuthState {
+  if (typeof window !== 'undefined') {
+    window.__SET_MOCK_AUTH__ = setGlobalMockAuth;
+  }
+
+  const mockAuth = useSyncExternalStore(
+    subscribeMockAuth,
+    getMockAuthSnapshot,
+    getMockAuthSnapshot
+  );
+
   let clerkAuth: AppAuthState;
   try {
     const clerk = useAuth();
@@ -38,23 +81,6 @@ export function useAppAuth(): AppAuthState {
       getToken: async () => null,
     };
   }
-
-  const [mockAuth, setMockAuth] = useState<Window['__MOCK_AUTH__']>(() => {
-    return typeof window !== 'undefined' ? window.__MOCK_AUTH__ : undefined;
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    window.__SET_MOCK_AUTH__ = (newAuth: Window['__MOCK_AUTH__']) => {
-      window.__MOCK_AUTH__ = newAuth;
-      setMockAuth(newAuth ? { ...newAuth } : undefined);
-    };
-
-    if (window.__MOCK_AUTH__) {
-      setMockAuth({ ...window.__MOCK_AUTH__ });
-    }
-  }, []);
 
   if (mockAuth !== undefined) {
     const userId = mockAuth.userId ?? (mockAuth.isSignedIn ? 'mock-user' : null);

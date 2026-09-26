@@ -245,3 +245,7 @@ export const DEFAULT_STORE_DATA: AppStoreData = {
   plans: DEFAULT_PLANS,
   lastSaved: '1970-01-01T00:00:00.000Z',
 };
+
+export function getDefaultStoreData(): AppStoreData {
+  return JSON.parse(JSON.stringify(DEFAULT_STORE_DATA));
+}

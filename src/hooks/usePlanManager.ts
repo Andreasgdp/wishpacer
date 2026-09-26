@@ -20,7 +20,7 @@ import type {
   WishItem,
 } from '../types/plan.js';
 import { calculatePortfolioSummary } from '../utils/calculator.js';
-import { DEFAULT_STORE_DATA } from '../utils/defaults.js';
+import { DEFAULT_STORE_DATA, getDefaultStoreData } from '../utils/defaults.js';
 
 export interface PlanManagerOptions {
   isAuthLoaded?: boolean;
@@ -107,7 +107,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       );
       return localAdapter.loadSync();
     } catch {
-      return DEFAULT_STORE_DATA;
+      return getDefaultStoreData();
     }
   });
 
@@ -150,19 +150,19 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       console.warn('[usePlanManager] Background storage sync failed:', err);
     }
   }, [storageRepo, applyNewerStoreData]);
-  const prevIsSignedInRef = useRef<boolean | undefined>(isSignedIn);
+  const activeAuthSessionKey = `${Boolean(isSignedIn)}`;
+  const lastCommittedAuthSessionKey = useRef<string>(activeAuthSessionKey);
 
   // Initial load and repository subscription
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
 
-    const authStateChanged = prevIsSignedInRef.current !== isSignedIn;
-    prevIsSignedInRef.current = isSignedIn;
-
+    const targetSessionKey = activeAuthSessionKey;
     storageRepo.load().then(loaded => {
       if (!isMounted) return;
-      if (authStateChanged) {
+      if (lastCommittedAuthSessionKey.current !== targetSessionKey) {
+        lastCommittedAuthSessionKey.current = targetSessionKey;
         setStoreData(loaded);
       } else {
         applyNewerStoreData(loaded);
@@ -178,7 +178,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       isMounted = false;
       unsubscribe?.();
     };
-  }, [storageRepo, isSignedIn, applyNewerStoreData]);
+  }, [storageRepo, isSignedIn, activeAuthSessionKey, applyNewerStoreData]);
   useEffect(() => {
     if (typeof window === 'undefined') return;
 

@@ -1,5 +1,5 @@
 import type { AppStoreData } from '../../types/plan.js';
-import { DEFAULT_STORE_DATA } from '../../utils/defaults.js';
+import { getDefaultStoreData } from '../../utils/defaults.js';
 import { migrateToMultiPlan } from '../migrations.js';
 import type { GetTokenFn, SaveResult, StorageRepository } from '../types.js';
 
@@ -56,7 +56,7 @@ export class ApiSyncAdapter implements StorageRepository {
     } catch (err) {
       console.warn(`[ApiSyncAdapter] Failed to fetch ${this.endpoint}:`, err);
     }
-    return DEFAULT_STORE_DATA;
+    return getDefaultStoreData();
   }
 
   public async save(data: AppStoreData): Promise<SaveResult> {
