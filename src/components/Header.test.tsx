@@ -128,4 +128,50 @@ describe('Header Component', () => {
       expect(button.getAttribute('aria-label')).not.toBeNull();
     });
   });
+
+  it('renders landing mode controls when viewMode is landing', () => {
+    const onLaunchApp = mock(() => {});
+    const onExploreDemo = mock(() => {});
+    const onToggleDarkMode = mock(() => {});
+
+    const { getAllByRole } = render(
+      <Header
+        viewMode="landing"
+        onLaunchApp={onLaunchApp}
+        onExploreDemo={onExploreDemo}
+        onToggleDarkMode={onToggleDarkMode}
+      />
+    );
+
+    const launchButtons = getAllByRole('button', { name: 'Launch App' });
+    expect(launchButtons.length).toBeGreaterThan(0);
+    fireEvent.click(launchButtons[0]);
+    expect(onLaunchApp).toHaveBeenCalledTimes(1);
+
+    const demoButtons = getAllByRole('button', { name: 'Explore Demo' });
+    expect(demoButtons.length).toBeGreaterThan(0);
+    fireEvent.click(demoButtons[0]);
+    expect(onExploreDemo).toHaveBeenCalledTimes(1);
+
+    const themeButtons = getAllByRole('button', { name: 'Toggle theme' });
+    expect(themeButtons.length).toBeGreaterThan(0);
+    fireEvent.click(themeButtons[0]);
+    expect(onToggleDarkMode).toHaveBeenCalledTimes(1);
+  });
+  it('renders interactive demo banner when isDemo is true', () => {
+    const onSignInClick = mock(() => {});
+    const { getByText } = render(
+      <Header
+        {...defaultProps}
+        isDemo={true}
+        onSignInClick={onSignInClick}
+      />
+    );
+
+    expect(getByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
+    const signInButton = getByText(/Sign In to Save Your Plan/i);
+    expect(signInButton).not.toBeNull();
+    fireEvent.click(signInButton);
+    expect(onSignInClick).toHaveBeenCalledTimes(1);
+  });
 });

@@ -8,6 +8,7 @@ import { App } from './App';
 
 beforeEach(() => {
   localStorage.setItem('saving_plan_onboarding_seen', 'true');
+  localStorage.setItem('saving_plan_activated', 'true');
   if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
     window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
   }
@@ -38,16 +39,54 @@ describe('App Client-Side Routing', () => {
     expect(launchButtons.length).toBeGreaterThan(0);
   });
 
-  it('renders Main App Dashboard on route "/app"', async () => {
-    const { findByRole } = renderAppWithRoute('/app');
+  it('renders Interactive Demo Dashboard on route "/demo"', async () => {
+    const { findByRole, findByText } = renderAppWithRoute('/demo');
     expect(await findByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
+    expect(await findByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
   });
 
-  it('renders Portfolio Overview on route "/app/portfolio"', async () => {
+  it('renders Demo Portfolio Overview on route "/demo/portfolio"', async () => {
+    const { findByText } = renderAppWithRoute('/demo/portfolio');
+    expect(await findByText(/Savings Portfolio Overview/i)).not.toBeNull();
+    expect(await findByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
+  });
+
+  it('renders Demo plan view on route "/demo/plan/:planId"', async () => {
+    const { findByRole, findByText } = renderAppWithRoute('/demo/plan/plan-personal-wants');
+    expect(await findByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
+    expect(await findByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
+  });
+
+  it('renders Auth Gate on protected route "/app" when user is signed out', async () => {
+    const { findByText } = renderAppWithRoute('/app');
+    expect(await findByText(/Sign In Required to Access App/i)).not.toBeNull();
+    expect(await findByText(/Explore Interactive Demo First/i)).not.toBeNull();
+  });
+
+  it('renders Main App Dashboard on protected route "/app" when user is signed in', async () => {
+    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true });
+    }
+
+    const { findByRole, queryByText } = renderAppWithRoute('/app');
+    expect(await findByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
+    expect(queryByText(/Interactive Demo Mode • Changes are temporary/i)).toBeNull();
+  });
+
+  it('renders Portfolio Overview on route "/app/portfolio" when user is signed in', async () => {
+    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true });
+    }
+
     const { findByText } = renderAppWithRoute('/app/portfolio');
     expect(await findByText(/Savings Portfolio Overview/i)).not.toBeNull();
   });
-  it('renders plan view on route "/app/plan/:planId"', async () => {
+
+  it('renders plan view on route "/app/plan/:planId" when user is signed in', async () => {
+    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true });
+    }
+
     const { findByRole } = renderAppWithRoute('/app/plan/plan-personal-wants');
     expect(await findByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
   });
@@ -57,8 +96,17 @@ describe('App Client-Side Routing', () => {
     expect(await findByText(/Wish List Item or Page Not Found/i)).not.toBeNull();
   });
 
-  it('renders NotFoundPage on non-existent plan route', async () => {
+  it('renders NotFoundPage on non-existent plan route in /app', async () => {
+    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true });
+    }
+
     const { findByText } = renderAppWithRoute('/app/plan/invalid-plan-999');
+    expect(await findByText(/Wish List Item or Page Not Found/i)).not.toBeNull();
+  });
+
+  it('renders NotFoundPage on non-existent plan route in /demo', async () => {
+    const { findByText } = renderAppWithRoute('/demo/plan/invalid-plan-999');
     expect(await findByText(/Wish List Item or Page Not Found/i)).not.toBeNull();
   });
 });
