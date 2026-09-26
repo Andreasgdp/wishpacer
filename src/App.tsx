@@ -7,6 +7,7 @@ import { PlanActionsBar } from './components/PlanActionsBar';
 import { useAppAuth, useModalRegistry, usePlanManager } from './hooks';
 import type { Plan } from './types/plan';
 import { Header } from './components/Header';
+import { LandingPage } from './components/LandingPage';
 import { MetricsOverview } from './components/MetricsOverview';
 import { WishList } from './components/WishList';
 import { WishModal } from './components/WishModal';
@@ -34,6 +35,14 @@ export const AppContent: React.FC = () => {
   const clerk = useClerk();
 
   const [authTimedOut, setAuthTimedOut] = useState(false);
+  const [viewMode, setViewMode] = useState<'landing' | 'app'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('view') === 'app') return 'app';
+      if (params.get('view') === 'landing') return 'landing';
+    }
+    return 'landing';
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -127,6 +136,10 @@ export const AppContent: React.FC = () => {
       },
     });
   };
+  const handleExploreDemo = () => {
+    setViewMode('app');
+  };
+
 
   const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
   const isPlaceholderKey =
@@ -145,6 +158,20 @@ export const AppContent: React.FC = () => {
       </div>
     );
   }
+  if (viewMode === 'landing') {
+    return (
+      <>
+        <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
+        <LandingPage
+          onLaunchApp={() => setViewMode('app')}
+          onExploreDemo={handleExploreDemo}
+          onToggleDarkMode={toggleDarkMode}
+          darkMode={darkMode}
+        />
+      </>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
@@ -157,6 +184,9 @@ export const AppContent: React.FC = () => {
         isPortfolioView={isPortfolioView}
         activePlanCalculation={activePlanCalculation}
         darkMode={darkMode}
+        viewMode={viewMode}
+        onNavigateLanding={() => setViewMode('landing')}
+        onNavigateApp={() => setViewMode('app')}
         onSelectPlan={actions.selectPlan}
         onSelectPortfolio={() => setIsPortfolioView(true)}
         onOpenNewPlanModal={handleOpenCreatePlanModal}
