@@ -15,9 +15,8 @@ import {
   Zap,
   Target,
   ChevronRight,
-  Sun,
-  Moon,
 } from 'lucide-react';
+import { Header } from './Header';
 import { Logo } from './Logo';
 
 export interface LandingPageProps {
@@ -81,46 +80,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       {/* Top Navigation Bar */}
-      <nav className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-8 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Logo variant="full" size="md" onClick={onLaunchApp} />
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            {onToggleDarkMode && (
-              <button
-                type="button"
-                onClick={onToggleDarkMode}
-                className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-800/80 transition-colors"
-                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-                aria-label="Toggle theme"
-              >
-                {darkMode ? (
-                  <Sun className="w-4 h-4 text-amber-400" />
-                ) : (
-                  <Moon className="w-4 h-4 text-slate-600" />
-                )}
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={onExploreDemo}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
-              Explore Demo
-            </button>
-
-            <button
-              type="button"
-              onClick={onLaunchApp}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <span>Launch App</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Header
+        viewMode="landing"
+        darkMode={darkMode}
+        onToggleDarkMode={onToggleDarkMode}
+        onNavigateLanding={onLaunchApp}
+        onNavigateApp={onLaunchApp}
+        onExploreDemo={onExploreDemo}
+      />
 
       {/* Hero Section */}
       <section className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">

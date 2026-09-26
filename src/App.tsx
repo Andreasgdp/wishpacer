@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
@@ -28,10 +28,13 @@ import { ActivationWallModal } from './components/ActivationWallModal';
 import { OnboardingModal } from './components/OnboardingModal';
 import { ConfirmDialogModal } from './components/ConfirmDialogModal';
 import { NotFoundPage } from './components/NotFoundPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { useTheme } from './context/ThemeContext';
-import { DEFAULT_PLANS } from './utils/defaults';
+import { DEFAULT_PLANS, getDefaultStoreData } from './utils/defaults';
+import { InMemoryStorageRepository } from './storage';
 
 interface AppDashboardProps {
+  isDemo?: boolean;
   storeData: AppStoreData;
   activePlan: Plan;
   activePlanCalculation: PlanCalculationResult;
@@ -59,6 +62,7 @@ interface AppDashboardProps {
 }
 
 const AppDashboard: React.FC<AppDashboardProps> = ({
+  isDemo = false,
   storeData,
   activePlan,
   activePlanCalculation,
@@ -88,9 +92,11 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
 
+  const basePath = isDemo ? '/demo' : '/app';
+
   // Route synchronization
   useEffect(() => {
-    if (location.pathname === '/app/portfolio') {
+    if (location.pathname === `${basePath}/portfolio`) {
       if (!isPortfolioView) {
         setIsPortfolioView(true);
       }
@@ -104,7 +110,7 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
           actions.selectPlan(planId);
         }
       }
-    } else if (location.pathname === '/app') {
+    } else if (location.pathname === basePath) {
       // Maintain active plan or portfolio according to state
     }
   }, [
@@ -115,31 +121,31 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
     storeData.plans,
     actions,
     setIsPortfolioView,
+    basePath,
   ]);
 
   // Sync route URL if activePlanId changes while viewing a plan
-  // Sync route URL if activePlanId changes while viewing a valid plan
   useEffect(() => {
     if (!isPortfolioView && storeData.activePlanId) {
       if (
-        location.pathname.startsWith('/app/plan/') &&
+        location.pathname.startsWith(`${basePath}/plan/`) &&
         planId &&
         planId !== storeData.activePlanId &&
         storeData.plans.some(p => p.id === planId)
       ) {
         const activePlanExists = storeData.plans.some(p => p.id === storeData.activePlanId);
         if (activePlanExists) {
-          navigate(`/app/plan/${storeData.activePlanId}`, { replace: true });
+          navigate(`${basePath}/plan/${storeData.activePlanId}`, { replace: true });
         }
       }
     }
-  }, [storeData.activePlanId, storeData.plans, isPortfolioView, location.pathname, planId, navigate]);
+  }, [storeData.activePlanId, storeData.plans, isPortfolioView, location.pathname, planId, navigate, basePath]);
 
-  // Render 404 if planId param was requested in /app/plan/:planId but does not exist
+  // Render 404 if planId param was requested in plan route but does not exist
   if (planId && !storeData.plans.some(p => p.id === planId)) {
     return (
       <NotFoundPage
-        onReturnToApp={() => navigate('/app')}
+        onReturnToApp={() => navigate(basePath)}
         onGoToLanding={() => navigate('/')}
       />
     );
@@ -151,6 +157,7 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
 
       {/* Header */}
       <Header
+        isDemo={isDemo}
         plans={storeData.plans}
         activePlanId={storeData.activePlanId}
         isPortfolioView={isPortfolioView}
@@ -158,14 +165,14 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
         darkMode={darkMode}
         viewMode={location.pathname === '/' ? 'landing' : 'app'}
         onNavigateLanding={() => navigate('/')}
-        onNavigateApp={() => navigate('/app')}
+        onNavigateApp={() => navigate(basePath)}
         onSelectPlan={id => {
           actions.selectPlan(id);
-          navigate(`/app/plan/${id}`);
+          navigate(`${basePath}/plan/${id}`);
         }}
         onSelectPortfolio={() => {
           setIsPortfolioView(true);
-          navigate('/app/portfolio');
+          navigate(`${basePath}/portfolio`);
         }}
         onOpenNewPlanModal={handleOpenCreatePlanModal}
         onOpenManagePlanModal={() => handleOpenEditPlanModal(activePlan)}
@@ -190,7 +197,7 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
             summary={portfolioSummary}
             onSelectPlan={id => {
               actions.selectPlan(id);
-              navigate(`/app/plan/${id}`);
+              navigate(`${basePath}/plan/${id}`);
             }}
             onOpenNewPlanModal={handleOpenCreatePlanModal}
             onEditPlan={handleOpenEditPlanModal}
@@ -481,33 +488,26 @@ export const AppContent: React.FC = () => {
     return localStorage.getItem('saving_plan_onboarding_seen') === 'true';
   });
 
-  const {
-    storeData,
-    activePlan,
-    activePlanCalculation,
-    effectiveConfig,
-    portfolioSummary,
-    isLoading,
-    isPortfolioView,
-    setIsPortfolioView,
-    showWhatIf,
-    simulatedSavingsRate,
-    simulatedExtraBonus,
-    actions,
-  } = usePlanManager({
+  // App Plan Manager (for real protected app routes)
+  const appPlanManager = usePlanManager({
     isAuthLoaded,
     isSignedIn,
     getToken,
   });
+
+  // Demo Plan Manager (pre-populated with DEFAULT_PLANS sample data)
+  const demoRepo = useMemo(() => new InMemoryStorageRepository(getDefaultStoreData()), []);
+  const demoPlanManager = usePlanManager({ repository: demoRepo });
 
   const handleOpenCreatePlanModal = () => {
     setPlanManageMode('create');
     modal.open('createPlan');
   };
 
-  const handleOpenEditPlanModal = (planToEdit: Plan = activePlan) => {
+  const handleOpenEditPlanModal = (planToEdit?: Plan, isDemo = false) => {
+    const targetPlan = planToEdit || (isDemo ? demoPlanManager.activePlan : appPlanManager.activePlan);
     setPlanManageMode('edit');
-    modal.open('editPlan', { plan: planToEdit });
+    modal.open('editPlan', { plan: targetPlan });
   };
 
   const handleActivate = (code: string) => {
@@ -534,7 +534,7 @@ export const AppContent: React.FC = () => {
     modal.close();
   };
 
-  const handleConfirmLoadSamplePlan = () => {
+  const handleConfirmLoadSamplePlan = (actions = appPlanManager.actions) => {
     modal.open('confirmDialog', {
       confirm: {
         title: 'Load Interactive Sample Plan',
@@ -548,7 +548,7 @@ export const AppContent: React.FC = () => {
             lastSaved: new Date().toISOString(),
             activePlanId: DEFAULT_PLANS[0].id,
             plans: DEFAULT_PLANS,
-            settings: storeData.settings,
+            settings: appPlanManager.storeData.settings,
           });
         },
       },
@@ -560,7 +560,7 @@ export const AppContent: React.FC = () => {
     !clerkKey || clerkKey.includes('placeholder') || clerkKey.includes('Y2xlcms');
   const shouldBlockAuth = !isAuthLoaded && !authTimedOut && !isPlaceholderKey;
 
-  if (isLoading || shouldBlockAuth) {
+  if (appPlanManager.isLoading || shouldBlockAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <ThinkingOrbLoader
@@ -573,18 +573,18 @@ export const AppContent: React.FC = () => {
     );
   }
 
-  const dashboardProps = {
-    storeData,
-    activePlan,
-    activePlanCalculation,
-    effectiveConfig,
-    portfolioSummary,
-    isPortfolioView,
-    setIsPortfolioView,
-    showWhatIf,
-    simulatedSavingsRate,
-    simulatedExtraBonus,
-    actions,
+  const appDashboardProps = {
+    storeData: appPlanManager.storeData,
+    activePlan: appPlanManager.activePlan,
+    activePlanCalculation: appPlanManager.activePlanCalculation,
+    effectiveConfig: appPlanManager.effectiveConfig,
+    portfolioSummary: appPlanManager.portfolioSummary,
+    isPortfolioView: appPlanManager.isPortfolioView,
+    setIsPortfolioView: appPlanManager.setIsPortfolioView,
+    showWhatIf: appPlanManager.showWhatIf,
+    simulatedSavingsRate: appPlanManager.simulatedSavingsRate,
+    simulatedExtraBonus: appPlanManager.simulatedExtraBonus,
+    actions: appPlanManager.actions,
     darkMode,
     toggleDarkMode,
     modal,
@@ -595,9 +595,36 @@ export const AppContent: React.FC = () => {
     hasSeenOnboarding,
     handleActivate,
     handleCloseOnboarding,
-    handleConfirmLoadSamplePlan,
-    handleOpenCreatePlanModal,
-    handleOpenEditPlanModal,
+    handleConfirmLoadSamplePlan: () => handleConfirmLoadSamplePlan(appPlanManager.actions),
+    handleOpenCreatePlanModal: handleOpenCreatePlanModal,
+    handleOpenEditPlanModal: (planToEdit?: Plan) => handleOpenEditPlanModal(planToEdit, false),
+  };
+
+  const demoDashboardProps = {
+    storeData: demoPlanManager.storeData,
+    activePlan: demoPlanManager.activePlan,
+    activePlanCalculation: demoPlanManager.activePlanCalculation,
+    effectiveConfig: demoPlanManager.effectiveConfig,
+    portfolioSummary: demoPlanManager.portfolioSummary,
+    isPortfolioView: demoPlanManager.isPortfolioView,
+    setIsPortfolioView: demoPlanManager.setIsPortfolioView,
+    showWhatIf: demoPlanManager.showWhatIf,
+    simulatedSavingsRate: demoPlanManager.simulatedSavingsRate,
+    simulatedExtraBonus: demoPlanManager.simulatedExtraBonus,
+    actions: demoPlanManager.actions,
+    darkMode,
+    toggleDarkMode,
+    modal,
+    planManageMode,
+    isQuickAdd,
+    setIsQuickAdd,
+    isActivated,
+    hasSeenOnboarding,
+    handleActivate,
+    handleCloseOnboarding,
+    handleConfirmLoadSamplePlan: () => handleConfirmLoadSamplePlan(demoPlanManager.actions),
+    handleOpenCreatePlanModal: handleOpenCreatePlanModal,
+    handleOpenEditPlanModal: (planToEdit?: Plan) => handleOpenEditPlanModal(planToEdit, true),
   };
 
   return (
@@ -609,16 +636,46 @@ export const AppContent: React.FC = () => {
             <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
             <LandingPage
               onLaunchApp={() => navigate('/app')}
-              onExploreDemo={() => navigate('/app')}
+              onExploreDemo={() => navigate('/demo')}
               onToggleDarkMode={toggleDarkMode}
               darkMode={darkMode}
             />
           </>
         }
       />
-      <Route path="/app" element={<AppDashboard {...dashboardProps} />} />
-      <Route path="/app/plan/:planId" element={<AppDashboard {...dashboardProps} />} />
-      <Route path="/app/portfolio" element={<AppDashboard {...dashboardProps} />} />
+
+      {/* Demo Mode Routes (Interactive Demo with sample data) */}
+      <Route path="/demo" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
+      <Route path="/demo/plan/:planId" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
+      <Route path="/demo/portfolio" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
+
+      {/* Protected App Routes */}
+      <Route
+        path="/app"
+        element={
+          <ProtectedRoute isActivated={isActivated} onOpenActivationModal={() => modal.open('activation')}>
+            <AppDashboard {...appDashboardProps} isDemo={false} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/app/plan/:planId"
+        element={
+          <ProtectedRoute isActivated={isActivated} onOpenActivationModal={() => modal.open('activation')}>
+            <AppDashboard {...appDashboardProps} isDemo={false} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/app/portfolio"
+        element={
+          <ProtectedRoute isActivated={isActivated} onOpenActivationModal={() => modal.open('activation')}>
+            <AppDashboard {...appDashboardProps} isDemo={false} />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Fallback 404 Route */}
       <Route
         path="*"
         element={
