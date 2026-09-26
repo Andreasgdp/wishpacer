@@ -98,7 +98,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
               {...attributes}
               {...listeners}
               className="cursor-grab active:cursor-grabbing p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors touch-none"
-              aria-label="Drag to reorder priority"
+              aria-label={`Reorder ${item.title}`}
               title="Drag to reorder priority"
             >
               <GripVertical className="w-4 h-4" />
@@ -110,6 +110,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                 type="button"
                 disabled={index === 0}
                 onClick={() => onMoveUp(item.id)}
+                aria-label={`Move ${item.title} up in priority`}
                 className="p-1 sm:p-0.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 transition-colors"
                 title="Move up in priority"
               >
@@ -119,6 +120,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                 type="button"
                 disabled={index === totalActive - 1}
                 onClick={() => onMoveDown(item.id)}
+                aria-label={`Move ${item.title} down in priority`}
                 className="p-1 sm:p-0.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 transition-colors"
                 title="Move down in priority"
               >
@@ -198,6 +200,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                 href={item.url}
                 target="_blank"
                 rel="noreferrer noopener"
+                aria-label={`Open product link for ${item.title}`}
                 className="text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors p-1"
                 title="Open product link"
               >
@@ -271,6 +274,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
             <button
               type="button"
               onClick={handlePurchaseClick}
+              aria-label={item.isPurchased ? `Mark ${item.title} as planned` : `Mark ${item.title} as purchased`}
               className={`p-2 rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${
                 item.isPurchased
                   ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400'
@@ -285,6 +289,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
             <button
               type="button"
               onClick={() => onTogglePaused(item.id)}
+              aria-label={item.isPaused ? `Include ${item.title} in active plan` : `Pause ${item.title}`}
               className={`p-2 rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${
                 item.isPaused
                   ? 'bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400'
@@ -299,6 +304,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
             <button
               type="button"
               onClick={() => onEdit(item)}
+              aria-label={`Edit ${item.title}`}
               className="p-2 rounded-lg text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/40 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
               title="Edit wish"
             >
@@ -309,6 +315,7 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
             <button
               type="button"
               onClick={() => onDelete(item.id)}
+              aria-label={`Delete ${item.title}`}
               className="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
               title="Delete wish"
             >

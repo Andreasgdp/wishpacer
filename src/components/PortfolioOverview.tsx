@@ -32,9 +32,9 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
               <Layers className="w-3.5 h-3.5" />
               <span>Savings Portfolio Overview</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
               All Active Savings Plans
-            </h2>
+            </h1>
             <p className="text-sm text-slate-300 max-w-xl mt-1.5">
               Managing <strong>{plans.length} independent plans</strong> with a combined monthly
               savings rate of{' '}
@@ -112,12 +112,12 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
 
       {/* Plans Comparison Grid */}
       <div className="space-y-3">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center justify-between">
           <span>Individual Plan Breakdowns</span>
           <span className="text-xs font-normal text-slate-500">
             Click any plan to open its full priority queue
           </span>
-        </h3>
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {plans.map(plan => {
@@ -145,9 +145,9 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
                         {getPlanIcon(plan.icon)}
                       </div>
                       <div>
-                        <h4 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                           {plan.name}
-                        </h4>
+                        </h3>
                         {plan.description && (
                           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
                             {plan.description}
@@ -159,6 +159,7 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
                     <button
                       type="button"
                       onClick={() => onEditPlan(plan)}
+                      aria-label={`Edit ${plan.name} configuration`}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                       title="Edit plan configuration"
                     >
@@ -284,9 +285,9 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
               <Plus className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                 Create Another Savings Plan
-              </h4>
+              </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mt-1">
                 Keep goals organized with distinct budgets (e.g. Vacation, House Needs, Car, Tech).
               </p>

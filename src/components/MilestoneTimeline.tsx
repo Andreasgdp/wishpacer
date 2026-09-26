@@ -23,14 +23,14 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ config, re
             <Calendar className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <span>Savings Timeline & Milestone Projections</span>
               {result.totalRemainingDeficit === 0 && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
                   Fully Funded
                 </span>
               )}
-            </h3>
+            </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Month-by-month breakdown of your savings growth and exact unlocked purchase dates.
             </p>
@@ -72,9 +72,9 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ config, re
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-mono text-xs font-bold text-slate-400">#{idx + 1}</span>
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
                       {item.title}
-                    </h4>
+                    </h3>
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                       <AnimatedCurrency value={item.price} currency={result.currency} />
                     </span>
@@ -127,10 +127,10 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ config, re
       {/* Expanded Month-by-Month Projection Table */}
       {isExpanded && result.milestones.length > 0 && (
         <div className="border-t border-slate-100 dark:border-slate-800 p-4 sm:p-5 bg-slate-50/50 dark:bg-slate-950/30">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-1.5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-1.5">
             <TrendingUp className="w-4 h-4 text-brand-500" />
             <span>Deposit & Savings Schedule Progression</span>
-          </h4>
+          </h3>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">

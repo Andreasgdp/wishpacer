@@ -146,8 +146,8 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     try {
       const loaded = await storageRepo.load();
       applyNewerStoreData(loaded);
-    } catch (err) {
-      console.warn('[usePlanManager] Background storage sync failed:', err);
+    } catch {
+      // Storage sync failed silently
     }
   }, [storageRepo, applyNewerStoreData]);
   const activeAuthSessionKey = `${Boolean(isSignedIn)}`;
@@ -581,8 +581,8 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
           },
         });
       }
-    } catch (err) {
-      console.error('Failed to purge remote user database records:', err);
+    } catch {
+      // Remote purge failed silently
     }
     localStorage.clear();
     toast.success('All user data permanently deleted.');

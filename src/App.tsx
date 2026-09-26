@@ -26,6 +26,7 @@ import { SupportModal } from './components/SupportModal';
 import { ActivationWallModal } from './components/ActivationWallModal';
 import { OnboardingModal } from './components/OnboardingModal';
 import { ConfirmDialogModal } from './components/ConfirmDialogModal';
+import { NotFoundPage } from './components/NotFoundPage';
 import { useTheme } from './context/ThemeContext';
 import { DEFAULT_PLANS } from './utils/defaults';
 
@@ -35,11 +36,16 @@ export const AppContent: React.FC = () => {
   const clerk = useClerk();
 
   const [authTimedOut, setAuthTimedOut] = useState(false);
-  const [viewMode, setViewMode] = useState<'landing' | 'app'>(() => {
+  const [viewMode, setViewMode] = useState<'landing' | 'app' | '404'>(() => {
     if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname;
+      if (pathname !== '/' && pathname !== '' && pathname !== '/index.html') {
+        return '404';
+      }
       const params = new URLSearchParams(window.location.search);
       if (params.get('view') === 'app') return 'app';
       if (params.get('view') === 'landing') return 'landing';
+      if (params.get('view') === '404') return '404';
     }
     return 'landing';
   });
@@ -169,6 +175,24 @@ export const AppContent: React.FC = () => {
           darkMode={darkMode}
         />
       </>
+    );
+  }
+  if (viewMode === '404') {
+    return (
+      <NotFoundPage
+        onReturnToApp={() => {
+          if (typeof window !== 'undefined') {
+            window.history.pushState({}, '', '/?view=app');
+          }
+          setViewMode('app');
+        }}
+        onGoToLanding={() => {
+          if (typeof window !== 'undefined') {
+            window.history.pushState({}, '', '/');
+          }
+          setViewMode('landing');
+        }}
+      />
     );
   }
 

@@ -26,7 +26,7 @@ interface PlanSwitcherProps {
   onSelectPlan: (planId: string) => void;
   onSelectPortfolio: () => void;
   onOpenNewPlanModal: () => void;
-  onOpenManagePlanModal: () => void;
+  onOpenManagePlanModal?: () => void;
 }
 
 export const getPlanIcon = (iconName?: string) => {
@@ -59,6 +59,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
   onSelectPlan,
   onSelectPortfolio,
   onOpenNewPlanModal,
+  onOpenManagePlanModal,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -82,7 +83,8 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3 py-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/80 text-slate-900 dark:text-white transition-all text-left group"
+        aria-label={`Switch savings plan. Currently selected: ${isPortfolioView ? 'Portfolio' : activePlan?.name || 'Plan'}`}
+        className="flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/80 text-slate-900 dark:text-white transition-all text-left group min-w-0 max-w-[150px] xs:max-w-[200px] sm:max-w-none shrink"
       >
         <div
           className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl flex items-center justify-center text-white shadow-xs flex-shrink-0 ${
@@ -98,9 +100,9 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
           )}
         </div>
 
-        <div className="flex flex-col min-w-0 pr-0.5">
-          <div className="flex items-center gap-1">
-            <span className="text-xs font-bold truncate max-w-[85px] xs:max-w-[120px] sm:max-w-[180px]">
+        <div className="flex flex-col min-w-0 pr-0.5 overflow-hidden">
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-xs font-bold truncate">
               {isPortfolioView ? 'Portfolio' : activePlan?.name}
             </span>
             <span className="text-[10px] font-mono px-1 py-0 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-500 font-semibold">
@@ -143,6 +145,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
                     onSelectPlan(plan.id);
                     setIsOpen(false);
                   }}
+                  aria-label={`Select ${plan.name} plan`}
                   className={`w-full flex items-center justify-between p-2 sm:p-2.5 rounded-xl text-left transition-colors ${
                     isSelected
                       ? 'bg-brand-50/80 dark:bg-brand-950/60 text-brand-900 dark:text-brand-100 border border-brand-200 dark:border-brand-800/80'
@@ -182,6 +185,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
                 onSelectPortfolio();
                 setIsOpen(false);
               }}
+              aria-label="Select All Plans Portfolio"
               className={`w-full flex items-center justify-between p-2 sm:p-2.5 rounded-xl text-left transition-colors ${
                 isPortfolioView
                   ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold'
@@ -201,18 +205,37 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
             </button>
 
             {/* Create New Plan Button */}
+            {onOpenManagePlanModal && !isPortfolioView && (
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenManagePlanModal();
+                  setIsOpen(false);
+                }}
+                aria-label="Manage Plan Settings"
+                className="w-full flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl text-left text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                  <Wrench className="w-3.5 h-3.5" />
+                </div>
+                <span>Manage Plan Settings...</span>
+              </button>
+            )}
+
+            {/* Create New Plan Button */}
             <button
               type="button"
               onClick={() => {
                 onOpenNewPlanModal();
                 setIsOpen(false);
               }}
+              aria-label="Create New Savings Plan"
               className="w-full flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl text-left text-xs font-semibold text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/40 transition-colors"
             >
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center border border-dashed border-brand-400 dark:border-brand-600 text-brand-600 dark:text-brand-400">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center bg-brand-100 dark:bg-brand-900/50 text-brand-600 dark:text-brand-400">
                 <Plus className="w-3.5 h-3.5" />
               </div>
-              <span>Create New Savings Plan...</span>
+              <span>Create New Plan...</span>
             </button>
           </div>
         </div>

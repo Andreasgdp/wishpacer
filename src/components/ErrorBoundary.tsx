@@ -38,7 +38,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <AlertTriangle className="w-7 h-7" />
             </div>
 
-            <h2 className="text-xl font-bold">Something went wrong</h2>
+            <h1 className="text-xl font-bold">Something went wrong</h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               An unexpected application error occurred. You can safely try reloading the session.
             </p>

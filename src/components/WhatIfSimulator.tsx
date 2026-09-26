@@ -38,9 +38,9 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
                 What-If Savings Scenario Tester
-              </h3>
+              </h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">
                 Interactive Simulation
               </span>
@@ -76,6 +76,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close What-If Simulator"
             className="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-white"
           >
             Hide
