@@ -1,5 +1,5 @@
 import '../test-setup';
-import { afterEach, describe, expect, it, mock } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { Header } from './Header';
 import type { Plan, PlanCalculationResult } from '../types/plan';
@@ -59,8 +59,17 @@ const mockCalculation: PlanCalculationResult = {
   milestones: [],
 };
 
+beforeEach(() => {
+  if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+    window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
+  }
+});
+
 afterEach(() => {
   cleanup();
+  if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+    window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
+  }
 });
 
 describe('Header Component', () => {
@@ -158,20 +167,65 @@ describe('Header Component', () => {
     fireEvent.click(themeButtons[0]);
     expect(onToggleDarkMode).toHaveBeenCalledTimes(1);
   });
-  it('renders interactive demo banner when isDemo is true', () => {
-    const onSignInClick = mock(() => {});
-    const { getByText } = render(
-      <Header
-        {...defaultProps}
-        isDemo={true}
-        onSignInClick={onSignInClick}
-      />
-    );
+  describe('Demo Mode', () => {
+    it('renders interactive demo banner when isDemo is true', () => {
+      if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+        window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
+      }
+      const onSignInClick = mock(() => {});
+      const { getByText, getAllByRole } = render(
+        <Header
+          {...defaultProps}
+          isDemo={true}
+          onSignInClick={onSignInClick}
+        />
+      );
 
-    expect(getByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
-    const signInButton = getByText(/Sign In to Save Your Plan/i);
-    expect(signInButton).not.toBeNull();
-    fireEvent.click(signInButton);
-    expect(onSignInClick).toHaveBeenCalledTimes(1);
+      expect(getByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
+      const signInButtons = getAllByRole('button', { name: /Sign In to Save Plan/i });
+      expect(signInButtons.length).toBeGreaterThan(0);
+      fireEvent.click(signInButtons[0]);
+      expect(onSignInClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('hides UserButton and displays "Sign In to Save Plan" CTA when signed out in demo mode', () => {
+      if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+        window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
+      }
+      const onSignInClick = mock(() => {});
+      const { queryByTitle, getAllByRole } = render(
+        <Header
+          {...defaultProps}
+          isDemo={true}
+          onSignInClick={onSignInClick}
+        />
+      );
+
+      expect(queryByTitle('Mock User Session')).toBeNull();
+      const signInButtons = getAllByRole('button', { name: /Sign In to Save Plan/i });
+      expect(signInButtons.length).toBeGreaterThan(0);
+    });
+
+    it('hides UserButton and displays "Go to Your Plans" CTA when signed in in demo mode', () => {
+      if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+        window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true, userId: 'user-1' });
+      }
+      const onNavigateApp = mock(() => {});
+      const { queryByTitle, getAllByRole, queryByRole } = render(
+        <Header
+          {...defaultProps}
+          isDemo={true}
+          onNavigateApp={onNavigateApp}
+        />
+      );
+
+      expect(queryByTitle('Mock User Session')).toBeNull();
+      expect(queryByRole('button', { name: /Sign In to Save Plan/i })).toBeNull();
+
+      const goAppButtons = getAllByRole('button', { name: /Go to Your Plans/i });
+      expect(goAppButtons.length).toBeGreaterThan(0);
+      fireEvent.click(goAppButtons[0]);
+      expect(onNavigateApp).toHaveBeenCalledTimes(1);
+    });
   });
 });
