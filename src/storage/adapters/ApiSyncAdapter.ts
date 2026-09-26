@@ -50,11 +50,9 @@ export class ApiSyncAdapter implements StorageRepository {
         if (data && typeof data === 'object' && ('plans' in data || 'items' in data)) {
           return migrateToMultiPlan(data);
         }
-      } else {
-        console.warn(`[ApiSyncAdapter] GET ${this.endpoint} returned HTTP ${res.status}`);
       }
-    } catch (err) {
-      console.warn(`[ApiSyncAdapter] Failed to fetch ${this.endpoint}:`, err);
+    } catch {
+      // Return default store data on fetch failure
     }
     return getDefaultStoreData();
   }
@@ -102,11 +100,9 @@ export class ApiSyncAdapter implements StorageRepository {
 
       const errJson = (await res.json().catch(() => ({}))) as { error?: string };
       const errorMsg = errJson.error || `HTTP ${res.status} error saving plan data`;
-      console.error(`[ApiSyncAdapter] POST ${this.endpoint} failed:`, errorMsg);
       return { success: false, localSaved: false, remoteSaved: false, error: errorMsg };
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Network error saving store data';
-      console.error('[ApiSyncAdapter] Network error:', err);
       return { success: false, localSaved: false, remoteSaved: false, error: msg };
     }
   }

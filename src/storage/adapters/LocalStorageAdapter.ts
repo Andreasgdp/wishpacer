@@ -31,11 +31,8 @@ export class LocalStorageAdapter implements StorageRepository {
       if (raw) {
         return migrateToMultiPlan(JSON.parse(raw));
       }
-    } catch (err) {
-      console.warn(
-        `[LocalStorageAdapter] Failed to parse primary storage key "${this.storageKey}":`,
-        err
-      );
+    } catch {
+      // Primary storage key parse failed; fall through to legacy keys
     }
 
     // 2. If guest storage key, try legacy keys for unauthenticated migration
@@ -96,7 +93,6 @@ export class LocalStorageAdapter implements StorageRepository {
       return { success: true, localSaved: true, remoteSaved: false };
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to write to localStorage';
-      console.warn('[LocalStorageAdapter] Write error:', err);
       return { success: false, localSaved: false, remoteSaved: false, error: msg };
     }
   }

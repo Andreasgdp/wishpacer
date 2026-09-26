@@ -66,6 +66,8 @@ export const Logo: React.FC<LogoProps> = ({
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        role="img"
         className="w-full h-full p-1"
       >
         <defs>
@@ -121,28 +123,30 @@ export const Logo: React.FC<LogoProps> = ({
   );
 
   if (variant === 'icon') {
+    if (onClick) {
+      return (
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label="Wish Pacing"
+          className={`inline-flex items-center cursor-pointer select-none group focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 rounded-xl ${className}`}
+        >
+          {iconSvg}
+        </button>
+      );
+    }
     return (
-      <div
-        onClick={onClick}
-        className={`inline-flex items-center cursor-pointer select-none group ${className}`}
-        role={onClick ? 'button' : undefined}
-        tabIndex={onClick ? 0 : undefined}
-      >
+      <div className={`inline-flex items-center select-none group ${className}`}>
         {iconSvg}
       </div>
     );
   }
 
-  return (
-    <div
-      onClick={onClick}
-      className={`inline-flex items-center ${gap} select-none group ${onClick ? 'cursor-pointer' : ''} ${className}`}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-    >
+  const content = (
+    <>
       {iconSvg}
-      <div className="flex items-center gap-2">
-        <span className={`tracking-tight ${textSize}`}>
+      <div className="hidden sm:flex items-center gap-2 min-w-0">
+        <span className={`tracking-tight ${textSize} whitespace-nowrap`}>
           <span className="text-slate-900 dark:text-white">Wish</span>
           <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 dark:from-violet-400 dark:via-indigo-400 dark:to-blue-400 bg-clip-text text-transparent ml-1">
             Pacing
@@ -150,12 +154,31 @@ export const Logo: React.FC<LogoProps> = ({
         </span>
         {badge && (
           <span
-            className={`inline-flex items-center font-bold tracking-wide uppercase rounded-full bg-violet-100 dark:bg-violet-950/80 text-violet-700 dark:text-violet-300 border border-violet-200/80 dark:border-violet-800/80 shadow-2xs ${badgeSize}`}
+            className={`inline-flex items-center font-bold tracking-wide uppercase rounded-full bg-violet-100 dark:bg-violet-950/80 text-violet-700 dark:text-violet-300 border border-violet-200/80 dark:border-violet-800/80 shadow-2xs shrink-0 ${badgeSize}`}
           >
             {badge}
           </span>
         )}
       </div>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label="Wish Pacing"
+        className={`inline-flex items-center ${gap} select-none group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 rounded-xl ${className}`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className={`inline-flex items-center ${gap} select-none group ${className}`}>
+      {content}
     </div>
   );
 };

@@ -171,9 +171,9 @@ export const PlanManagementModal: React.FC<PlanManagementModalProps> = ({
           {/* Initial Financials in Create Mode */}
           {mode === 'create' && (
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
-              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Initial Budget & Savings
-              </h4>
+              </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>

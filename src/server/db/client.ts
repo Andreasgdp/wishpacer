@@ -101,7 +101,7 @@ export async function ensureTablesExist(): Promise<void> {
       );
     `);
     tablesChecked = true;
-  } catch (err) {
-    console.warn('[db] ensureTablesExist warning:', err);
+  } catch {
+    // ensureTablesExist failed silently
   }
 }
