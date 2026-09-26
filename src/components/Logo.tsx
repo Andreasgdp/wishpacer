@@ -136,9 +136,7 @@ export const Logo: React.FC<LogoProps> = ({
       );
     }
     return (
-      <div className={`inline-flex items-center select-none group ${className}`}>
-        {iconSvg}
-      </div>
+      <div className={`inline-flex items-center select-none group ${className}`}>{iconSvg}</div>
     );
   }
 

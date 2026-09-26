@@ -21,6 +21,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   let clerk: ReturnType<typeof useClerk> | null = null;
   try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     clerk = useClerk();
   } catch {
     clerk = null;
@@ -35,7 +36,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (!isLoaded) {
     return null;
   }
-
   if (isSignedIn && isActivated) {
     return <>{children}</>;
   }
@@ -74,7 +74,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             Sign In Required to Access App
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            Sign in or create a free Wish Pacing account to persist your savings plans across devices.
+            Sign in or create a free Wish Pacing account to persist your savings plans across
+            devices.
           </p>
         </div>
 

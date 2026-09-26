@@ -18,6 +18,9 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+    window.__SET_MOCK_AUTH__(undefined);
+  }
 });
 
 const renderAppWithRoute = (initialRoute = '/') => {
@@ -176,6 +179,42 @@ describe('App Client-Side Routing', () => {
 
       expect(await findByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
       expect(queryByText(/Interactive Demo Mode • Changes are temporary/i)).toBeNull();
+    });
+  });
+
+  describe('Protected Route Developer Code Gate', () => {
+    it('prompts for developer activation code when unactivated user clicks Sign In / Register from /app', async () => {
+      localStorage.setItem('saving_plan_activated', 'false');
+      if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+        window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
+      }
+
+      const { findByText, findByRole, findByPlaceholderText } = renderAppWithRoute('/app');
+
+      // Auth gate screen is shown
+      expect(await findByText(/Sign In Required to Access App/i)).not.toBeNull();
+      const signInButton = await findByRole('button', { name: /Sign In \/ Register/i });
+
+      // Clicking Sign In / Register triggers developer activation code modal
+      fireEvent.click(signInButton);
+
+      expect(await findByText(/Developer Preview — Activation Required/i)).not.toBeNull();
+      expect(
+        await findByText(/Enter developer invite code to unlock savings planner/i)
+      ).not.toBeNull();
+      const codeInput = (await findByPlaceholderText(
+        /Enter developer invite code\.\.\./i
+      )) as HTMLInputElement;
+      codeInput.value = 'SAVINGS2026';
+      fireEvent.input(codeInput, { target: { value: 'SAVINGS2026' } });
+      fireEvent.change(codeInput, { target: { value: 'SAVINGS2026' } });
+
+      const form = codeInput.closest('form');
+      expect(form).not.toBeNull();
+      if (form) fireEvent.submit(form);
+
+      // Activation modal closes and saving_plan_activated is true
+      expect(localStorage.getItem('saving_plan_activated')).toBe('true');
     });
   });
 });

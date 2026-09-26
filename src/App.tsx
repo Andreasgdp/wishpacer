@@ -5,8 +5,20 @@ import { Toaster } from 'sonner';
 import confetti from 'canvas-confetti';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { PlanActionsBar } from './components/PlanActionsBar';
-import { useAppAuth, useModalRegistry, usePlanManager, type PlanManagerActions, type ModalRegistry } from './hooks';
-import type { Plan, AppStoreData, PlanCalculationResult, PlanConfig, PortfolioSummary } from './types/plan';
+import {
+  useAppAuth,
+  useModalRegistry,
+  usePlanManager,
+  type PlanManagerActions,
+  type ModalRegistry,
+} from './hooks';
+import type {
+  Plan,
+  AppStoreData,
+  PlanCalculationResult,
+  PlanConfig,
+  PortfolioSummary,
+} from './types/plan';
 import { Header } from './components/Header';
 import { LandingPage } from './components/LandingPage';
 import { MetricsOverview } from './components/MetricsOverview';
@@ -139,15 +151,20 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
         }
       }
     }
-  }, [storeData.activePlanId, storeData.plans, isPortfolioView, location.pathname, planId, navigate, basePath]);
+  }, [
+    storeData.activePlanId,
+    storeData.plans,
+    isPortfolioView,
+    location.pathname,
+    planId,
+    navigate,
+    basePath,
+  ]);
 
   // Render 404 if planId param was requested in plan route but does not exist
   if (planId && !storeData.plans.some(p => p.id === planId)) {
     return (
-      <NotFoundPage
-        onReturnToApp={() => navigate(basePath)}
-        onGoToLanding={() => navigate('/')}
-      />
+      <NotFoundPage onReturnToApp={() => navigate(basePath)} onGoToLanding={() => navigate('/')} />
     );
   }
 
@@ -579,7 +596,10 @@ export const DemoAppWorkspace: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
-      <Route path="/plan/:planId" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
+      <Route
+        path="/plan/:planId"
+        element={<AppDashboard {...demoDashboardProps} isDemo={true} />}
+      />
       <Route path="/portfolio" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
       <Route
         path="*"
@@ -730,41 +750,57 @@ export const ProtectedAppWorkspace: React.FC = () => {
   };
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute isActivated={isActivated} onOpenActivationModal={() => modal.open('activation')}>
-            <AppDashboard {...appDashboardProps} isDemo={false} />
-          </ProtectedRoute>
-        }
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute
+              isActivated={isActivated}
+              onOpenActivationModal={() => modal.open('activation')}
+            >
+              <AppDashboard {...appDashboardProps} isDemo={false} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/plan/:planId"
+          element={
+            <ProtectedRoute
+              isActivated={isActivated}
+              onOpenActivationModal={() => modal.open('activation')}
+            >
+              <AppDashboard {...appDashboardProps} isDemo={false} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/portfolio"
+          element={
+            <ProtectedRoute
+              isActivated={isActivated}
+              onOpenActivationModal={() => modal.open('activation')}
+            >
+              <AppDashboard {...appDashboardProps} isDemo={false} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <NotFoundPage
+              onReturnToApp={() => navigate('/app')}
+              onGoToLanding={() => navigate('/')}
+            />
+          }
+        />
+      </Routes>
+      <ActivationWallModal
+        isOpen={modal.isOpen('activation')}
+        onClose={modal.close}
+        onActivate={handleActivate}
       />
-      <Route
-        path="/plan/:planId"
-        element={
-          <ProtectedRoute isActivated={isActivated} onOpenActivationModal={() => modal.open('activation')}>
-            <AppDashboard {...appDashboardProps} isDemo={false} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/portfolio"
-        element={
-          <ProtectedRoute isActivated={isActivated} onOpenActivationModal={() => modal.open('activation')}>
-            <AppDashboard {...appDashboardProps} isDemo={false} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="*"
-        element={
-          <NotFoundPage
-            onReturnToApp={() => navigate('/app')}
-            onGoToLanding={() => navigate('/')}
-          />
-        }
-      />
-    </Routes>
+    </>
   );
 };
 

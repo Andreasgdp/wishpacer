@@ -81,7 +81,7 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
       };
     });
 
-    await page.goto('/');
+    await page.goto('/app');
 
     // Ensure initial app loading spinner is gone
     await expect(page.getByText('Loading your savings plans...')).not.toBeVisible();
@@ -105,11 +105,11 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
         getToken: async () => null,
       });
     });
-
     // 4. Verify signed-out state: User 1's secret goal must NOT be visible
+    await page.goto('/demo');
     await expect(page.getByText('User 1 Secret Goal')).toHaveCount(0);
 
-    // 5. Guest modification: Guest creates a local wish item
+    // 5. Guest modification: Guest creates a local wish item in demo
     await page.getByRole('button', { name: 'Add Wish' }).click();
     await page.getByPlaceholder(/Robotstøvsuger/i).fill('Guest Local Goal');
     await page.getByPlaceholder('0.00').fill('250');
@@ -125,7 +125,7 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
         getToken: async () => 'user-2-token',
       });
     });
-
+    await page.goto('/app');
     // 7. Verify User 2 state: NEITHER User 1 Secret Goal NOR Guest Local Goal should be visible in User 2's account
     await expect(page.getByText('User 1 Secret Goal')).toHaveCount(0);
     await expect(page.getByText('Guest Local Goal')).toHaveCount(0);
