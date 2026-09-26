@@ -76,9 +76,9 @@ export const PurchasedHistoryModal: React.FC<PurchasedHistoryModalProps> = ({
                         </span>
                       )}
                     </div>
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
                       {item.title}
-                    </h4>
+                    </h3>
                     {item.notes && (
                       <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                         {item.notes}
@@ -97,6 +97,7 @@ export const PurchasedHistoryModal: React.FC<PurchasedHistoryModalProps> = ({
                     <button
                       type="button"
                       onClick={() => onRestoreToPlan(item.id)}
+                      aria-label={`Restore ${item.title} to wishlist`}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white dark:hover:bg-slate-700 transition-colors"
                       title="Move back to active plan"
                     >
@@ -106,6 +107,7 @@ export const PurchasedHistoryModal: React.FC<PurchasedHistoryModalProps> = ({
                     <button
                       type="button"
                       onClick={() => onDelete(item.id)}
+                      aria-label={`Delete ${item.title} permanently`}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-white dark:hover:bg-slate-700 transition-colors"
                       title="Delete permanently"
                     >

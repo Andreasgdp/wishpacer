@@ -109,9 +109,9 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
 
         {/* Export Options */}
         <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Export / Backup
-          </h4>
+          </h3>
           <div className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
@@ -143,9 +143,9 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
 
         {/* Import Option */}
         <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Import from Backup
-          </h4>
+          </h3>
           <Input
             type="file"
             ref={fileInputRef}

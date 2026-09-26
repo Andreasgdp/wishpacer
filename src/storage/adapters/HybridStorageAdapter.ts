@@ -38,8 +38,8 @@ export class HybridStorageAdapter implements StorageRepository {
     for (const listener of this.listeners) {
       try {
         listener(data);
-      } catch (err) {
-        console.error('[HybridStorageAdapter] Data updated listener error:', err);
+      } catch {
+        // Listener error handled silently
       }
     }
   }
@@ -61,15 +61,12 @@ export class HybridStorageAdapter implements StorageRepository {
               return remoteData;
             } else if (isNewer(localData, remoteData)) {
               // Local storage is newer than remote API (e.g. offline edits); push to remote
-              this.remote?.save(localData).catch(err => {
-                console.warn('[HybridStorageAdapter] Syncing local data to remote failed:', err);
-              });
+              this.remote?.save(localData).catch(() => {});
             }
           }
           return null;
         })
-        .catch(err => {
-          console.warn('[HybridStorageAdapter] Remote load failed or timed out:', err);
+        .catch(() => {
           return null;
         });
 
