@@ -165,7 +165,7 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
         darkMode={darkMode}
         viewMode={location.pathname === '/' ? 'landing' : 'app'}
         onNavigateLanding={() => navigate('/')}
-        onNavigateApp={() => navigate(basePath)}
+        onNavigateApp={() => navigate('/app')}
         onSelectPlan={id => {
           actions.selectPlan(id);
           navigate(`${basePath}/plan/${id}`);

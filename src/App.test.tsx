@@ -1,6 +1,6 @@
 import './test-setup';
 import { afterEach, beforeEach, describe, expect, it, spyOn } from 'bun:test';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, fireEvent } from '@testing-library/react';
 import * as hooks from './hooks';
 import { MemoryRouter } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
@@ -133,5 +133,49 @@ describe('App Client-Side Routing', () => {
   it('renders NotFoundPage on non-existent plan route in /demo', async () => {
     const { findByText } = renderAppWithRoute('/demo/plan/invalid-plan-999');
     expect(await findByText(/Wish List Item or Page Not Found/i)).not.toBeNull();
+  });
+  describe('Demo Mode Header Navigation', () => {
+    it('hides UserButton and shows "Sign In to Save Plan" when signed out in demo mode', async () => {
+      if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+        window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false, userId: null });
+      }
+
+      const { findAllByRole, queryByTitle } = renderAppWithRoute('/demo');
+
+      expect(queryByTitle('Mock User Session')).toBeNull();
+      const signInButtons = await findAllByRole('button', { name: /Sign In to Save Plan/i });
+      expect(signInButtons.length).toBeGreaterThan(0);
+    });
+
+    it('hides UserButton and shows "Go to Your Plans" when signed in in demo mode', async () => {
+      if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+        window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true, userId: 'user-demo-1' });
+      }
+
+      const { findAllByRole, queryByTitle, queryByRole } = renderAppWithRoute('/demo');
+
+      expect(queryByTitle('Mock User Session')).toBeNull();
+      expect(queryByRole('button', { name: /Sign In to Save Plan/i })).toBeNull();
+      const goAppButtons = await findAllByRole('button', { name: /Go to Your Plans/i });
+      expect(goAppButtons.length).toBeGreaterThan(0);
+    });
+
+    it('navigates to "/app" when clicking "Go to Your Plans" while signed in in demo mode', async () => {
+      if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+        window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true, userId: 'user-demo-1' });
+      }
+
+      const { findAllByRole, queryByText, findByRole, findByText } = renderAppWithRoute('/demo');
+
+      expect(await findByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
+
+      const goAppButtons = await findAllByRole('button', { name: /Go to Your Plans/i });
+      expect(goAppButtons.length).toBeGreaterThan(0);
+
+      fireEvent.click(goAppButtons[0]);
+
+      expect(await findByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
+      expect(queryByText(/Interactive Demo Mode • Changes are temporary/i)).toBeNull();
+    });
   });
 });
