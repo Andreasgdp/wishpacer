@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useClerk } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
 import confetti from 'canvas-confetti';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { PlanActionsBar } from './components/PlanActionsBar';
 import { useAppAuth, useModalRegistry, usePlanManager } from './hooks';
 import type { Plan } from './types/plan';
@@ -446,6 +447,7 @@ export const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <AppContent />
+      <SpeedInsights />
     </ErrorBoundary>
   );
 };
