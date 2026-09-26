@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClerkProviderWithTheme } from './components/ClerkProviderWithTheme';
@@ -17,8 +18,10 @@ ReactDOM.createRoot(rootElement).render(
     <ThemeProvider>
       <MotionProvider>
         <ClerkProviderWithTheme>
-          <App />
-          <Analytics />
+          <BrowserRouter>
+            <App />
+            <Analytics />
+          </BrowserRouter>
         </ClerkProviderWithTheme>
       </MotionProvider>
     </ThemeProvider>

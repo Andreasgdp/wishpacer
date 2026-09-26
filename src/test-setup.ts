@@ -4,6 +4,7 @@ const win = new Window();
 globalThis.window = win as unknown as typeof globalThis.window;
 globalThis.document = win.document as unknown as typeof globalThis.document;
 globalThis.navigator = win.navigator as unknown as typeof globalThis.navigator;
+globalThis.localStorage = win.localStorage as unknown as typeof globalThis.localStorage;
 globalThis.Node = win.Node as unknown as typeof globalThis.Node;
 globalThis.Element = win.Element as unknown as typeof globalThis.Element;
 globalThis.HTMLElement = win.HTMLElement as unknown as typeof globalThis.HTMLElement;
