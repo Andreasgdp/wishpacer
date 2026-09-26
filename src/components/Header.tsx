@@ -95,6 +95,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   let clerk: ReturnType<typeof useClerk> | null = null;
   try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     clerk = useClerk();
   } catch {
     clerk = null;
@@ -152,7 +153,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-4 min-w-0">
           {/* Logo & Plan Switcher */}
-          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink">
+          <div className="flex items-center gap-4 sm:gap-3 min-w-0 shrink">
             <Logo
               variant="full"
               size="sm"
@@ -450,7 +451,11 @@ export const Header: React.FC<HeaderProps> = ({
                   aria-label="Toggle mobile menu"
                   className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center shrink-0"
                 >
-                  {isMobileMenuOpen ? <X className="w-4 h-4" /> : <MoreVertical className="w-4 h-4" />}
+                  {isMobileMenuOpen ? (
+                    <X className="w-4 h-4" />
+                  ) : (
+                    <MoreVertical className="w-4 h-4" />
+                  )}
                 </button>
               </>
             ) : (
@@ -504,7 +509,11 @@ export const Header: React.FC<HeaderProps> = ({
                   aria-label="Toggle mobile menu"
                   className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center shrink-0"
                 >
-                  {isMobileMenuOpen ? <X className="w-4 h-4" /> : <MoreVertical className="w-4 h-4" />}
+                  {isMobileMenuOpen ? (
+                    <X className="w-4 h-4" />
+                  ) : (
+                    <MoreVertical className="w-4 h-4" />
+                  )}
                 </button>
               </>
             )}

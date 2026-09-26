@@ -3,21 +3,17 @@ import { afterEach, describe, expect, it, mock } from 'bun:test';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
+import { setGlobalMockAuth } from '../hooks/useAppAuth';
 
 afterEach(() => {
   cleanup();
   localStorage.clear();
-  if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
-    window.__SET_MOCK_AUTH__(undefined);
-  }
+  setGlobalMockAuth(undefined);
 });
 
 describe('ProtectedRoute Component', () => {
   it('renders children when user is signed in and activated', () => {
-    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
-      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true });
-    }
-
+    setGlobalMockAuth({ isLoaded: true, isSignedIn: true });
     const { getByText } = render(
       <MemoryRouter initialEntries={['/app']}>
         <ProtectedRoute isActivated={true}>
@@ -30,10 +26,7 @@ describe('ProtectedRoute Component', () => {
   });
 
   it('renders Auth Gate screen when user is not signed in', () => {
-    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
-      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
-    }
-
+    setGlobalMockAuth({ isLoaded: true, isSignedIn: false });
     const { getByText } = render(
       <MemoryRouter initialEntries={['/app']}>
         <ProtectedRoute isActivated={true}>
@@ -44,17 +37,16 @@ describe('ProtectedRoute Component', () => {
 
     expect(getByText('Sign In Required to Access App')).not.toBeNull();
     expect(
-      getByText('Sign in or create a free Wish Pacing account to persist your savings plans across devices.')
+      getByText(
+        'Sign in or create a free Wish Pacing account to persist your savings plans across devices.'
+      )
     ).not.toBeNull();
     expect(getByText('Sign In / Register')).not.toBeNull();
     expect(getByText('Explore Interactive Demo First')).not.toBeNull();
   });
 
   it('renders Auth Gate screen when user is signed in but not activated', () => {
-    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
-      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true });
-    }
-
+    setGlobalMockAuth({ isLoaded: true, isSignedIn: true });
     const { getByText } = render(
       <MemoryRouter initialEntries={['/app']}>
         <ProtectedRoute isActivated={false}>
@@ -67,10 +59,7 @@ describe('ProtectedRoute Component', () => {
   });
 
   it('navigates to /demo when "Explore Interactive Demo First" button is clicked', () => {
-    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
-      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
-    }
-
+    setGlobalMockAuth({ isLoaded: true, isSignedIn: false });
     const { getByText } = render(
       <MemoryRouter initialEntries={['/app']}>
         <Routes>
@@ -94,10 +83,7 @@ describe('ProtectedRoute Component', () => {
   });
 
   it('triggers onOpenActivationModal when Sign In / Register is clicked and user is unactivated', () => {
-    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
-      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
-    }
-
+    setGlobalMockAuth({ isLoaded: true, isSignedIn: false });
     const onOpenActivationModal = mock(() => {});
 
     const { getByText } = render(

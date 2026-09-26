@@ -174,11 +174,7 @@ describe('Header Component', () => {
       }
       const onSignInClick = mock(() => {});
       const { getByText, getAllByRole } = render(
-        <Header
-          {...defaultProps}
-          isDemo={true}
-          onSignInClick={onSignInClick}
-        />
+        <Header {...defaultProps} isDemo={true} onSignInClick={onSignInClick} />
       );
 
       expect(getByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
@@ -194,11 +190,7 @@ describe('Header Component', () => {
       }
       const onSignInClick = mock(() => {});
       const { queryByTitle, getAllByRole } = render(
-        <Header
-          {...defaultProps}
-          isDemo={true}
-          onSignInClick={onSignInClick}
-        />
+        <Header {...defaultProps} isDemo={true} onSignInClick={onSignInClick} />
       );
 
       expect(queryByTitle('Mock User Session')).toBeNull();
@@ -212,11 +204,7 @@ describe('Header Component', () => {
       }
       const onNavigateApp = mock(() => {});
       const { queryByTitle, getAllByRole, queryByRole } = render(
-        <Header
-          {...defaultProps}
-          isDemo={true}
-          onNavigateApp={onNavigateApp}
-        />
+        <Header {...defaultProps} isDemo={true} onNavigateApp={onNavigateApp} />
       );
 
       expect(queryByTitle('Mock User Session')).toBeNull();

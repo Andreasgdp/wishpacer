@@ -274,7 +274,11 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
             <button
               type="button"
               onClick={handlePurchaseClick}
-              aria-label={item.isPurchased ? `Mark ${item.title} as planned` : `Mark ${item.title} as purchased`}
+              aria-label={
+                item.isPurchased
+                  ? `Mark ${item.title} as planned`
+                  : `Mark ${item.title} as purchased`
+              }
               className={`p-2 rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${
                 item.isPurchased
                   ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400'
@@ -289,7 +293,9 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
             <button
               type="button"
               onClick={() => onTogglePaused(item.id)}
-              aria-label={item.isPaused ? `Include ${item.title} in active plan` : `Pause ${item.title}`}
+              aria-label={
+                item.isPaused ? `Include ${item.title} in active plan` : `Pause ${item.title}`
+              }
               className={`p-2 rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${
                 item.isPaused
                   ? 'bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400'
