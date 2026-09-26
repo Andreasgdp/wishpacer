@@ -183,7 +183,7 @@ describe('Header Component', () => {
 
       expect(getByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
       const signInButtons = getAllByRole('button', { name: /Sign In to Save Plan/i });
-      expect(signInButtons.length).toBeGreaterThan(0);
+      expect(signInButtons.length).toBe(1);
       fireEvent.click(signInButtons[0]);
       expect(onSignInClick).toHaveBeenCalledTimes(1);
     });
@@ -203,7 +203,7 @@ describe('Header Component', () => {
 
       expect(queryByTitle('Mock User Session')).toBeNull();
       const signInButtons = getAllByRole('button', { name: /Sign In to Save Plan/i });
-      expect(signInButtons.length).toBeGreaterThan(0);
+      expect(signInButtons.length).toBe(1);
     });
 
     it('hides UserButton and displays "Go to Your Plans" CTA when signed in in demo mode', () => {
@@ -223,7 +223,7 @@ describe('Header Component', () => {
       expect(queryByRole('button', { name: /Sign In to Save Plan/i })).toBeNull();
 
       const goAppButtons = getAllByRole('button', { name: /Go to Your Plans/i });
-      expect(goAppButtons.length).toBeGreaterThan(0);
+      expect(goAppButtons.length).toBe(1);
       fireEvent.click(goAppButtons[0]);
       expect(onNavigateApp).toHaveBeenCalledTimes(1);
     });
