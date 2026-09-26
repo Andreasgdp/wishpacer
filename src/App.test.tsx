@@ -144,7 +144,7 @@ describe('App Client-Side Routing', () => {
 
       expect(queryByTitle('Mock User Session')).toBeNull();
       const signInButtons = await findAllByRole('button', { name: /Sign In to Save Plan/i });
-      expect(signInButtons.length).toBeGreaterThan(0);
+      expect(signInButtons.length).toBe(1);
     });
 
     it('hides UserButton and shows "Go to Your Plans" when signed in in demo mode', async () => {
@@ -157,7 +157,7 @@ describe('App Client-Side Routing', () => {
       expect(queryByTitle('Mock User Session')).toBeNull();
       expect(queryByRole('button', { name: /Sign In to Save Plan/i })).toBeNull();
       const goAppButtons = await findAllByRole('button', { name: /Go to Your Plans/i });
-      expect(goAppButtons.length).toBeGreaterThan(0);
+      expect(goAppButtons.length).toBe(1);
     });
 
     it('navigates to "/app" when clicking "Go to Your Plans" while signed in in demo mode', async () => {
@@ -170,7 +170,7 @@ describe('App Client-Side Routing', () => {
       expect(await findByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
 
       const goAppButtons = await findAllByRole('button', { name: /Go to Your Plans/i });
-      expect(goAppButtons.length).toBeGreaterThan(0);
+      expect(goAppButtons.length).toBe(1);
 
       fireEvent.click(goAppButtons[0]);
 

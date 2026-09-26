@@ -368,55 +368,34 @@ export const Header: React.FC<HeaderProps> = ({
                 )}
 
                 {/* Clerk Authentication Controls */}
-                <div className="pl-1 border-l border-slate-200 dark:border-slate-800 flex items-center shrink-0">
-                  {isDemo ? (
-                    isSignedIn ? (
-                      <button
-                        type="button"
-                        onClick={onNavigateApp || handleAppLaunch}
-                        aria-label="Go to Your Plans"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold shadow-xs transition-all shrink-0"
-                      >
-                        <Layout className="w-3.5 h-3.5" />
-                        <span>Go to Your Plans</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
+                {!isDemo && (
+                  <div className="pl-1 border-l border-slate-200 dark:border-slate-800 flex items-center shrink-0">
+                    {isSignedIn ? (
+                      typeof window !== 'undefined' && window.__MOCK_AUTH__ ? (
+                        <div
+                          className="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-xs"
+                          title="Mock User Session"
+                        >
+                          U
+                        </div>
+                      ) : (
+                        <SignedIn>
+                          <UserButton userProfileMode="modal" />
+                        </SignedIn>
+                      )
                     ) : (
                       <button
                         type="button"
                         onClick={handleDemoSignIn}
-                        aria-label="Sign In to Save Plan"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold shadow-xs transition-all shrink-0"
+                        aria-label="Sign In"
+                        className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
                       >
                         <UserIcon className="w-3.5 h-3.5" />
-                        <span>Sign In to Save Plan</span>
+                        <span className="hidden lg:inline">Sign In</span>
                       </button>
-                    )
-                  ) : isSignedIn ? (
-                    typeof window !== 'undefined' && window.__MOCK_AUTH__ ? (
-                      <div
-                        className="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-xs"
-                        title="Mock User Session"
-                      >
-                        U
-                      </div>
-                    ) : (
-                      <SignedIn>
-                        <UserButton userProfileMode="modal" />
-                      </SignedIn>
-                    )
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleDemoSignIn}
-                      aria-label="Sign In"
-                      className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
-                    >
-                      <UserIcon className="w-3.5 h-3.5" />
-                      <span className="hidden lg:inline">Sign In</span>
-                    </button>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -489,54 +468,34 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
 
                 {/* Clerk User Button / Sign In on Mobile */}
-                <div className="flex items-center shrink-0">
-                  {isDemo ? (
-                    isSignedIn ? (
-                      <button
-                        type="button"
-                        onClick={onNavigateApp || handleAppLaunch}
-                        aria-label="Go to Your Plans"
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold shadow-xs transition-all shrink-0 min-h-[36px]"
-                      >
-                        <Layout className="w-3.5 h-3.5" />
-                        <span className="hidden xs:inline">Go to Your Plans</span>
-                      </button>
+                {!isDemo && (
+                  <div className="flex items-center shrink-0">
+                    {isSignedIn ? (
+                      typeof window !== 'undefined' && window.__MOCK_AUTH__ ? (
+                        <div
+                          className="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-xs"
+                          title="Mock User Session"
+                        >
+                          U
+                        </div>
+                      ) : (
+                        <SignedIn>
+                          <UserButton userProfileMode="modal" />
+                        </SignedIn>
+                      )
                     ) : (
                       <button
                         type="button"
                         onClick={handleDemoSignIn}
-                        aria-label="Sign In to Save Plan"
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold shadow-xs transition-all shrink-0 min-h-[36px]"
+                        aria-label="Sign In"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all min-h-[36px]"
                       >
                         <UserIcon className="w-3.5 h-3.5" />
-                        <span className="hidden xs:inline">Sign In to Save Plan</span>
+                        <span className="hidden xs:inline">Sign In</span>
                       </button>
-                    )
-                  ) : isSignedIn ? (
-                    typeof window !== 'undefined' && window.__MOCK_AUTH__ ? (
-                      <div
-                        className="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-xs"
-                        title="Mock User Session"
-                      >
-                        U
-                      </div>
-                    ) : (
-                      <SignedIn>
-                        <UserButton userProfileMode="modal" />
-                      </SignedIn>
-                    )
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleDemoSignIn}
-                      aria-label="Sign In"
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all min-h-[36px]"
-                    >
-                      <UserIcon className="w-3.5 h-3.5" />
-                      <span className="hidden xs:inline">Sign In</span>
-                    </button>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Mobile Menu Toggle Button */}
                 <button
@@ -658,50 +617,20 @@ export const Header: React.FC<HeaderProps> = ({
                       <span>Landing Page</span>
                     </button>
 
-                    {/* Sign In / Go to Plans in Mobile Drawer */}
-                    {isDemo ? (
-                      isSignedIn ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsMobileMenuOpen(false);
-                            (onNavigateApp || handleAppLaunch)?.();
-                          }}
-                          aria-label="Go to Your Plans"
-                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold bg-violet-600 text-white mb-2 shadow-xs"
-                        >
-                          <Layout className="w-4 h-4" />
-                          <span>Go to Your Plans</span>
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsMobileMenuOpen(false);
-                            handleDemoSignIn();
-                          }}
-                          aria-label="Sign In to Save Plan"
-                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900 mb-2 shadow-xs"
-                        >
-                          <UserIcon className="w-4 h-4" />
-                          <span>Sign In to Save Plan</span>
-                        </button>
-                      )
-                    ) : (
-                      !isSignedIn && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsMobileMenuOpen(false);
-                            handleDemoSignIn();
-                          }}
-                          aria-label="Sign In or Create Account"
-                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900 mb-2 shadow-xs"
-                        >
-                          <UserIcon className="w-4 h-4" />
-                          <span>Sign In / Create Account</span>
-                        </button>
-                      )
+                    {/* Sign In in Mobile Drawer */}
+                    {!isDemo && !isSignedIn && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          handleDemoSignIn();
+                        }}
+                        aria-label="Sign In or Create Account"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900 mb-2 shadow-xs"
+                      >
+                        <UserIcon className="w-4 h-4" />
+                        <span>Sign In / Create Account</span>
+                      </button>
                     )}
 
                     {/* All Plans */}
