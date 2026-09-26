@@ -39,9 +39,10 @@ function getMockAuthSnapshot(): Window['__MOCK_AUTH__'] {
   return globalMockAuth;
 }
 
-function setGlobalMockAuth(newAuth: Window['__MOCK_AUTH__']) {
+export function setGlobalMockAuth(newAuth: Window['__MOCK_AUTH__']) {
   if (typeof window !== 'undefined') {
     window.__MOCK_AUTH__ = newAuth;
+    window.__SET_MOCK_AUTH__ = setGlobalMockAuth;
   }
   globalMockAuth = newAuth ? { ...newAuth } : undefined;
   for (const listener of mockAuthListeners) {

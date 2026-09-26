@@ -5,7 +5,7 @@ test.describe('Wish Pacing End-to-End User Flows', () => {
     await page.addInitScript(() => {
       window.localStorage.clear();
     });
-    await page.goto('/');
+    await page.goto('/demo');
   });
 
   test('Flow 1: Activation Gate on Login Attempt and Session Unlock', async ({ page }) => {
@@ -17,7 +17,10 @@ test.describe('Wish Pacing End-to-End User Flows', () => {
     await page.getByRole('button', { name: 'Close' }).first().click();
 
     // Attempting to sign in triggers the Developer Activation Wall
-    await page.getByRole('button', { name: 'Sign In' }).first().click();
+    await page
+      .getByRole('button', { name: /Sign In/i })
+      .first()
+      .click();
     await expect(page.getByText('Developer Preview — Activation Required')).toBeVisible();
 
     // Entering invalid code shows error
@@ -153,7 +156,7 @@ test.describe('Wish Pacing End-to-End User Flows', () => {
     await expect(page.getByText('What-If Savings Scenario Tester')).toBeVisible();
 
     // Hide simulator
-    await page.getByRole('button', { name: 'Hide' }).click();
+    await page.getByRole('button', { name: /Hide|Close What-If/i }).click();
     await expect(page.getByText('What-If Savings Scenario Tester')).not.toBeVisible();
   });
 

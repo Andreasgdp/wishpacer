@@ -7,10 +7,7 @@ export interface NotFoundPageProps {
   onGoToLanding?: () => void;
 }
 
-export const NotFoundPage: React.FC<NotFoundPageProps> = ({
-  onReturnToApp,
-  onGoToLanding,
-}) => {
+export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onReturnToApp, onGoToLanding }) => {
   const handleReturnToApp = () => {
     if (onReturnToApp) {
       onReturnToApp();
@@ -70,7 +67,8 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
               Wish List Item or Page Not Found
             </h1>
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
-              The page, saved wishlist item, or route you are looking for does not exist, has been removed, or the link may be broken.
+              The page, saved wishlist item, or route you are looking for does not exist, has been
+              removed, or the link may be broken.
             </p>
           </div>
 

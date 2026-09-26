@@ -174,7 +174,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {/* Item Price Slider */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <label htmlFor="item-price-slider" className="font-semibold text-slate-700 dark:text-slate-300">Target Item Price</label>
+                  <label
+                    htmlFor="item-price-slider"
+                    className="font-semibold text-slate-700 dark:text-slate-300"
+                  >
+                    Target Item Price
+                  </label>
                   <span className="font-extrabold text-slate-900 dark:text-white text-base">
                     ${itemPrice.toLocaleString()}
                   </span>
@@ -199,7 +204,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {/* Monthly Savings Slider */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <label htmlFor="monthly-savings-slider" className="font-semibold text-slate-700 dark:text-slate-300">Monthly Savings Rate</label>
+                  <label
+                    htmlFor="monthly-savings-slider"
+                    className="font-semibold text-slate-700 dark:text-slate-300"
+                  >
+                    Monthly Savings Rate
+                  </label>
                   <span className="font-extrabold text-violet-600 dark:text-violet-400 text-base">
                     ${monthlySavings.toLocaleString()} / mo
                   </span>
@@ -224,7 +234,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {/* HYSA Yield Slider */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <label htmlFor="hysa-rate-slider" className="font-semibold text-slate-700 dark:text-slate-300">
+                  <label
+                    htmlFor="hysa-rate-slider"
+                    className="font-semibold text-slate-700 dark:text-slate-300"
+                  >
                     HYSA Annual Yield (APY)
                   </label>
                   <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-base">
@@ -265,11 +278,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 <div>
                   <div className="text-3xl sm:text-4xl font-extrabold text-white">
-                    {calculation.months} <span className="text-xl font-normal text-violet-200">Months</span>
+                    {calculation.months}{' '}
+                    <span className="text-xl font-normal text-violet-200">Months</span>
                   </div>
                   <div className="text-sm text-violet-200 font-medium mt-1 flex items-center gap-1.5">
                     <Calendar className="w-4 h-4 text-violet-300" />
-                    <span>Estimated: <strong className="text-white">{formattedDate}</strong></span>
+                    <span>
+                      Estimated: <strong className="text-white">{formattedDate}</strong>
+                    </span>
                   </div>
                 </div>
 
@@ -322,7 +338,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Engineered for Precision Pacing
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
-              Everything you need to turn vague wishlists into sequential, achievable financial milestones.
+              Everything you need to turn vague wishlists into sequential, achievable financial
+              milestones.
             </p>
           </div>
 
@@ -336,7 +353,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Contiguous Priority Queue
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Rank items 1 through N. Unused monthly savings spill directly into the next item in queue without leaving gaps.
+                Rank items 1 through N. Unused monthly savings spill directly into the next item in
+                queue without leaving gaps.
               </p>
             </div>
 
@@ -349,7 +367,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 HYSA Yield Simulator
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Account for high-yield interest compounding on unallocated cash balances to shorten purchase dates automatically.
+                Account for high-yield interest compounding on unallocated cash balances to shorten
+                purchase dates automatically.
               </p>
             </div>
 
@@ -358,11 +377,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                 <Sliders className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                What-If Sandbox
-              </h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">What-If Sandbox</h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Test unexpected bonuses or monthly budget increases on the fly to see instant completion shift across your queue.
+                Test unexpected bonuses or monthly budget increases on the fly to see instant
+                completion shift across your queue.
               </p>
             </div>
 
@@ -375,7 +393,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Multi-Plan Portfolio
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Maintain distinct plans for personal tech, home upgrades, travel, or gift goals with dedicated currencies.
+                Maintain distinct plans for personal tech, home upgrades, travel, or gift goals with
+                dedicated currencies.
               </p>
             </div>
 
@@ -388,7 +407,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Local-First Hybrid Sync
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Instant offline speed with seamless cloud synchronization across devices when logged in via Clerk.
+                Instant offline speed with seamless cloud synchronization across devices when logged
+                in via Clerk.
               </p>
             </div>
 
@@ -401,7 +421,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Milestone Timelines
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Get an intuitive visual roadmap of when each item will cross the finish line with real date milestones.
+                Get an intuitive visual roadmap of when each item will cross the finish line with
+                real date milestones.
               </p>
             </div>
           </div>
@@ -433,7 +454,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Add Wishlist &amp; Priority
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Enter your desired items with price, links, and priority rank. Drag and drop to adjust order anytime.
+                Enter your desired items with price, links, and priority rank. Drag and drop to
+                adjust order anytime.
               </p>
             </div>
 
@@ -446,7 +468,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Set Budget &amp; HYSA Yield
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Specify your monthly savings contribution and high-yield interest rate to power automated pacing calculations.
+                Specify your monthly savings contribution and high-yield interest rate to power
+                automated pacing calculations.
               </p>
             </div>
 
@@ -459,7 +482,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Watch Dates Unfold
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Wish Pacing computes exact funding months, milestone schedules, and lets you celebrate as items cross 100%!
+                Wish Pacing computes exact funding months, milestone schedules, and lets you
+                celebrate as items cross 100%!
               </p>
             </div>
           </div>
@@ -478,7 +502,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </h2>
 
           <p className="text-violet-200 text-sm sm:text-base max-w-xl mx-auto font-medium">
-            Start organizing your goals today. No credit card, setup fees, or spreadsheet magic required.
+            Start organizing your goals today. No credit card, setup fees, or spreadsheet magic
+            required.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
@@ -506,7 +531,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <footer className="py-8 px-4 sm:px-8 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <Logo variant="full" size="sm" onClick={onLaunchApp} />
-          <p>© {new Date().getFullYear()} Wish Pacing. Smart Wishlist &amp; Savings Planner. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} Wish Pacing. Smart Wishlist &amp; Savings Planner. All
+            rights reserved.
+          </p>
         </div>
       </footer>
     </div>
