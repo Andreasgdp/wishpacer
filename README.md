@@ -85,7 +85,7 @@ bun run test
 Playwright executes headless browser testing across all 7 core user flows (Activation Gate, Onboarding Tour, Multi-Plan CRUD, Wishlist Queue, What-If Simulator, Privacy/Support Modals, and Account Erasure):
 
 ```bash
-# Run full E2E test suite locally
+# Run full E2E test suite locally with
 bun run test:e2e
 
 # Run Playwright UI mode
