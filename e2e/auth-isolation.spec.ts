@@ -5,7 +5,6 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
 
   test.beforeEach(async ({ page }) => {
     userCloudDb.clear();
-
     // Mock backend endpoint /api/plan per user authorization token
     await page.route('**/api/plan', async route => {
       const request = route.request();
@@ -87,12 +86,9 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
     // Ensure initial app loading spinner is gone
     await expect(page.getByText('Loading your savings plans...')).not.toBeVisible();
 
+    // Dismiss onboarding tour modal if visible
     // 2. User 1 creates a secret wish item
-    const addWishBtn = page
-      .getByRole('button', { name: /Add (Wish|Item|Your First Wish)/i })
-      .first();
-    await expect(addWishBtn).toBeVisible();
-    await addWishBtn.click();
+    await page.getByRole('button', { name: 'Add Wish' }).click();
 
     await page.getByPlaceholder(/Robotstøvsuger/i).fill('User 1 Secret Goal');
     await page.getByPlaceholder('0.00').fill('500');
@@ -114,11 +110,10 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
     await expect(page.getByText('User 1 Secret Goal')).toHaveCount(0);
 
     // 5. Guest modification: Guest creates a local wish item
-    await addWishBtn.click();
+    await page.getByRole('button', { name: 'Add Wish' }).click();
     await page.getByPlaceholder(/Robotstøvsuger/i).fill('Guest Local Goal');
     await page.getByPlaceholder('0.00').fill('250');
     await page.getByRole('button', { name: 'Add to Plan' }).click();
-
     await expect(page.getByText('Guest Local Goal').first()).toBeVisible();
 
     // 6. User 2 logs in

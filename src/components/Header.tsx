@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   User as UserIcon,
 } from 'lucide-react';
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { SignedIn, SignInButton, UserButton } from '@clerk/clerk-react';
+import { useAppAuth } from '../hooks';
 import { Button } from './ui/button';
 import type { Plan, PlanCalculationResult } from '../types/plan';
 import { PlanSwitcher } from './PlanSwitcher';
@@ -59,6 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
   isActivated = true,
   onSignInClick,
 }) => {
+  const { isSignedIn } = useAppAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -200,31 +202,39 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Clerk Authentication Controls */}
             <div className="pl-1 border-l border-slate-200 dark:border-slate-800 flex items-center">
-              <SignedIn>
-                <UserButton userProfileMode="modal" />
-              </SignedIn>
-              <SignedOut>
-                {isActivated ? (
-                  <SignInButton mode="modal">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
-                    >
-                      <UserIcon className="w-3.5 h-3.5" />
-                      <span>Sign In</span>
-                    </button>
-                  </SignInButton>
+              {isSignedIn ? (
+                typeof window !== 'undefined' && window.__MOCK_AUTH__ ? (
+                  <div
+                    className="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-xs"
+                    title="Mock User Session"
+                  >
+                    U
+                  </div>
                 ) : (
+                  <SignedIn>
+                    <UserButton userProfileMode="modal" />
+                  </SignedIn>
+                )
+              ) : isActivated ? (
+                <SignInButton mode="modal">
                   <button
                     type="button"
-                    onClick={onSignInClick}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
                   >
                     <UserIcon className="w-3.5 h-3.5" />
                     <span>Sign In</span>
                   </button>
-                )}
-              </SignedOut>
+                </SignInButton>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onSignInClick}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
+                >
+                  <UserIcon className="w-3.5 h-3.5" />
+                  <span>Sign In</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -251,11 +261,19 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {/* Clerk User Button / Sign In on Mobile */}
-            <SignedIn>
-              <UserButton userProfileMode="modal" />
-            </SignedIn>
-
-            {/* Mobile Menu Toggle Button */}
+            {isSignedIn &&
+              (typeof window !== 'undefined' && window.__MOCK_AUTH__ ? (
+                <div
+                  className="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-xs"
+                  title="Mock User Session"
+                >
+                  U
+                </div>
+              ) : (
+                <SignedIn>
+                  <UserButton userProfileMode="modal" />
+                </SignedIn>
+              ))}
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -274,8 +292,8 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 {/* Sign In Button if Signed Out */}
-                <SignedOut>
-                  {isActivated ? (
+                {!isSignedIn &&
+                  (isActivated ? (
                     <SignInButton mode="modal">
                       <button
                         type="button"
@@ -297,8 +315,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <UserIcon className="w-4 h-4" />
                       <span>Sign In / Create Account</span>
                     </button>
-                  )}
-                </SignedOut>
+                  ))}
 
                 {/* All Plans */}
                 <button

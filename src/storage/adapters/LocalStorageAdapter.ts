@@ -1,5 +1,5 @@
 import type { AppStoreData } from '../../types/plan.js';
-import { DEFAULT_STORE_DATA } from '../../utils/defaults.js';
+import { getDefaultStoreData } from '../../utils/defaults.js';
 import { migrateToMultiPlan } from '../migrations.js';
 import type { SaveResult, StorageRepository } from '../types.js';
 
@@ -22,7 +22,7 @@ export class LocalStorageAdapter implements StorageRepository {
 
   public loadSync(): AppStoreData {
     if (!this.storage) {
-      return DEFAULT_STORE_DATA;
+      return getDefaultStoreData();
     }
 
     // 1. Try primary storage key
@@ -68,7 +68,7 @@ export class LocalStorageAdapter implements StorageRepository {
       }
     }
 
-    return DEFAULT_STORE_DATA;
+    return getDefaultStoreData();
   }
 
   public async load(): Promise<AppStoreData> {

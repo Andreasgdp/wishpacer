@@ -1,5 +1,5 @@
 import type { AppStoreData, CurrencyConfig, GlobalSettings, Plan } from '../types/plan.js';
-import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_STORE_DATA } from '../utils/defaults.js';
+import { DEFAULT_GLOBAL_SETTINGS, getDefaultStoreData } from '../utils/defaults.js';
 
 /**
  * Pure schema migration function converting legacy v1, v2, or untyped store objects into
@@ -7,7 +7,7 @@ import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_STORE_DATA } from '../utils/defaults.j
  */
 export function migrateToMultiPlan(data: unknown): AppStoreData {
   if (!data || typeof data !== 'object') {
-    return DEFAULT_STORE_DATA;
+    return getDefaultStoreData();
   }
 
   let globalSettings: GlobalSettings = { ...DEFAULT_GLOBAL_SETTINGS };
@@ -84,5 +84,5 @@ export function migrateToMultiPlan(data: unknown): AppStoreData {
     };
   }
 
-  return DEFAULT_STORE_DATA;
+  return getDefaultStoreData();
 }
