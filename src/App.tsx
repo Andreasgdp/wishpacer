@@ -461,7 +461,140 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
   );
 };
 
-export const AppContent: React.FC = () => {
+export const LandingPageWorkspace: React.FC = () => {
+  const { darkMode, toggleDarkMode } = useTheme();
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
+      <LandingPage
+        onLaunchApp={() => navigate('/app')}
+        onExploreDemo={() => navigate('/demo')}
+        onToggleDarkMode={toggleDarkMode}
+        darkMode={darkMode}
+      />
+    </>
+  );
+};
+
+export const DemoAppWorkspace: React.FC = () => {
+  const { darkMode, toggleDarkMode } = useTheme();
+  const navigate = useNavigate();
+  const modal = useModalRegistry();
+
+  const [planManageMode, setPlanManageMode] = useState<'create' | 'edit'>('create');
+  const [isQuickAdd, setIsQuickAdd] = useState(false);
+
+  const [isActivated, setIsActivated] = useState<boolean>(() => {
+    return localStorage.getItem('saving_plan_activated') === 'true';
+  });
+
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(() => {
+    return localStorage.getItem('saving_plan_onboarding_seen') === 'true';
+  });
+
+  // Demo Plan Manager (pre-populated with DEFAULT_PLANS sample data)
+  const demoRepo = useMemo(() => new InMemoryStorageRepository(getDefaultStoreData()), []);
+  const demoPlanManager = usePlanManager({ repository: demoRepo });
+
+  const handleOpenCreatePlanModal = () => {
+    setPlanManageMode('create');
+    modal.open('createPlan');
+  };
+
+  const handleOpenEditPlanModal = (planToEdit?: Plan) => {
+    const targetPlan = planToEdit || demoPlanManager.activePlan;
+    setPlanManageMode('edit');
+    modal.open('editPlan', { plan: targetPlan });
+  };
+
+  const handleActivate = (code: string) => {
+    const validCode = (import.meta.env.VITE_DEV_ACTIVATION_CODE || 'SAVINGS2026')
+      .trim()
+      .toLowerCase();
+    if (code.toLowerCase() === validCode) {
+      localStorage.setItem('saving_plan_activated', 'true');
+      setIsActivated(true);
+      modal.close();
+      return true;
+    }
+    return false;
+  };
+
+  const handleCloseOnboarding = () => {
+    localStorage.setItem('saving_plan_onboarding_seen', 'true');
+    setHasSeenOnboarding(true);
+    modal.close();
+  };
+
+  const handleConfirmLoadSamplePlan = () => {
+    modal.open('confirmDialog', {
+      confirm: {
+        title: 'Load Interactive Sample Plan',
+        description:
+          'Loading the sample plan will replace your current savings plans and wishlists with sample data. Do you wish to continue?',
+        confirmLabel: 'Load Sample Data',
+        variant: 'warning',
+        onConfirm: () => {
+          demoPlanManager.actions.importStoreData({
+            version: 3,
+            lastSaved: new Date().toISOString(),
+            activePlanId: DEFAULT_PLANS[0].id,
+            plans: DEFAULT_PLANS,
+            settings: demoPlanManager.storeData.settings,
+          });
+        },
+      },
+    });
+  };
+
+  const demoDashboardProps = {
+    storeData: demoPlanManager.storeData,
+    activePlan: demoPlanManager.activePlan,
+    activePlanCalculation: demoPlanManager.activePlanCalculation,
+    effectiveConfig: demoPlanManager.effectiveConfig,
+    portfolioSummary: demoPlanManager.portfolioSummary,
+    isPortfolioView: demoPlanManager.isPortfolioView,
+    setIsPortfolioView: demoPlanManager.setIsPortfolioView,
+    showWhatIf: demoPlanManager.showWhatIf,
+    simulatedSavingsRate: demoPlanManager.simulatedSavingsRate,
+    simulatedExtraBonus: demoPlanManager.simulatedExtraBonus,
+    actions: demoPlanManager.actions,
+    darkMode,
+    toggleDarkMode,
+    modal,
+    planManageMode,
+    isQuickAdd,
+    setIsQuickAdd,
+    isActivated,
+    hasSeenOnboarding,
+    handleActivate,
+    handleCloseOnboarding,
+    handleConfirmLoadSamplePlan,
+    handleOpenCreatePlanModal,
+    handleOpenEditPlanModal: (planToEdit?: Plan) => handleOpenEditPlanModal(planToEdit),
+  };
+
+  return (
+    <Routes>
+      <Route path="/" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
+      <Route path="/plan/:planId" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
+      <Route path="/portfolio" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
+      <Route
+        path="*"
+        element={
+          <NotFoundPage
+            onReturnToApp={() => navigate('/demo')}
+            onGoToLanding={() => navigate('/')}
+          />
+        }
+      />
+    </Routes>
+  );
+};
+
+export const ProtectedAppWorkspace: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAppAuth();
   const clerk = useClerk();
@@ -495,17 +628,13 @@ export const AppContent: React.FC = () => {
     getToken,
   });
 
-  // Demo Plan Manager (pre-populated with DEFAULT_PLANS sample data)
-  const demoRepo = useMemo(() => new InMemoryStorageRepository(getDefaultStoreData()), []);
-  const demoPlanManager = usePlanManager({ repository: demoRepo });
-
   const handleOpenCreatePlanModal = () => {
     setPlanManageMode('create');
     modal.open('createPlan');
   };
 
-  const handleOpenEditPlanModal = (planToEdit?: Plan, isDemo = false) => {
-    const targetPlan = planToEdit || (isDemo ? demoPlanManager.activePlan : appPlanManager.activePlan);
+  const handleOpenEditPlanModal = (planToEdit?: Plan) => {
+    const targetPlan = planToEdit || appPlanManager.activePlan;
     setPlanManageMode('edit');
     modal.open('editPlan', { plan: targetPlan });
   };
@@ -534,7 +663,7 @@ export const AppContent: React.FC = () => {
     modal.close();
   };
 
-  const handleConfirmLoadSamplePlan = (actions = appPlanManager.actions) => {
+  const handleConfirmLoadSamplePlan = () => {
     modal.open('confirmDialog', {
       confirm: {
         title: 'Load Interactive Sample Plan',
@@ -543,7 +672,7 @@ export const AppContent: React.FC = () => {
         confirmLabel: 'Load Sample Data',
         variant: 'warning',
         onConfirm: () => {
-          actions.importStoreData({
+          appPlanManager.actions.importStoreData({
             version: 3,
             lastSaved: new Date().toISOString(),
             activePlanId: DEFAULT_PLANS[0].id,
@@ -595,36 +724,9 @@ export const AppContent: React.FC = () => {
     hasSeenOnboarding,
     handleActivate,
     handleCloseOnboarding,
-    handleConfirmLoadSamplePlan: () => handleConfirmLoadSamplePlan(appPlanManager.actions),
-    handleOpenCreatePlanModal: handleOpenCreatePlanModal,
-    handleOpenEditPlanModal: (planToEdit?: Plan) => handleOpenEditPlanModal(planToEdit, false),
-  };
-
-  const demoDashboardProps = {
-    storeData: demoPlanManager.storeData,
-    activePlan: demoPlanManager.activePlan,
-    activePlanCalculation: demoPlanManager.activePlanCalculation,
-    effectiveConfig: demoPlanManager.effectiveConfig,
-    portfolioSummary: demoPlanManager.portfolioSummary,
-    isPortfolioView: demoPlanManager.isPortfolioView,
-    setIsPortfolioView: demoPlanManager.setIsPortfolioView,
-    showWhatIf: demoPlanManager.showWhatIf,
-    simulatedSavingsRate: demoPlanManager.simulatedSavingsRate,
-    simulatedExtraBonus: demoPlanManager.simulatedExtraBonus,
-    actions: demoPlanManager.actions,
-    darkMode,
-    toggleDarkMode,
-    modal,
-    planManageMode,
-    isQuickAdd,
-    setIsQuickAdd,
-    isActivated,
-    hasSeenOnboarding,
-    handleActivate,
-    handleCloseOnboarding,
-    handleConfirmLoadSamplePlan: () => handleConfirmLoadSamplePlan(demoPlanManager.actions),
-    handleOpenCreatePlanModal: handleOpenCreatePlanModal,
-    handleOpenEditPlanModal: (planToEdit?: Plan) => handleOpenEditPlanModal(planToEdit, true),
+    handleConfirmLoadSamplePlan,
+    handleOpenCreatePlanModal,
+    handleOpenEditPlanModal: (planToEdit?: Plan) => handleOpenEditPlanModal(planToEdit),
   };
 
   return (
@@ -632,26 +734,13 @@ export const AppContent: React.FC = () => {
       <Route
         path="/"
         element={
-          <>
-            <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
-            <LandingPage
-              onLaunchApp={() => navigate('/app')}
-              onExploreDemo={() => navigate('/demo')}
-              onToggleDarkMode={toggleDarkMode}
-              darkMode={darkMode}
-            />
-          </>
+          <ProtectedRoute isActivated={isActivated} onOpenActivationModal={() => modal.open('activation')}>
+            <AppDashboard {...appDashboardProps} isDemo={false} />
+          </ProtectedRoute>
         }
       />
-
-      {/* Demo Mode Routes (Interactive Demo with sample data) */}
-      <Route path="/demo" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
-      <Route path="/demo/plan/:planId" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
-      <Route path="/demo/portfolio" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
-
-      {/* Protected App Routes */}
       <Route
-        path="/app"
+        path="/plan/:planId"
         element={
           <ProtectedRoute isActivated={isActivated} onOpenActivationModal={() => modal.open('activation')}>
             <AppDashboard {...appDashboardProps} isDemo={false} />
@@ -659,7 +748,7 @@ export const AppContent: React.FC = () => {
         }
       />
       <Route
-        path="/app/plan/:planId"
+        path="/portfolio"
         element={
           <ProtectedRoute isActivated={isActivated} onOpenActivationModal={() => modal.open('activation')}>
             <AppDashboard {...appDashboardProps} isDemo={false} />
@@ -667,15 +756,26 @@ export const AppContent: React.FC = () => {
         }
       />
       <Route
-        path="/app/portfolio"
+        path="*"
         element={
-          <ProtectedRoute isActivated={isActivated} onOpenActivationModal={() => modal.open('activation')}>
-            <AppDashboard {...appDashboardProps} isDemo={false} />
-          </ProtectedRoute>
+          <NotFoundPage
+            onReturnToApp={() => navigate('/app')}
+            onGoToLanding={() => navigate('/')}
+          />
         }
       />
+    </Routes>
+  );
+};
 
-      {/* Fallback 404 Route */}
+export const AppContent: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPageWorkspace />} />
+      <Route path="/demo/*" element={<DemoAppWorkspace />} />
+      <Route path="/app/*" element={<ProtectedAppWorkspace />} />
       <Route
         path="*"
         element={
