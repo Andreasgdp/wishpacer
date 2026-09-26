@@ -9,7 +9,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "bun run typecheck && bun run lint && bun run format:check && bun run test",
     "build": "bun run db:migrate && tsc && vite build && esbuild api/plan.ts --bundle --platform=node --target=node20 --format=esm --outdir=api --external:@clerk/backend --external:@libsql/client --external:@vercel/node",
     "server": "bun src/server/index.ts",
     "start": "bun src/server/index.ts",

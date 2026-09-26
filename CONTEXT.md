@@ -68,4 +68,4 @@ Adaptive modal presentation layer switching between desktop Radix UI Dialog and 
 
 ### Playwright E2E Test Suite (`e2e/flows.spec.ts`)
 
-End-to-end browser testing seam validating 7 complete user flows (Activation Gate, Onboarding Tour, Multi-Plan CRUD, Wishlist Priority Queue, What-If Simulator, Privacy/Support Modals, and Account Data Erasure). Required standard practice for all new features and changes; enforced in GitHub Actions CI and excluded from Vercel deployment builds (`prebuild`).
+End-to-end browser testing seam validating 7 complete user flows (Activation Gate, Onboarding Tour, Multi-Plan CRUD, Wishlist Priority Queue, What-If Simulator, Privacy/Support Modals, and Account Data Erasure). Required standard practice for all new features and changes; enforced in GitHub Actions CI and excluded from Vercel deployment builds.

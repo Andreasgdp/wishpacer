@@ -95,23 +95,16 @@ npx playwright test --ui
 ### 3. CI/CD & Deployment Strategy
 
 - **GitHub Actions CI (`.github/workflows/ci.yml`)**: Executes the full validation suite including typechecking, linting, formatting, unit tests, production build, AND Playwright E2E browser tests on every pull request and push to `main`.
-- **Vercel Deployment Pipeline (`prebuild`)**: Vercel executes `bun run prebuild` (`typecheck && lint && format:check && test`). **Playwright E2E tests are intentionally EXCLUDED from Vercel's build pipeline** to prevent slow, heavy browser downloads and ensure ultra-fast deployment builds.
+- **Vercel Deployment Pipeline**: Vercel executes `bun run build`, which runs database migrations (`bun run db:migrate`) and compiles assets without running formatting, linting, typechecking, or testing, leaving those standard checks to GitHub Actions CI.
 
 ---
 
 ## 🛑 Deployment Quality Gates & Blockers
 
-Deployments are **automatically blocked** if any quality check fails:
+Deployments are quality-gated via GitHub Actions and protected branches:
 
-1. **Automatic Pre-Build Gating (`package.json`)**:
-   - `bun run build` automatically executes `bun run prebuild` first:
-     ```bash
-     bun run typecheck && bun run lint && bun run format:check && bun run test
-     ```
-   - If typechecking, ESLint, Prettier verification, or any unit test fails, Vercel **immediately aborts the build** and cancels deployment.
-
-2. **GitHub Branch Protection Rules**:
-   - Require `validate` job from `.github/workflows/ci.yml` (including Playwright E2E tests) to pass before merging PRs.
+1. **GitHub Branch Protection Rules**:
+   - Require `validate` job from `.github/workflows/ci.yml` (including Playwright E2E tests, typecheck, lint, formatting, and unit tests) to pass before merging PRs.
 
 ---
 
