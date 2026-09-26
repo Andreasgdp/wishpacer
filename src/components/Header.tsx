@@ -12,12 +12,14 @@ import {
   HelpCircle,
   ShieldCheck,
   User as UserIcon,
+  Layout,
 } from 'lucide-react';
 import { SignedIn, SignInButton, UserButton } from '@clerk/clerk-react';
 import { useAppAuth } from '../hooks';
 import { Button } from './ui/button';
 import type { Plan, PlanCalculationResult } from '../types/plan';
 import { PlanSwitcher } from './PlanSwitcher';
+import { Logo } from './Logo';
 
 interface HeaderProps {
   plans: Plan[];
@@ -25,6 +27,9 @@ interface HeaderProps {
   isPortfolioView: boolean;
   activePlanCalculation: PlanCalculationResult;
   darkMode: boolean;
+  viewMode?: 'landing' | 'app';
+  onNavigateLanding?: () => void;
+  onNavigateApp?: () => void;
   onSelectPlan: (planId: string) => void;
   onSelectPortfolio: () => void;
   onOpenNewPlanModal: () => void;
@@ -46,6 +51,9 @@ export const Header: React.FC<HeaderProps> = ({
   isPortfolioView,
   activePlanCalculation,
   darkMode,
+  viewMode = 'app',
+  onNavigateLanding,
+  onNavigateApp,
   onSelectPlan,
   onSelectPortfolio,
   onOpenNewPlanModal,
@@ -78,8 +86,16 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-30 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-200 pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
-          {/* Plan Selector & Quick Switcher */}
-          <div className="flex items-center gap-2 min-w-0">
+          {/* Logo & Plan Switcher */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Logo
+              variant="full"
+              size="sm"
+              badge="2.0"
+              onClick={onNavigateLanding}
+              className="hover:opacity-90 transition-opacity shrink-0"
+            />
+            <div className="h-5 w-px bg-slate-200 dark:bg-slate-800 shrink-0 hidden sm:block" />
             <PlanSwitcher
               plans={plans}
               activePlanId={activePlanId}
@@ -94,6 +110,28 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Desktop Actions (>= 640px) */}
           <div className="hidden sm:flex items-center gap-1.5 lg:gap-2">
+            {/* View Mode Toggle Button */}
+            {viewMode === 'landing' ? (
+              <button
+                type="button"
+                onClick={onNavigateApp}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-violet-600 text-white shadow-xs hover:bg-violet-700 transition-all"
+              >
+                <Layout className="w-3.5 h-3.5" />
+                <span>App Dashboard</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onNavigateLanding}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-xl text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                title="Return to Wish Pacing Landing Page"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+                <span className="hidden md:inline">Landing Page</span>
+              </button>
+            )}
+
             {/* Portfolio View Button */}
             <button
               type="button"
@@ -130,6 +168,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Download className="w-4 h-4" />
             </button>
+
             {/* Support / Help */}
             <button
               type="button"
@@ -290,6 +329,33 @@ export const Header: React.FC<HeaderProps> = ({
                   <span>Quick Actions</span>
                   <Sparkles className="w-3 h-3 text-brand-500" />
                 </div>
+
+                {/* Navigation Mode Toggle */}
+                {viewMode === 'app' ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigateLanding?.();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <Sparkles className="w-4 h-4 text-violet-500" />
+                    <span>Landing Page</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigateApp?.();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <Layout className="w-4 h-4 text-violet-500" />
+                    <span>App Dashboard</span>
+                  </button>
+                )}
 
                 {/* Sign In Button if Signed Out */}
                 {!isSignedIn &&
