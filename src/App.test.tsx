@@ -1,6 +1,6 @@
 import './test-setup';
 import { afterEach, beforeEach, describe, expect, it, spyOn } from 'bun:test';
-import { cleanup, render, fireEvent } from '@testing-library/react';
+import { cleanup, render, fireEvent, type RenderResult } from '@testing-library/react';
 import * as hooks from './hooks';
 import { MemoryRouter } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
@@ -215,6 +215,83 @@ describe('App Client-Side Routing', () => {
 
       // Activation modal closes and saving_plan_activated is true
       expect(localStorage.getItem('saving_plan_activated')).toBe('true');
+    });
+  });
+
+  describe('Plan Switcher Route Synchronization & Loop Prevention', () => {
+    const selectPlanInSwitcher = async (
+      findByRole: RenderResult['findByRole'],
+      findByLabelText: RenderResult['findByLabelText'],
+      planOptionLabel: string
+    ) => {
+      const switcherTrigger = await findByRole('button', { name: /Switch savings plan/i });
+      fireEvent.click(switcherTrigger);
+      const planOption = await findByLabelText(planOptionLabel);
+      fireEvent.click(planOption);
+    };
+
+    it('switches to another plan and back via PlanSwitcher without entering an infinite loop', async () => {
+      if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+        window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true });
+      }
+
+      const { findByRole, findByLabelText } = renderAppWithRoute('/app/plan/plan-personal-wants');
+
+      // Initial view shows Personal Wants & Tech heading
+      expect(
+        await findByRole('heading', { name: /Personal Wants & Tech/i, level: 1 })
+      ).not.toBeNull();
+
+      // 1. Switch to House & Living Needs
+      await selectPlanInSwitcher(findByRole, findByLabelText, 'Select House & Living Needs plan');
+      expect(
+        await findByRole('heading', { name: /House & Living Needs/i, level: 1 })
+      ).not.toBeNull();
+
+      // 2. Switch back to Personal Wants & Tech
+      await selectPlanInSwitcher(findByRole, findByLabelText, 'Select Personal Wants & Tech plan');
+      expect(
+        await findByRole('heading', { name: /Personal Wants & Tech/i, level: 1 })
+      ).not.toBeNull();
+
+      // Verify switcher remains interactive
+      expect(await findByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
+    });
+
+    it('switches multiple times in succession across plans and portfolio without freezing', async () => {
+      if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+        window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true });
+      }
+
+      const { findByRole, findByLabelText, findByText } = renderAppWithRoute(
+        '/app/plan/plan-personal-wants'
+      );
+
+      for (let i = 0; i < 3; i++) {
+        await selectPlanInSwitcher(findByRole, findByLabelText, 'Select House & Living Needs plan');
+        expect(
+          await findByRole('heading', { name: /House & Living Needs/i, level: 1 })
+        ).not.toBeNull();
+
+        await selectPlanInSwitcher(
+          findByRole,
+          findByLabelText,
+          'Select Personal Wants & Tech plan'
+        );
+        expect(
+          await findByRole('heading', { name: /Personal Wants & Tech/i, level: 1 })
+        ).not.toBeNull();
+      }
+
+      // Switch to Portfolio
+      await selectPlanInSwitcher(findByRole, findByLabelText, 'Select All Plans Portfolio');
+      expect(await findByText(/Savings Portfolio Overview/i)).not.toBeNull();
+
+      // Switch back to a Plan from Portfolio
+      await selectPlanInSwitcher(findByRole, findByLabelText, 'Select House & Living Needs plan');
+      expect(
+        await findByRole('heading', { name: /House & Living Needs/i, level: 1 })
+      ).not.toBeNull();
     });
   });
 });

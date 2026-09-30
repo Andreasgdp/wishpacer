@@ -200,4 +200,47 @@ test.describe('Wish Pacing End-to-End User Flows', () => {
     // Session resets and presents onboarding modal again
     await expect(page.getByText('Welcome to Wish Pacing')).toBeVisible();
   });
+
+  test('Flow 8: Plan Switcher Navbar Navigation and Loop Prevention', async ({ page }) => {
+    // Dismiss onboarding tour modal
+    await page.getByRole('button', { name: 'Close' }).first().click();
+
+    // Verify initial active plan heading
+    await expect(
+      page.getByRole('heading', { name: 'Personal Wants & Tech', level: 1 })
+    ).toBeVisible();
+
+    // 1. Open Plan Switcher dropdown in header
+    await page.getByRole('button', { name: /Switch savings plan/i }).click();
+    await expect(page.getByText('Savings Plans (2)')).toBeVisible();
+
+    // 2. Switch to House & Living Needs
+    await page.getByLabel('Select House & Living Needs plan').click();
+    await expect(
+      page.getByRole('heading', { name: 'House & Living Needs', level: 1 })
+    ).toBeVisible();
+    expect(page.url()).toContain('/plan/plan-house-needs');
+
+    // 3. Open Plan Switcher dropdown again and switch back to Personal Wants & Tech
+    await page.getByRole('button', { name: /Switch savings plan/i }).click();
+    await page.getByLabel('Select Personal Wants & Tech plan').click();
+    await expect(
+      page.getByRole('heading', { name: 'Personal Wants & Tech', level: 1 })
+    ).toBeVisible();
+    expect(page.url()).toContain('/plan/plan-personal-wants');
+
+    // 4. Switch to Portfolio view
+    await page.getByRole('button', { name: /Switch savings plan/i }).click();
+    await page.getByLabel('Select All Plans Portfolio').click();
+    await expect(page.getByText('Savings Portfolio Overview')).toBeVisible();
+    expect(page.url()).toContain('/portfolio');
+
+    // 5. Switch back to a plan from Portfolio view
+    await page.getByRole('button', { name: /Switch savings plan/i }).click();
+    await page.getByLabel('Select House & Living Needs plan').click();
+    await expect(
+      page.getByRole('heading', { name: 'House & Living Needs', level: 1 })
+    ).toBeVisible();
+    expect(page.url()).toContain('/plan/plan-house-needs');
+  });
 });

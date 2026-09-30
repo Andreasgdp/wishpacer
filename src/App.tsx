@@ -136,31 +136,6 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
     basePath,
   ]);
 
-  // Sync route URL if activePlanId changes while viewing a plan
-  useEffect(() => {
-    if (!isPortfolioView && storeData.activePlanId) {
-      if (
-        location.pathname.startsWith(`${basePath}/plan/`) &&
-        planId &&
-        planId !== storeData.activePlanId &&
-        storeData.plans.some(p => p.id === planId)
-      ) {
-        const activePlanExists = storeData.plans.some(p => p.id === storeData.activePlanId);
-        if (activePlanExists) {
-          navigate(`${basePath}/plan/${storeData.activePlanId}`, { replace: true });
-        }
-      }
-    }
-  }, [
-    storeData.activePlanId,
-    storeData.plans,
-    isPortfolioView,
-    location.pathname,
-    planId,
-    navigate,
-    basePath,
-  ]);
-
   // Render 404 if planId param was requested in plan route but does not exist
   if (planId && !storeData.plans.some(p => p.id === planId)) {
     return (
@@ -396,7 +371,12 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
                 description: `Are you sure you want to delete "${targetPlan?.name || 'this plan'}"?`,
                 confirmLabel: 'Delete Plan',
                 variant: 'danger',
-                onConfirm: () => actions.deletePlan(planIdToDelete),
+                onConfirm: () => {
+                  actions.deletePlan(planIdToDelete);
+                  if (planId === planIdToDelete) {
+                    navigate(basePath);
+                  }
+                },
               },
             });
           }, 150);
