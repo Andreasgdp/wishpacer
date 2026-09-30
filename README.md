@@ -1,5 +1,7 @@
 # WishPacer — Multi-Plan Wishlist & Savings Planner
 
+test
+
 A fast, modern multi-user savings and wishlist feasibility planner built with **React**, **TypeScript**, **Drizzle ORM** (LibSQL / SQLite / Turso), **Clerk Authentication**, **Sonner Toast Notifications**, and **Vercel Serverless Functions**.
 
 Inspired by [Wishing-Plan](https://github.com/Andreasgdp/Wishing-Plan), upgraded to support **multiple independent plans**, site-wide currency preferences, timeline projections, what-if simulations, and cloud persistence.
