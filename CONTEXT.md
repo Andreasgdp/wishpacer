@@ -1,6 +1,6 @@
-# Domain Model: Wish Pacing
+# Domain Model: WishPacer
 
-This document defines the core domain terms and invariants for the `wishpacing` application.
+This document defines the core domain terms and invariants for the `wishpacer` application.
 
 ## Glossary
 

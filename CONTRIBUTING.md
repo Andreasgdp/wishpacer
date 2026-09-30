@@ -1,8 +1,8 @@
-# Contributing to Wish Pacing
+# Contributing to WishPacer
 
-First off, thank you for considering contributing to **Wish Pacing**! 🎉
+First off, thank you for considering contributing to **WishPacer**! 🎉
 
-**Wish Pacing** is an open-source multi-plan wishlist and savings feasibility planner built with React, TypeScript, Bun, Drizzle ORM, Clerk, and Vercel. We welcome contributions of all kinds—from bug fixes and feature enhancements to documentation improvements and issue reports.
+**WishPacer** is an open-source multi-plan wishlist and savings feasibility planner built with React, TypeScript, Bun, Drizzle ORM, Clerk, and Vercel. We welcome contributions of all kinds—from bug fixes and feature enhancements to documentation improvements and issue reports.
 
 This document provides a comprehensive guide on how to set up your local development environment, write clean code, and submit pull requests.
 
@@ -12,8 +12,8 @@ This document provides a comprehensive guide on how to set up your local develop
 
 There are many ways you can contribute to the project:
 
-- 🐛 **[Report Bugs](https://github.com/Andreasgdp/wishpacing/issues/new)** — Found a bug? Open an issue describing the bug, steps to reproduce, and expected behavior.
-- 💡 **[Suggest Features](https://github.com/Andreasgdp/wishpacing/issues/new)** — Have an idea for a feature or UI improvement? Let us know!
+- 🐛 **[Report Bugs](https://github.com/Andreasgdp/wishpacer/issues/new)** — Found a bug? Open an issue describing the bug, steps to reproduce, and expected behavior.
+- 💡 **[Suggest Features](https://github.com/Andreasgdp/wishpacer/issues/new)** — Have an idea for a feature or UI improvement? Let us know!
 - 🛠️ **Submit Code** — Pick up an issue or implement a new feature.
 - 📚 **Improve Documentation** — Help refine architectural specs, README guides, or code comments.
 
@@ -33,8 +33,8 @@ Make sure you have the following installed on your machine:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Andreasgdp/wishpacing.git
-cd wishpacing
+git clone https://github.com/Andreasgdp/wishpacer.git
+cd wishpacer
 
 # Install dependencies with Bun
 bun install
@@ -163,4 +163,4 @@ When your changes are ready:
 4. Complete the PR template checklist in `.github/PULL_REQUEST_TEMPLATE.md`.
 5. Link any relevant issue using GitHub keywords (e.g., `Closes #123`).
 
-Thank you for contributing to **Wish Pacing**! 🚀
+Thank you for contributing to **WishPacer**! 🚀

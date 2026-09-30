@@ -1,8 +1,8 @@
 {
-  "name": "wishpacing",
+  "name": "wishpacer",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Andreasgdp/wishpacing.git"
+    "url": "git+https://github.com/Andreasgdp/wishpacer.git"
   },
   "private": true,
   "version": "1.0.0",

@@ -11,14 +11,14 @@ describe('Logo Component', () => {
   it('renders full variant with brand text and default badge', () => {
     const { getByText } = render(<Logo variant="full" badge="2.0" />);
     expect(getByText('Wish')).not.toBeNull();
-    expect(getByText('Pacing')).not.toBeNull();
+    expect(getByText('Pacer')).not.toBeNull();
     expect(getByText('2.0')).not.toBeNull();
   });
 
   it('renders icon variant without text', () => {
     const { queryByText, container } = render(<Logo variant="icon" />);
     expect(queryByText('Wish')).toBeNull();
-    expect(queryByText('Pacing')).toBeNull();
+    expect(queryByText('Pacer')).toBeNull();
     expect(container.querySelector('svg')).not.toBeNull();
   });
 

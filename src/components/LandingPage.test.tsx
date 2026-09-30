@@ -16,7 +16,7 @@ describe('LandingPage Component', () => {
       <LandingPage onLaunchApp={onLaunchApp} onExploreDemo={onExploreDemo} />
     );
 
-    expect(getByText(/Wish Pacing 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
+    expect(getByText(/WishPacer 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
     expect(getByText(/Stop Waiting./i)).not.toBeNull();
 
     const launchButtons = getAllByText(/Launch Planner App/i);
@@ -57,7 +57,7 @@ describe('LandingPage Component', () => {
     expect(getByText(/What-If Sandbox/i)).not.toBeNull();
     expect(getByText(/Multi-Plan Portfolio/i)).not.toBeNull();
     expect(getByText(/Local-First Hybrid Sync/i)).not.toBeNull();
-    expect(getByText(/How Wish Pacing Works/i)).not.toBeNull();
+    expect(getByText(/How WishPacer Works/i)).not.toBeNull();
   });
 
   it('renders as a standalone lightweight component using local state for the calculator', () => {
@@ -65,8 +65,8 @@ describe('LandingPage Component', () => {
       <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />
     );
 
-    expect(getByText(/Wish Pacing 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
-    expect(getByText(/Simulate Your Wish Pacing Timeline/i)).not.toBeNull();
+    expect(getByText(/WishPacer 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
+    expect(getByText(/Simulate Your WishPacer Timeline/i)).not.toBeNull();
 
     const priceSlider = getByLabelText(/Target Item Price/i) as HTMLInputElement;
     expect(priceSlider.value).toBe('2400');
