@@ -38,7 +38,7 @@ describe('ProtectedRoute Component', () => {
     expect(getByText('Sign In Required to Access App')).not.toBeNull();
     expect(
       getByText(
-        'Sign in or create a free Wish Pacing account to persist your savings plans across devices.'
+        'Sign in or create a free WishPacer account to persist your savings plans across devices.'
       )
     ).not.toBeNull();
     expect(getByText('Sign In / Register')).not.toBeNull();

@@ -41,7 +41,7 @@ describe('App Client-Side Routing', () => {
     const modalRegistrySpy = spyOn(hooks, 'useModalRegistry');
 
     const { findByText, findAllByText } = renderAppWithRoute('/');
-    expect(await findByText(/Wish Pacing 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
+    expect(await findByText(/WishPacer 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
     const launchButtons = await findAllByText(/Launch Planner App/i);
     expect(launchButtons.length).toBeGreaterThan(0);
 

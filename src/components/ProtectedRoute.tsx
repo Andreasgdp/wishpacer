@@ -74,8 +74,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             Sign In Required to Access App
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            Sign in or create a free Wish Pacing account to persist your savings plans across
-            devices.
+            Sign in or create a free WishPacer account to persist your savings plans across devices.
           </p>
         </div>
 

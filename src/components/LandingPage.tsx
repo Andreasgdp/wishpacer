@@ -99,7 +99,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* Header Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-violet-100 dark:bg-violet-950/80 border border-violet-200 dark:border-violet-800/80 text-violet-700 dark:text-violet-300 text-xs sm:text-sm font-semibold shadow-xs">
             <Sparkles className="w-4 h-4 text-violet-500 animate-pulse" />
-            <span>Wish Pacing 2.0 • Turn Dreams Into Timelines</span>
+            <span>WishPacer 2.0 • Turn Dreams Into Timelines</span>
           </div>
 
           {/* Hero Headline */}
@@ -161,7 +161,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <Calculator className="w-3.5 h-3.5" /> Interactive Calculator
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-              Simulate Your Wish Pacing Timeline
+              Simulate Your WishPacer Timeline
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
               Adjust your monthly budget and target item price to see when you'll be 100% funded!
@@ -437,7 +437,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               3 Simple Steps
             </div>
             <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
-              How Wish Pacing Works
+              How WishPacer Works
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
               From daydreaming to real ownership in three frictionless steps.
@@ -482,8 +482,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Watch Dates Unfold
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Wish Pacing computes exact funding months, milestone schedules, and lets you
-                celebrate as items cross 100%!
+                WishPacer computes exact funding months, milestone schedules, and lets you celebrate
+                as items cross 100%!
               </p>
             </div>
           </div>
@@ -498,7 +498,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
-            Ready to Pacing Your Next Big Dream?
+            Ready to Pace Your Next Big Dream?
           </h2>
 
           <p className="text-violet-200 text-sm sm:text-base max-w-xl mx-auto font-medium">
@@ -532,8 +532,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <Logo variant="full" size="sm" onClick={onLaunchApp} />
           <p>
-            © {new Date().getFullYear()} Wish Pacing. Smart Wishlist &amp; Savings Planner. All
-            rights reserved.
+            © {new Date().getFullYear()} WishPacer. Smart Wishlist &amp; Savings Planner. All rights
+            reserved.
           </p>
         </div>
       </footer>

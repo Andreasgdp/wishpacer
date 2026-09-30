@@ -128,7 +128,7 @@ export const Logo: React.FC<LogoProps> = ({
         <button
           type="button"
           onClick={onClick}
-          aria-label="Wish Pacing"
+          aria-label="WishPacer"
           className={`inline-flex items-center cursor-pointer select-none group focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 rounded-xl ${className}`}
         >
           {iconSvg}
@@ -146,8 +146,8 @@ export const Logo: React.FC<LogoProps> = ({
       <div className="hidden sm:flex items-center gap-2 min-w-0">
         <span className={`tracking-tight ${textSize} whitespace-nowrap`}>
           <span className="text-slate-900 dark:text-white">Wish</span>
-          <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 dark:from-violet-400 dark:via-indigo-400 dark:to-blue-400 bg-clip-text text-transparent ml-1">
-            Pacing
+          <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 dark:from-violet-400 dark:via-indigo-400 dark:to-blue-400 bg-clip-text text-transparent">
+            Pacer
           </span>
         </span>
         {badge && (
@@ -166,7 +166,7 @@ export const Logo: React.FC<LogoProps> = ({
       <button
         type="button"
         onClick={onClick}
-        aria-label="Wish Pacing"
+        aria-label="WishPacer"
         className={`inline-flex items-center ${gap} select-none group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 rounded-xl ${className}`}
       >
         {content}

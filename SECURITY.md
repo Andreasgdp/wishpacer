@@ -1,12 +1,12 @@
 # Security Policy
 
-The **Wish Pacing** project takes security and data privacy seriously. This document outlines our policy for reporting security vulnerabilities and describes our security practices.
+The **WishPacer** project takes security and data privacy seriously. This document outlines our policy for reporting security vulnerabilities and describes our security practices.
 
 ---
 
 ## 🛡️ Supported Versions
 
-We actively provide security updates for the following versions of **Wish Pacing**:
+We actively provide security updates for the following versions of **WishPacer**:
 
 | Version        | Supported | Notes                                    |
 | :------------- | :-------: | :--------------------------------------- |
@@ -21,7 +21,7 @@ If you discover a security vulnerability or potential privacy issue in this repo
 
 ### How to Report
 
-1. **Email**: Send details of the vulnerability to [security@wishpacing.com](mailto:security@wishpacing.com) or reach out privately to maintainers via GitHub Security Advisories.
+1. **Email**: Send details of the vulnerability to [security@wishpacer.com](mailto:security@wishpacer.com) or reach out privately to maintainers via GitHub Security Advisories.
 2. **Details to Include**:
    - Description of the vulnerability and its potential impact.
    - Step-by-step instructions or proof-of-concept (PoC) to reproduce the issue.
@@ -46,7 +46,7 @@ We consider ethical security research conducted under this policy to be:
 
 ## 🏛️ Security Architecture & Practices
 
-**Wish Pacing** incorporates defence-in-depth measures across the stack:
+**WishPacer** incorporates defence-in-depth measures across the stack:
 
 1. **Authentication & Identity**:
    - Authentication is handled exclusively via **Clerk Auth** (`@clerk/backend` & `@clerk/clerk-react`).
