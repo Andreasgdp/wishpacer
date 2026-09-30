@@ -25,7 +25,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onReturnToApp, onGoT
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between selection:bg-brand-500 selection:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between selection:bg-brand-900 selection:text-champagne-200 transition-colors duration-200">
       {/* Navigation Bar Header */}
       <header className="border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -49,13 +49,13 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onReturnToApp, onGoT
           {/* Logo & 404 Visual Header */}
           <div className="flex flex-col items-center justify-center space-y-4">
             <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-brand-500/20 via-sky-500/20 to-emerald-500/20 rounded-full blur-xl opacity-75 dark:opacity-50 animate-pulse" />
+              <div className="absolute -inset-4 bg-gradient-to-r from-brand-900/20 via-champagne-300/20 to-emerald-500/20 rounded-full blur-xl opacity-75 dark:opacity-50 animate-pulse" />
               <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none">
                 <Logo variant="icon" size="xl" />
               </div>
             </div>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200/60 dark:border-brand-800/60">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-champagne-100 text-brand-900 dark:bg-brand-950/80 dark:text-champagne-200 border border-champagne-300/60 dark:border-brand-800/60">
               <Sparkles className="w-3.5 h-3.5" />
               Error 404
             </span>
@@ -77,7 +77,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onReturnToApp, onGoT
             <button
               type="button"
               onClick={handleReturnToApp}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-500 dark:bg-brand-600 dark:hover:bg-brand-500 rounded-xl shadow-lg shadow-brand-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-champagne-100 bg-brand-900 hover:bg-brand-950 dark:bg-brand-900 dark:hover:bg-brand-800 border border-champagne-300/30 rounded-xl shadow-lg shadow-brand-950/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <LayoutDashboard className="w-4 h-4" />
               <span>Return to Savings Planner</span>

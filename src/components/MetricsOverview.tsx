@@ -162,7 +162,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
             <span className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Fully Funded Date
             </span>
-            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl bg-champagne-300/20 text-brand-900 dark:text-champagne-300 flex items-center justify-center">
               <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
@@ -217,7 +217,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
         {/* Multi-Segment / Solid Progress Bar */}
         <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 sm:h-3.5 overflow-hidden p-0.5 relative">
           <div
-            className="bg-gradient-to-r from-brand-600 via-indigo-500 to-emerald-500 h-full rounded-full transition-all duration-500 ease-out shadow-xs"
+            className="bg-gradient-to-r from-brand-900 via-emerald-600 to-champagne-400 h-full rounded-full transition-all duration-500 ease-out shadow-xs"
             style={{
               width: `${Math.max(result.overallProgressPercent > 0 ? 2 : 0, Math.min(100, result.overallProgressPercent))}%`,
             }}

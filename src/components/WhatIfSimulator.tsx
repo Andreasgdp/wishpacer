@@ -30,7 +30,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
   const rateDelta = simulatedSavingsRate - config.amountToSave;
 
   return (
-    <div className="bg-gradient-to-br from-amber-500/10 via-brand-500/5 to-purple-500/10 border border-amber-300/80 dark:border-amber-700/60 rounded-3xl p-5 shadow-sm transition-all duration-200 relative overflow-hidden">
+    <div className="bg-gradient-to-br from-amber-500/10 via-brand-500/5 to-champagne-400/10 border border-amber-300/80 dark:border-amber-700/60 rounded-3xl p-5 shadow-sm transition-all duration-200 relative overflow-hidden">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-amber-200/60 dark:border-amber-800/40">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20">

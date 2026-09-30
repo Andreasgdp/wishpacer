@@ -18,8 +18,8 @@ export const ClerkProviderWithTheme: React.FC<{ children: React.ReactNode }> = (
     return {
       baseTheme: darkMode ? dark : undefined,
       variables: {
-        colorPrimary: '#7c3aed',
-        colorTextOnPrimaryBackground: '#ffffff',
+        colorPrimary: '#064E3B',
+        colorTextOnPrimaryBackground: '#F8E7C9',
         ...(darkMode
           ? {
               colorBackground: '#0f172a',

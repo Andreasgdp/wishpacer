@@ -13,7 +13,7 @@
     border-color: theme('colors.slate.200');
   }
   .dark * {
-    border-color: theme('colors.slate.800');
+    border-color: theme('colors.onyx.800');
   }
 }
 
@@ -104,7 +104,7 @@ input[type='date']::-webkit-calendar-picker-indicator:hover {
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: theme('colors.slate.700');
+  background: theme('colors.onyx.800');
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -112,5 +112,5 @@ input[type='date']::-webkit-calendar-picker-indicator:hover {
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: theme('colors.slate.600');
+  background: theme('colors.onyx.700');
 }
