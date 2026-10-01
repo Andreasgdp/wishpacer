@@ -203,7 +203,7 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left font-normal h-10 rounded-xl"
+                      className="w-full justify-start text-left"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
                       {firstSavingDate ? (

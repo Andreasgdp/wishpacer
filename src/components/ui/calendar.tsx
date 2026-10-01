@@ -11,7 +11,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        'p-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl',
+        'p-3 bg-white/95 dark:bg-[#12161A]/95 backdrop-blur-2xl rounded-2xl border border-black/10 dark:border-[#21262D] shadow-2xl',
         className
       )}
       classNames={{

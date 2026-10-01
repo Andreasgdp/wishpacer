@@ -79,60 +79,60 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative bg-white dark:bg-slate-900 rounded-2xl border transition-all duration-200 ${
+      className={`group relative rounded-2xl border transition-all duration-200 ${
         item.isPurchased
-          ? 'border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/20 dark:bg-emerald-950/10'
+          ? 'bg-emerald-50/70 dark:bg-[#161B22]/80 border-emerald-500/40 dark:border-emerald-500/30 shadow-xs'
           : item.isPaused
-            ? 'border-dashed border-slate-300 dark:border-slate-800 opacity-60'
+            ? 'bg-slate-50 dark:bg-[#12161A]/60 border-dashed border-slate-300 dark:border-[#30363D] opacity-65'
             : item.isAffordable
-              ? 'border-emerald-300 dark:border-emerald-800/80 shadow-xs hover:shadow-md'
-              : 'border-slate-200/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
+              ? 'bg-white dark:bg-[#161B22] border-emerald-500/80 dark:border-emerald-400/60 ring-1 ring-emerald-500/20 shadow-sm'
+              : 'bg-white dark:bg-[#161B22] border-slate-300/80 dark:border-[#21262D] shadow-sm hover:border-emerald-500/40 dark:hover:border-[#30363D]'
       }`}
     >
       <div className="p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         {/* Left Drag Handle & Priority Rank */}
         <div className="flex items-center justify-between sm:justify-start gap-2 flex-shrink-0">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               {...attributes}
               {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors touch-none"
+              className="cursor-grab active:cursor-grabbing p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-[#22282E] transition-colors touch-none shrink-0"
               aria-label={`Reorder ${item.title}`}
               title="Drag to reorder priority"
             >
-              <GripVertical className="w-4 h-4" />
+              <GripVertical className="w-4 h-4 shrink-0" />
             </button>
 
-            {/* Up/Down Arrow buttons for touch or keyboard accessibility */}
-            <div className="flex flex-row sm:flex-col gap-0.5">
+            {/* Always-Vertical Stepper: Up arrow stacked directly above Down arrow */}
+            <div className="flex flex-col items-center justify-center -space-y-1 shrink-0">
               <button
                 type="button"
                 disabled={index === 0}
                 onClick={() => onMoveUp(item.id)}
                 aria-label={`Move ${item.title} up in priority`}
-                className="p-1 sm:p-0.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 transition-colors"
+                className="p-1 rounded text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 disabled:opacity-20 transition-colors shrink-0"
                 title="Move up in priority"
               >
-                <ChevronUp className="w-3.5 h-3.5" />
+                <ChevronUp className="w-4 h-4 shrink-0" strokeWidth={2.5} />
               </button>
               <button
                 type="button"
                 disabled={index === totalActive - 1}
                 onClick={() => onMoveDown(item.id)}
                 aria-label={`Move ${item.title} down in priority`}
-                className="p-1 sm:p-0.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 transition-colors"
+                className="p-1 rounded text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 disabled:opacity-20 transition-colors shrink-0"
                 title="Move down in priority"
               >
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className="w-4 h-4 shrink-0" strokeWidth={2.5} />
               </button>
             </div>
 
             <div
-              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-mono font-bold text-xs ${
+              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-mono font-bold text-xs shrink-0 ${
                 item.isAffordable && !item.isPurchased
-                  ? 'bg-emerald-500 text-white shadow-xs shadow-emerald-500/30'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                  ? 'bg-emerald-500 text-slate-950 font-black shadow-xs'
+                  : 'bg-slate-100 dark:bg-[#12161A] border border-slate-300 dark:border-[#21262D] text-slate-800 dark:text-slate-200'
               }`}
             >
               #{item.priority}
@@ -159,20 +159,20 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
 
             {/* Status Pill */}
             {item.isPurchased ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-semibold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-900 dark:text-emerald-300 border border-emerald-500/30">
                 <CheckCircle className="w-3 h-3" /> Purchased
               </span>
             ) : item.isPaused ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-black/5 dark:bg-[#12161A] text-slate-600 dark:text-slate-400 border border-black/10 dark:border-[#21262D]">
                 <Pause className="w-3 h-3" /> Paused (Simulation)
               </span>
             ) : item.isAffordable ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-emerald-500 text-white shadow-xs">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-emerald-500 text-slate-950 shadow-glow-sm">
                 <Sparkles className="w-3 h-3" /> {item.humanTimeRemaining}
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800/60">
-                <Calendar className="w-3 h-3 text-brand-500 flex-shrink-0" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-emerald-500/10 dark:bg-emerald-500/10 text-emerald-900 dark:text-emerald-300 border border-emerald-500/20 dark:border-emerald-500/20">
+                <Calendar className="w-3 h-3 text-emerald-500 flex-shrink-0" />
                 {item.projectedDate && (
                   <>
                     <strong className="font-semibold">{item.formattedProjectedDate}</strong>
@@ -201,17 +201,17 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                 target="_blank"
                 rel="noreferrer noopener"
                 aria-label={`Open product link for ${item.title}`}
-                className="text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors p-1"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors p-1"
                 title="Open product link"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink className="w-3.5 h-3.5 shrink-0" />
               </a>
             )}
           </div>
 
           {/* Notes if present */}
           {item.notes && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 sm:line-clamp-1">
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 line-clamp-2 sm:line-clamp-1">
               {item.notes}
             </p>
           )}
@@ -219,12 +219,12 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
           {/* Per-item Savings Progress Bar */}
           {!item.isPurchased && !item.isPaused && (
             <div className="mt-2.5 sm:mt-3 space-y-1">
-              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                <div className="flex items-center gap-1 truncate text-[11px] sm:text-xs">
-                  <Layers className="w-3 h-3 text-slate-400 flex-shrink-0" />
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+                <div className="flex items-center gap-1.5 truncate text-[11px] sm:text-xs">
+                  <Layers className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
                   <span className="truncate">
                     Allocated:{' '}
-                    <strong className="text-slate-700 dark:text-slate-300">
+                    <strong className="text-slate-900 dark:text-white font-semibold">
                       <AnimatedCurrency value={item.availableSavings} currency={currency} />
                     </strong>{' '}
                     of {formatCurrency(item.price, currency)}
@@ -244,27 +244,25 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
               {/* Bar */}
               <Progress
                 value={Math.min(100, Math.max(0, item.progressPercent))}
-                indicatorClassName={
-                  item.isAffordable ? 'bg-emerald-500' : 'bg-brand-600 dark:bg-brand-500'
-                }
+                variant={item.isAffordable ? 'success' : 'default'}
               />
             </div>
           )}
         </div>
 
         {/* Right Financial Price (Desktop) & Action Buttons */}
-        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2.5 flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
+        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2.5 flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-white/10">
           <div className="text-right hidden sm:block">
             <span className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white font-mono">
               <AnimatedCurrency value={item.price} currency={currency} />
             </span>
-            <div className="text-[10px] sm:text-[11px] text-slate-400 font-mono">
+            <div className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400 font-mono font-medium">
               Cumulative: <AnimatedCurrency value={item.cumulativeTarget} currency={currency} />
             </div>
           </div>
 
           {/* Cumulative on Mobile */}
-          <div className="sm:hidden text-xs text-slate-400 font-mono">
+          <div className="sm:hidden text-xs text-slate-600 dark:text-slate-400 font-mono font-medium">
             Cumulative: <AnimatedCurrency value={item.cumulativeTarget} currency={currency} />
           </div>
 
@@ -279,14 +277,14 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
                   ? `Mark ${item.title} as planned`
                   : `Mark ${item.title} as purchased`
               }
-              className={`p-2 rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${
+              className={`p-2 rounded-xl transition-all min-h-[36px] min-w-[36px] flex items-center justify-center shrink-0 border ${
                 item.isPurchased
-                  ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400'
-                  : 'text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
+                  ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/40 shadow-xs'
+                  : 'bg-black/[0.04] dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border-black/5 dark:border-white/10 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-500/30'
               }`}
               title={item.isPurchased ? 'Mark as planned' : 'Mark as purchased'}
             >
-              <CheckCircle className="w-4 h-4" />
+              <CheckCircle className="w-4 h-4 shrink-0" strokeWidth={2} />
             </button>
 
             {/* Pause / Resume for what-if scenarios */}
@@ -296,14 +294,18 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
               aria-label={
                 item.isPaused ? `Include ${item.title} in active plan` : `Pause ${item.title}`
               }
-              className={`p-2 rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${
+              className={`p-2 rounded-xl transition-all min-h-[36px] min-w-[36px] flex items-center justify-center shrink-0 border ${
                 item.isPaused
-                  ? 'bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400'
-                  : 'text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
+                  ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/40 shadow-xs'
+                  : 'bg-black/[0.04] dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border-black/5 dark:border-white/10 hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-500/30'
               }`}
               title={item.isPaused ? 'Include in active plan' : 'Temporarily pause item'}
             >
-              {item.isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+              {item.isPaused ? (
+                <Play className="w-4 h-4 shrink-0" strokeWidth={2} />
+              ) : (
+                <Pause className="w-4 h-4 shrink-0" strokeWidth={2} />
+              )}
             </button>
 
             {/* Edit */}
@@ -311,10 +313,10 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
               type="button"
               onClick={() => onEdit(item)}
               aria-label={`Edit ${item.title}`}
-              className="p-2 rounded-lg text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/40 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-black/[0.04] dark:bg-white/[0.04] border border-black/5 dark:border-white/10 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-500/30 transition-all min-h-[36px] min-w-[36px] flex items-center justify-center shrink-0"
               title="Edit wish"
             >
-              <Edit2 className="w-4 h-4" />
+              <Edit2 className="w-4 h-4 shrink-0" strokeWidth={2} />
             </button>
 
             {/* Delete */}
@@ -322,10 +324,10 @@ export const WishItemCard: React.FC<WishItemCardProps> = ({
               type="button"
               onClick={() => onDelete(item.id)}
               aria-label={`Delete ${item.title}`}
-              className="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-black/[0.04] dark:bg-white/[0.04] border border-black/5 dark:border-white/10 hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-500/30 transition-all min-h-[36px] min-w-[36px] flex items-center justify-center shrink-0"
               title="Delete wish"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4 h-4 shrink-0" strokeWidth={2} />
             </button>
           </div>
         </div>

@@ -94,7 +94,7 @@ export const WishList: React.FC<WishListProps> = ({
   return (
     <div className="space-y-4">
       {/* Top Controls Bar: Search & Filter Pills */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+      <div className="bg-white dark:bg-[#12161A] rounded-2xl p-4 border border-slate-300/80 dark:border-[#21262D] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3.5">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -123,10 +123,10 @@ export const WishList: React.FC<WishListProps> = ({
           <button
             type="button"
             onClick={() => setFilterAffordableOnly(!filterAffordableOnly)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all min-h-8 ${
               filterAffordableOnly
-                ? 'bg-emerald-500 text-white border-emerald-600 shadow-xs'
-                : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                ? 'bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 font-semibold border-emerald-500/40 shadow-xs'
+                : 'bg-slate-100 hover:bg-slate-200 dark:bg-[#181D21] dark:hover:bg-[#22282E] text-slate-700 dark:text-slate-200 border border-slate-300/80 dark:border-[#30363D]'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -137,7 +137,7 @@ export const WishList: React.FC<WishListProps> = ({
           <button
             type="button"
             onClick={onOpenAddModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-xs transition-colors ml-auto"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-xs transition-all ml-auto cursor-pointer min-h-8"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Item</span>
@@ -158,10 +158,10 @@ export const WishList: React.FC<WishListProps> = ({
               key={cat}
               type="button"
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-colors border ${
+              className={`px-3 py-1 rounded-full font-medium whitespace-nowrap transition-colors border text-xs font-mono ${
                 isSelected
-                  ? 'bg-brand-600 text-white border-brand-600 shadow-xs'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                  ? 'bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 font-semibold border-emerald-500/40 shadow-xs'
+                  : 'bg-white hover:bg-slate-50 dark:bg-[#161B22] dark:hover:bg-[#21262D] text-slate-700 dark:text-slate-300 border border-slate-300/80 dark:border-[#21262D]'
               }`}
             >
               {label}
@@ -172,8 +172,8 @@ export const WishList: React.FC<WishListProps> = ({
 
       {/* Reorderable Items List */}
       {filteredItems.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-12 text-center border border-dashed border-slate-300 dark:border-slate-800">
-          <div className="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-[#12161A] rounded-2xl p-12 text-center border border-dashed border-slate-300 dark:border-[#21262D] shadow-sm">
+          <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mx-auto mb-4 border border-black/5 dark:border-emerald-500/20">
             <ListOrdered className="w-6 h-6" />
           </div>
           <h3 className="text-base font-semibold text-slate-900 dark:text-white">
@@ -189,7 +189,7 @@ export const WishList: React.FC<WishListProps> = ({
           <button
             type="button"
             onClick={onOpenAddModal}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/20 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-xs transition-all min-h-9"
           >
             <Plus className="w-4 h-4" />
             <span>Add Your First Wish</span>

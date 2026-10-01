@@ -42,7 +42,7 @@ describe('App Client-Side Routing', () => {
 
     const { findByText, findAllByText } = renderAppWithRoute('/');
     expect(await findByText(/WishPacer 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
-    const launchButtons = await findAllByText(/Launch Planner App/i);
+    const launchButtons = await findAllByText(/Launch App|Launch Planner App/i);
     expect(launchButtons.length).toBeGreaterThan(0);
 
     expect(planManagerSpy).not.toHaveBeenCalled();

@@ -48,54 +48,54 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
             }
           }}
           aria-label="Edit budget settings for available saved amount"
-          className="bg-white dark:bg-slate-900 rounded-2xl p-2.5 sm:p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-xs relative overflow-hidden cursor-pointer hover:border-brand-300 dark:hover:border-brand-700 transition-colors group focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 dark:focus:ring-offset-slate-900"
+          className="bg-white dark:bg-[#12161A] rounded-2xl p-2.5 sm:p-4 border border-slate-300/80 dark:border-[#21262D] shadow-sm relative overflow-hidden cursor-pointer hover:border-slate-400 dark:hover:border-[#30363D] transition-all duration-150 group focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 dark:focus:ring-offset-[#0B0E11]"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Available Saved
             </span>
-            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl bg-black/5 dark:bg-emerald-500/10 border border-black/5 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div className="mt-1.5 sm:mt-2 flex items-baseline gap-2 min-w-0 overflow-hidden">
-            <span className="text-base sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono truncate">
+            <span className="text-base sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono tabular-nums truncate">
               <AnimatedCurrency value={result.effectiveSaved} currency={result.currency} />
             </span>
           </div>
-          <div className="mt-1 flex items-center justify-between text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 min-w-0 gap-1">
+          <div className="mt-1 flex flex-col xs:flex-row xs:items-center justify-between text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 min-w-0 gap-0.5">
             {config.emergencyBuffer > 0 ? (
               <span className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400 min-w-0 truncate">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
                 <span className="truncate">
                   {formatCurrency(config.emergencyBuffer, result.currency)} buffer
                 </span>
               </span>
             ) : (
-              <span className="truncate min-w-0">
+              <span className="truncate min-w-0 font-mono tabular-nums">
                 Total: {formatCurrency(config.currentAmountSaved, result.currency)}
               </span>
             )}
-            <span className="inline-flex items-center gap-1 text-brand-600 dark:text-brand-400 font-medium group-hover:underline ml-1 shrink-0">
-              <Pencil className="w-3 h-3 shrink-0" />
+            <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium group-hover:underline self-end xs:self-auto shrink-0">
+              <Pencil className="w-2.5 h-2.5 shrink-0" />
               <span className="hidden sm:inline">Edit balance</span>
-              <span className="sm:hidden">Edit</span>
+              <span className="sm:hidden text-[9px] uppercase font-mono">Edit</span>
             </span>
           </div>
         </div>
 
         {/* 2. Total Plan Cost & Remaining Deficit */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-2.5 sm:p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-xs relative overflow-hidden">
+        <div className="bg-white dark:bg-[#12161A] rounded-2xl p-2.5 sm:p-4 border border-slate-300/80 dark:border-[#21262D] shadow-sm relative overflow-hidden transition-all duration-150">
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Total Active Wishes
             </span>
-            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl bg-black/5 dark:bg-emerald-500/10 border border-black/5 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div className="mt-1.5 sm:mt-2 flex items-baseline gap-2 min-w-0 overflow-hidden">
-            <span className="text-base sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono truncate">
+            <span className="text-base sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono tabular-nums truncate">
               <AnimatedCurrency value={result.totalActiveCost} currency={result.currency} />
             </span>
           </div>
@@ -103,7 +103,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
             {result.totalRemainingDeficit > 0 ? (
               <span className="truncate">
                 Need{' '}
-                <strong className="text-amber-600 dark:text-amber-400 font-semibold">
+                <strong className="text-amber-700 dark:text-amber-400 font-semibold font-mono tabular-nums">
                   {formatCurrency(result.totalRemainingDeficit, result.currency)}
                 </strong>{' '}
                 more
@@ -128,41 +128,43 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
             }
           }}
           aria-label="Edit budget settings for savings rate"
-          className="bg-white dark:bg-slate-900 rounded-2xl p-2.5 sm:p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-xs relative overflow-hidden cursor-pointer hover:border-brand-300 dark:hover:border-brand-700 transition-colors group focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 dark:focus:ring-offset-slate-900"
+          className="bg-white dark:bg-[#12161A] rounded-2xl p-2.5 sm:p-4 border border-slate-300/80 dark:border-[#21262D] shadow-sm relative overflow-hidden cursor-pointer hover:border-slate-400 dark:hover:border-[#30363D] transition-all duration-150 group focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 dark:focus:ring-offset-[#0B0E11]"
         >
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Savings Rate
             </span>
-            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl bg-black/5 dark:bg-emerald-500/10 border border-black/5 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <PiggyBank className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
           <div className="mt-1.5 sm:mt-2 flex items-baseline gap-1 sm:gap-1.5 min-w-0 overflow-hidden">
-            <span className="text-base sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono truncate">
+            <span className="text-base sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono tabular-nums truncate">
               <AnimatedCurrency value={config.amountToSave} currency={result.currency} />
             </span>
             <span className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">
               / {frequencyLabel.toLowerCase()}
             </span>
           </div>
-          <div className="mt-1 flex items-center justify-between text-[11px] sm:text-xs text-brand-600 dark:text-brand-400 min-w-0 gap-1 group-hover:underline">
-            <span className="truncate min-w-0">Deposit on day {config.savingsDayOfMonth || 1}</span>
-            <span className="inline-flex items-center gap-1 font-medium shrink-0">
-              <Pencil className="w-3 h-3 shrink-0" />
+          <div className="mt-1 flex flex-col xs:flex-row xs:items-center justify-between text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 min-w-0 gap-0.5 group-hover:underline">
+            <span className="truncate min-w-0 text-slate-500 dark:text-slate-400">
+              <span className="hidden xs:inline">Deposit on </span>day {config.savingsDayOfMonth || 1}
+            </span>
+            <span className="inline-flex items-center gap-1 font-medium self-end xs:self-auto shrink-0">
+              <Pencil className="w-2.5 h-2.5 shrink-0" />
               <span className="hidden sm:inline">Edit rate</span>
-              <span className="sm:hidden">Edit</span>
+              <span className="sm:hidden text-[9px] uppercase font-mono">Edit</span>
             </span>
           </div>
         </div>
 
         {/* 4. Target Completion Date */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-2.5 sm:p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-xs relative overflow-hidden">
+        <div className="bg-white dark:bg-[#12161A] rounded-2xl p-2.5 sm:p-4 border border-slate-300/80 dark:border-[#21262D] shadow-sm relative overflow-hidden transition-all duration-150">
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Fully Funded Date
             </span>
-            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl bg-champagne-300/20 text-brand-900 dark:text-champagne-300 flex items-center justify-center">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl bg-black/5 dark:bg-emerald-500/10 border border-black/5 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
@@ -191,11 +193,18 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
           </div>
         </div>
       </div>
+
       {/* Progress Bar & Milestone Visualizer */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 sm:p-5 border border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+      <div className="bg-white dark:bg-[#12161A] rounded-2xl p-3 sm:p-5 border border-slate-300/80 dark:border-[#21262D] shadow-sm transition-all duration-200">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-brand-500 animate-pulse" />
+            <div
+              className={`w-2.5 h-2.5 rounded-full ${
+                result.overallProgressPercent >= 100
+                  ? 'bg-emerald-500'
+                  : 'bg-emerald-500 animate-pulse'
+              }`}
+            />
             <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
               Overall Wishlist Feasibility
             </span>
@@ -205,19 +214,19 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
           </div>
           <div className="flex items-center justify-between sm:justify-end gap-2 text-xs">
             <span className="text-slate-600 dark:text-slate-400 text-[11px] sm:text-xs">
-              <strong>{formatCurrency(result.effectiveSaved, result.currency)}</strong> of{' '}
-              {formatCurrency(result.totalActiveCost, result.currency)}
+              <strong className="font-mono tabular-nums">{formatCurrency(result.effectiveSaved, result.currency)}</strong> of{' '}
+              <span className="font-mono tabular-nums">{formatCurrency(result.totalActiveCost, result.currency)}</span>
             </span>
-            <span className="px-2 py-0.5 rounded-full font-bold text-[10px] sm:text-xs bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
+            <span className="px-2.5 py-0.5 rounded-full font-bold text-[10px] sm:text-xs bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-mono">
               {result.overallProgressPercent.toFixed(0)}%
             </span>
           </div>
         </div>
 
-        {/* Multi-Segment / Solid Progress Bar */}
-        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 sm:h-3.5 overflow-hidden p-0.5 relative">
+        {/* Clean, Non-Fuzzy Solid Progress Bar */}
+        <div className="w-full bg-black/10 dark:bg-[#0D1117] rounded-full h-2.5 sm:h-3 overflow-hidden p-0.5 relative border border-black/5 dark:border-white/5">
           <div
-            className="bg-gradient-to-r from-brand-900 via-emerald-600 to-champagne-400 h-full rounded-full transition-all duration-500 ease-out shadow-xs"
+            className="bg-emerald-600 dark:bg-emerald-400 h-full rounded-full transition-all duration-500 ease-out"
             style={{
               width: `${Math.max(result.overallProgressPercent > 0 ? 2 : 0, Math.min(100, result.overallProgressPercent))}%`,
             }}
@@ -226,24 +235,24 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
 
         {/* Mini Item Badges along the progress */}
         {result.activeItems.length > 0 && (
-          <div className="mt-2.5 sm:mt-3 flex flex-wrap gap-1.5 pt-1 border-t border-slate-100 dark:border-slate-800/60">
+          <div className="mt-2.5 sm:mt-3 flex flex-wrap gap-1.5 pt-2 border-t border-black/5 dark:border-white/10">
             {result.activeItems.map((item, idx) => (
               <div
                 key={item.id}
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] sm:text-xs transition-colors ${
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] sm:text-xs transition-colors ${
                   item.isAffordable
-                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
-                    : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-800'
+                    ? 'bg-emerald-500/15 text-emerald-900 dark:text-emerald-300 border border-emerald-500/30'
+                    : 'bg-white/70 dark:bg-[#181D21] text-slate-700 dark:text-slate-300 border border-black/10 dark:border-[#21262D]'
                 }`}
               >
                 <span className="font-mono font-bold text-[9px] sm:text-[10px] opacity-70">
                   #{idx + 1}
                 </span>
-                <span className="max-w-[90px] sm:max-w-[160px] truncate font-medium">
+                <span className="max-w-22.5 sm:max-w-40 truncate font-medium">
                   {item.title}
                 </span>
                 {item.isAffordable ? (
-                  <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                 ) : (
                   <span className="font-mono text-[9px] sm:text-[10px] opacity-80">
                     {item.progressPercent.toFixed(0)}%

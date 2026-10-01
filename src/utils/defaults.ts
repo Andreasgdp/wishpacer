@@ -73,11 +73,11 @@ export const PLAN_COLORS: Record<
     gradient: 'from-champagne-200 via-champagne-300 to-champagne-400',
   },
   amber: {
-    label: 'Amber',
-    bg: 'bg-amber-500',
-    text: 'text-amber-600 dark:text-amber-400',
-    ring: 'ring-amber-500',
-    gradient: 'from-amber-500 to-orange-600',
+    label: 'Terracotta & Ochre',
+    bg: 'bg-terracotta',
+    text: 'text-terracotta dark:text-gold-ochre',
+    ring: 'ring-terracotta',
+    gradient: 'from-[#C16C4B] via-[#DDA05E] to-[#B48B53]',
   },
   emerald: {
     label: 'Emerald',

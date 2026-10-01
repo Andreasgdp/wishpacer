@@ -4,21 +4,23 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs sm:text-sm font-semibold ring-offset-white transition-all duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-xs sm:text-sm font-semibold ring-offset-white transition-all duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-[#041A10]',
   {
     variants: {
       variant: {
         default:
-          'bg-brand-600 text-white hover:bg-brand-700 shadow-md shadow-brand-600/20 active:bg-brand-800',
+          'bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-xs active:scale-[0.99]',
         destructive:
-          'bg-rose-600 text-white hover:bg-rose-700 shadow-md shadow-rose-600/20 active:bg-rose-800',
+          'bg-rose-600 text-white hover:bg-rose-700 shadow-xs active:bg-rose-800',
+        warning:
+          'bg-amber-600 text-white hover:bg-amber-700 shadow-xs active:bg-amber-800',
         outline:
-          'border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700',
+          'border border-black/10 dark:border-[#21262D] bg-white dark:bg-[#161B22] hover:bg-black/5 dark:hover:bg-[#22282E] text-slate-700 dark:text-slate-200 hover:border-black/20 dark:hover:border-[#30363D] shadow-xs',
         secondary:
-          'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700',
+          'bg-slate-100 dark:bg-white/[0.06] text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/[0.1]',
         ghost:
-          'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100',
-        link: 'text-brand-600 dark:text-brand-400 underline-offset-4 hover:underline',
+          'hover:bg-slate-100 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white',
+        link: 'text-emerald-600 dark:text-emerald-400 underline-offset-4 hover:underline',
       },
       size: {
         default: 'h-10 px-4 py-2',
