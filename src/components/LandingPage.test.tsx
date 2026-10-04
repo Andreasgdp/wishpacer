@@ -12,14 +12,14 @@ describe('LandingPage Component', () => {
     const onLaunchApp = mock(() => {});
     const onExploreDemo = mock(() => {});
 
-    const { getByText, getAllByText } = render(
+    const { getByText, getAllByText, getByRole } = render(
       <LandingPage onLaunchApp={onLaunchApp} onExploreDemo={onExploreDemo} />
     );
 
     expect(getByText(/WishPacer 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
-    expect(getByText(/Stop Waiting./i)).not.toBeNull();
+    expect(getByRole('heading', { level: 1, name: /Your Wishlist, Funded/i })).not.toBeNull();
 
-    const launchButtons = getAllByText(/Launch Planner App/i);
+    const launchButtons = getAllByText(/Launch App/i);
     expect(launchButtons.length).toBeGreaterThan(0);
 
     fireEvent.click(launchButtons[0]);
@@ -53,7 +53,9 @@ describe('LandingPage Component', () => {
       <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />
     );
 
+    expect(getByText(/Your Goals, Funded in Order/i)).not.toBeNull();
     expect(getAllByText(/Contiguous Priority Queue/i).length).toBeGreaterThan(0);
+    expect(getByText(/HYSA Yield Simulator/i)).not.toBeNull();
     expect(getByText(/What-If Sandbox/i)).not.toBeNull();
     expect(getByText(/Multi-Plan Portfolio/i)).not.toBeNull();
     expect(getByText(/Local-First Hybrid Sync/i)).not.toBeNull();
@@ -66,9 +68,45 @@ describe('LandingPage Component', () => {
     );
 
     expect(getByText(/WishPacer 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
-    expect(getByText(/Simulate Your WishPacer Timeline/i)).not.toBeNull();
-
+    expect(getByText(/Simulate Your Goal/i)).not.toBeNull();
     const priceSlider = getByLabelText(/Target Item Price/i) as HTMLInputElement;
     expect(priceSlider.value).toBe('2400');
+  });
+  it('supports accessible ARIA slider attributes, quick presets, and windfall simulation', () => {
+    const { getByLabelText, getByText, getByRole } = render(
+      <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />
+    );
+
+    const priceSlider = getByLabelText(/Target Item Price/i);
+    expect(priceSlider.getAttribute('aria-valuemin')).toBe('100');
+    expect(priceSlider.getAttribute('aria-valuemax')).toBe('10000');
+    expect(priceSlider.getAttribute('aria-valuenow')).toBe('2400');
+
+    // Click quick preset button
+    const preset1200 = getByRole('button', { name: '$1,200' });
+    fireEvent.click(preset1200);
+    expect((priceSlider as HTMLInputElement).value).toBe('1200');
+
+    // Click windfall simulation button
+    const windfallButton = getByText('+$1000');
+    fireEvent.click(windfallButton);
+    expect(getByText(/Sequential Priority Cascade/i)).not.toBeNull();
+    expect(getByText(/Live Engine/i)).not.toBeNull();
+  });
+
+  it('renders updated footer links indicating TBD and only repository GitHub link', () => {
+    const { getByText, getByLabelText, queryByLabelText } = render(
+      <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />
+    );
+
+    expect(getByText('Legal (TBD)')).not.toBeNull();
+    expect(getByText('Privacy (TBD)')).not.toBeNull();
+    expect(getByText('Support (TBD)')).not.toBeNull();
+
+    const githubLink = getByLabelText('GitHub');
+    expect(githubLink.getAttribute('href')).toBe('https://github.com/Andreasgdp/wishpacer');
+
+    expect(queryByLabelText('Twitter')).toBeNull();
+    expect(queryByLabelText('Instagram')).toBeNull();
   });
 });

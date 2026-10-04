@@ -28,6 +28,10 @@ Budget settings (`PlanConfig`) governing deposit frequency (daily, weekly, biwee
 
 A scenario projection that simulates altered monthly savings rates or lump-sum bonus additions without mutating or persisting the underlying plan state.
 
+### Simulation Carryover
+
+Transient pacing parameters (target price, monthly savings rate, APY) carried over from the public landing simulator into an active workspace session, providing instant continuity between simulated scenarios and real plans.
+
 ### Developer Gate & Activation
 
 A session access gate (`ActivationWallModal`) that restricts unauthorized web access prior to production paywall deployment, unlocked via a developer invite key (`VITE_DEV_ACTIVATION_CODE`).

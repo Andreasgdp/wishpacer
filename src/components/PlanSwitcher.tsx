@@ -84,7 +84,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-label={`Switch savings plan. Currently selected: ${isPortfolioView ? 'Portfolio' : activePlan?.name || 'Plan'}`}
-        className="flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/80 text-slate-900 dark:text-white transition-all text-left group min-w-0 max-w-[150px] xs:max-w-[200px] sm:max-w-none shrink"
+        className="flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-1.5 rounded-2xl bg-white dark:bg-[#161B22] hover:bg-slate-50 dark:hover:bg-[#1F242C] border border-slate-300/80 dark:border-[#21262D] text-slate-900 dark:text-white transition-all text-left group min-w-0 max-w-[150px] xs:max-w-[200px] sm:max-w-none shrink shadow-xs"
       >
         <div
           className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl flex items-center justify-center text-white shadow-xs flex-shrink-0 ${
@@ -105,7 +105,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
             <span className="text-xs font-bold truncate">
               {isPortfolioView ? 'Portfolio' : activePlan?.name}
             </span>
-            <span className="text-[10px] font-mono px-1 py-0 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-500 font-semibold">
+            <span className="text-[10px] font-mono px-1 py-0 rounded-md bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-semibold">
               {plans.length}
             </span>
           </div>
@@ -125,7 +125,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-[280px] xs:w-72 sm:w-80 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="absolute left-0 top-full mt-2 w-[280px] xs:w-72 sm:w-80 bg-[#E2EAE5]/95 dark:bg-[#12161A]/95 backdrop-blur-2xl rounded-2xl border border-black/10 dark:border-[#21262D] shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
             Savings Plans ({plans.length})
           </div>
@@ -148,8 +148,8 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
                   aria-label={`Select ${plan.name} plan`}
                   className={`w-full flex items-center justify-between p-2 sm:p-2.5 rounded-xl text-left transition-colors ${
                     isSelected
-                      ? 'bg-brand-50/80 dark:bg-brand-950/60 text-brand-900 dark:text-brand-100 border border-brand-200 dark:border-brand-800/80'
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      ? 'bg-emerald-500/15 text-emerald-950 dark:text-emerald-100 border border-emerald-500/30'
+                      : 'hover:bg-black/5 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -170,7 +170,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
                   </div>
 
                   {isSelected && (
-                    <Check className="w-4 h-4 text-brand-600 dark:text-brand-400 flex-shrink-0" />
+                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                   )}
                 </button>
               );
@@ -178,7 +178,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
           </div>
 
           {/* Portfolio Option */}
-          <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1">
+          <div className="mt-2 pt-2 border-t border-slate-100 dark:border-white/10 space-y-1">
             <button
               type="button"
               onClick={() => {
@@ -188,8 +188,8 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
               aria-label="Select All Plans Portfolio"
               className={`w-full flex items-center justify-between p-2 sm:p-2.5 rounded-xl text-left transition-colors ${
                 isPortfolioView
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold'
-                  : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+                  ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-950 dark:text-emerald-100 font-semibold border border-emerald-500/30'
+                  : 'hover:bg-slate-100 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200'
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -201,7 +201,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
                   <div className="text-[10px] text-slate-500">Combined overview & comparisons</div>
                 </div>
               </div>
-              {isPortfolioView && <Check className="w-4 h-4 text-slate-900 dark:text-white" />}
+              {isPortfolioView && <Check className="w-4 h-4 text-emerald-500" />}
             </button>
 
             {/* Create New Plan Button */}
@@ -213,9 +213,9 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
                   setIsOpen(false);
                 }}
                 aria-label="Manage Plan Settings"
-                className="w-full flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl text-left text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="w-full flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
               >
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300">
                   <Wrench className="w-3.5 h-3.5" />
                 </div>
                 <span>Manage Plan Settings...</span>
@@ -230,9 +230,9 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
                 setIsOpen(false);
               }}
               aria-label="Create New Savings Plan"
-              className="w-full flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl text-left text-xs font-semibold text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/40 transition-colors"
+              className="w-full flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl text-left text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/15 transition-colors"
             >
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center bg-brand-100 dark:bg-brand-900/50 text-brand-600 dark:text-brand-400">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
                 <Plus className="w-3.5 h-3.5" />
               </div>
               <span>Create New Plan...</span>

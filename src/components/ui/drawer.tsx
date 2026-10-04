@@ -51,12 +51,12 @@ const DrawerContent = React.forwardRef<
       }}
       tabIndex={-1}
       className={cn(
-        'fixed inset-x-0 bottom-0 z-50 mt-24 flex max-h-[85dvh] flex-col rounded-t-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl outline-none',
+        'fixed inset-x-0 bottom-0 z-50 mt-24 flex max-h-[85dvh] flex-col rounded-t-[20px] border border-black/10 dark:border-[#21262D] bg-[#E2EAE5]/95 dark:bg-[#12161A]/95 backdrop-blur-2xl shadow-2xl outline-none',
         className
       )}
       {...props}
     >
-      <div className="mx-auto mt-3 h-1.5 w-12 flex-shrink-0 rounded-full bg-slate-300 dark:bg-slate-700" />
+      <div className="mx-auto mt-3 h-1.5 w-12 flex-shrink-0 rounded-full bg-slate-300 dark:bg-white/20" />
       <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6">{children}</div>
     </DrawerPrimitive.Content>
   </DrawerPortal>

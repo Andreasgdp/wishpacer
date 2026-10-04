@@ -59,12 +59,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 sm:p-6 font-sans text-slate-900 dark:text-slate-100">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#CCD7D0] dark:bg-[#0B0E11] flex flex-col items-center justify-center p-4 sm:p-6 font-sans text-[#111714] dark:text-[#E6EDF3] relative overflow-hidden">
+      <div className="w-full max-w-md bg-[#E2EAE5]/95 dark:bg-[#12161A]/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-black/10 dark:border-[#21262D] p-8 text-center space-y-6 relative overflow-hidden">
         {/* Glow effect */}
         <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 ring-8 ring-indigo-50/50 dark:ring-indigo-950/30">
+        <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 ring-8 ring-emerald-500/10">
           <Lock className="w-7 h-7" />
           <Sparkles className="w-4 h-4 absolute -top-1 -right-1 text-amber-500" />
         </div>
@@ -79,11 +79,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         </div>
 
         <div className="space-y-3 pt-2 relative">
-          <Button
-            type="button"
-            onClick={handleSignIn}
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
-          >
+          <Button type="button" size="lg" onClick={handleSignIn} className="w-full cursor-pointer">
             <span>Sign In / Register</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
@@ -91,10 +87,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <Button
             type="button"
             variant="outline"
+            size="lg"
             onClick={() => navigate('/demo')}
-            className="w-full h-11 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+            className="w-full cursor-pointer"
           >
-            Explore Interactive Demo First
+            <span>Explore Interactive Demo First</span>
           </Button>
         </div>
       </div>

@@ -144,7 +144,14 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
+    <div className="min-h-screen bg-[#CCD7D0] dark:bg-[#0B0E11] text-[#111714] dark:text-[#E6EDF3] flex flex-col font-sans transition-colors duration-200 relative overflow-x-hidden selection:bg-emerald-500/20 selection:text-slate-900 dark:selection:text-emerald-300">
+      {/* Restrained Architectural Illumination */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[560px] pointer-events-none z-0 opacity-60 dark:opacity-40"
+        aria-hidden="true"
+      >
+        <div className="w-full h-full bg-radial-glow-light dark:bg-radial-glow-dark" />
+      </div>
       <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
 
       {/* Header */}
@@ -182,7 +189,7 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
         onSignInClick={() => modal.open('activation')}
       />
 
-      <main className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full space-y-4 sm:space-y-6">
+      <main className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full space-y-4 sm:space-y-6 relative z-10">
         {isPortfolioView ? (
           <PortfolioOverview
             plans={storeData.plans}
@@ -466,8 +473,26 @@ export const LandingPageWorkspace: React.FC = () => {
     <>
       <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
       <LandingPage
-        onLaunchApp={() => navigate('/app')}
-        onExploreDemo={() => navigate('/demo')}
+        onLaunchApp={simData => {
+          if (
+            simData &&
+            typeof window !== 'undefined' &&
+            typeof window.sessionStorage !== 'undefined'
+          ) {
+            window.sessionStorage.setItem('wishpacer_sim_carryover', JSON.stringify(simData));
+          }
+          navigate('/app');
+        }}
+        onExploreDemo={simData => {
+          if (
+            simData &&
+            typeof window !== 'undefined' &&
+            typeof window.sessionStorage !== 'undefined'
+          ) {
+            window.sessionStorage.setItem('wishpacer_sim_carryover', JSON.stringify(simData));
+          }
+          navigate('/demo');
+        }}
         onToggleDarkMode={toggleDarkMode}
         darkMode={darkMode}
       />
@@ -494,6 +519,40 @@ export const DemoAppWorkspace: React.FC = () => {
   // Demo Plan Manager (pre-populated with DEFAULT_PLANS sample data)
   const demoRepo = useMemo(() => new InMemoryStorageRepository(getDefaultStoreData()), []);
   const demoPlanManager = usePlanManager({ repository: demoRepo });
+  // Apply Landing Simulator Session Carryover if user clicked "Activate Your Plan"
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.sessionStorage === 'undefined') return;
+    const raw = window.sessionStorage.getItem('wishpacer_sim_carryover');
+    if (raw) {
+      window.sessionStorage.removeItem('wishpacer_sim_carryover');
+      try {
+        const carryover = JSON.parse(raw);
+        if (carryover.itemPrice && demoPlanManager.activePlan?.items?.[0]) {
+          const firstItem = demoPlanManager.activePlan.items[0];
+          demoPlanManager.actions.saveWishItem(
+            {
+              title: firstItem.title,
+              price: carryover.itemPrice,
+              category: firstItem.category,
+              priority: firstItem.priority,
+              url: firstItem.url,
+              notes: firstItem.notes,
+            },
+            firstItem.id
+          );
+        }
+        if (carryover.monthlySavings) {
+          demoPlanManager.actions.updateBudgetSettings({
+            ...demoPlanManager.effectiveConfig,
+            amountToSave: carryover.monthlySavings,
+            annualInterestRate: carryover.hysaRate ?? 4.5,
+          });
+        }
+      } catch {
+        // ignore invalid carryover payload
+      }
+    }
+  }, [demoPlanManager]);
 
   const handleOpenCreatePlanModal = () => {
     setPlanManageMode('create');

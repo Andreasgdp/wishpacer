@@ -243,4 +243,44 @@ test.describe('WishPacer End-to-End User Flows', () => {
     ).toBeVisible();
     expect(page.url()).toContain('/plan/plan-house-needs');
   });
+
+  test('Flow 9: Theme, Wishing-Plan Logo, and iOS App Icon Verification', async ({ page }) => {
+    // 1. Verify iOS homescreen and web app head elements
+    const appleTouchIcon = page.locator('link[rel="apple-touch-icon"]').first();
+    await expect(appleTouchIcon).toHaveAttribute('href', '/apple-touch-icon.png');
+
+    const appleCapable = page.locator('meta[name="apple-mobile-web-app-capable"]');
+    await expect(appleCapable).toHaveAttribute('content', 'yes');
+
+    const appleTitle = page.locator('meta[name="apple-mobile-web-app-title"]');
+    await expect(appleTitle).toHaveAttribute('content', 'WishPacer');
+
+    const manifestLink = page.locator('link[rel="manifest"]');
+    await expect(manifestLink).toHaveAttribute('href', '/manifest.json');
+
+    const themeColorLight = page.locator(
+      'meta[name="theme-color"][media="(prefers-color-scheme: light)"]'
+    );
+    await expect(themeColorLight).toHaveAttribute('content', '#F8E7C9');
+
+    // 2. Dismiss onboarding modal
+    await page.getByRole('button', { name: 'Close' }).first().click();
+
+    // 3. Verify Logo displays the Wishing-Plan vector mark (viewBox 0 0 642 582)
+    const logoSvg = page.locator('header svg[viewBox="0 0 642 582"]').first();
+    await expect(logoSvg).toBeVisible();
+
+    // 4. Toggle light / dark mode
+    const themeToggleBtn = page.getByRole('button', { name: /toggle theme/i }).first();
+    if (await themeToggleBtn.isVisible()) {
+      const isInitiallyDark = await page.evaluate(() =>
+        document.documentElement.classList.contains('dark')
+      );
+      await themeToggleBtn.click();
+      const isDarkAfter = await page.evaluate(() =>
+        document.documentElement.classList.contains('dark')
+      );
+      expect(isDarkAfter).not.toBe(isInitiallyDark);
+    }
+  });
 });
