@@ -201,10 +201,7 @@ export const PlanSettingsModal: React.FC<PlanSettingsModalProps> = ({
                 <Label className="block mb-1.5">Timeline Start Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left"
-                    >
+                    <Button variant="outline" className="w-full justify-start text-left">
                       <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
                       {firstSavingDate ? (
                         format(parseISO(firstSavingDate), 'PPP')

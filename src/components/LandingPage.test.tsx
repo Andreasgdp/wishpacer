@@ -93,4 +93,20 @@ describe('LandingPage Component', () => {
     expect(getByText(/Sequential Priority Cascade/i)).not.toBeNull();
     expect(getByText(/Live Engine/i)).not.toBeNull();
   });
+
+  it('renders updated footer links indicating TBD and only repository GitHub link', () => {
+    const { getByText, getByLabelText, queryByLabelText } = render(
+      <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />
+    );
+
+    expect(getByText('Legal (TBD)')).not.toBeNull();
+    expect(getByText('Privacy (TBD)')).not.toBeNull();
+    expect(getByText('Support (TBD)')).not.toBeNull();
+
+    const githubLink = getByLabelText('GitHub');
+    expect(githubLink.getAttribute('href')).toBe('https://github.com/Andreasgdp/wishpacer');
+
+    expect(queryByLabelText('Twitter')).toBeNull();
+    expect(queryByLabelText('Instagram')).toBeNull();
+  });
 });

@@ -19,29 +19,29 @@ const progressIndicatorVariants = cva(
 );
 
 export interface ProgressProps
-  extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>,
+  extends
+    React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>,
     VariantProps<typeof progressIndicatorVariants> {
   indicatorClassName?: string;
 }
 
-const Progress = React.forwardRef<
-  React.ElementRef<typeof ProgressPrimitive.Root>,
-  ProgressProps
->(({ className, value, variant = 'default', indicatorClassName, ...props }, ref) => (
-  <ProgressPrimitive.Root
-    ref={ref}
-    className={cn(
-      'relative h-2.5 w-full overflow-hidden rounded-full bg-slate-200/90 dark:bg-[#0D1117] border border-black/5 dark:border-white/5 p-0.5',
-      className
-    )}
-    {...props}
-  >
-    <ProgressPrimitive.Indicator
-      className={cn(progressIndicatorVariants({ variant }), indicatorClassName)}
-      style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
-    />
-  </ProgressPrimitive.Root>
-));
+const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root>, ProgressProps>(
+  ({ className, value, variant = 'default', indicatorClassName, ...props }, ref) => (
+    <ProgressPrimitive.Root
+      ref={ref}
+      className={cn(
+        'relative h-2.5 w-full overflow-hidden rounded-full bg-slate-200/90 dark:bg-[#0D1117] border border-black/5 dark:border-white/5 p-0.5',
+        className
+      )}
+      {...props}
+    >
+      <ProgressPrimitive.Indicator
+        className={cn(progressIndicatorVariants({ variant }), indicatorClassName)}
+        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+      />
+    </ProgressPrimitive.Root>
+  )
+);
 Progress.displayName = ProgressPrimitive.Root.displayName;
 
 export { Progress, progressIndicatorVariants };

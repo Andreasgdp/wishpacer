@@ -148,7 +148,8 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
           </div>
           <div className="mt-1 flex flex-col xs:flex-row xs:items-center justify-between text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 min-w-0 gap-0.5 group-hover:underline">
             <span className="truncate min-w-0 text-slate-500 dark:text-slate-400">
-              <span className="hidden xs:inline">Deposit on </span>day {config.savingsDayOfMonth || 1}
+              <span className="hidden xs:inline">Deposit on </span>day{' '}
+              {config.savingsDayOfMonth || 1}
             </span>
             <span className="inline-flex items-center gap-1 font-medium self-end xs:self-auto shrink-0">
               <Pencil className="w-2.5 h-2.5 shrink-0" />
@@ -214,8 +215,13 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
           </div>
           <div className="flex items-center justify-between sm:justify-end gap-2 text-xs">
             <span className="text-slate-600 dark:text-slate-400 text-[11px] sm:text-xs">
-              <strong className="font-mono tabular-nums">{formatCurrency(result.effectiveSaved, result.currency)}</strong> of{' '}
-              <span className="font-mono tabular-nums">{formatCurrency(result.totalActiveCost, result.currency)}</span>
+              <strong className="font-mono tabular-nums">
+                {formatCurrency(result.effectiveSaved, result.currency)}
+              </strong>{' '}
+              of{' '}
+              <span className="font-mono tabular-nums">
+                {formatCurrency(result.totalActiveCost, result.currency)}
+              </span>
             </span>
             <span className="px-2.5 py-0.5 rounded-full font-bold text-[10px] sm:text-xs bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-mono">
               {result.overallProgressPercent.toFixed(0)}%
@@ -248,9 +254,7 @@ export const MetricsOverview: React.FC<MetricsOverviewProps> = ({
                 <span className="font-mono font-bold text-[9px] sm:text-[10px] opacity-70">
                   #{idx + 1}
                 </span>
-                <span className="max-w-22.5 sm:max-w-40 truncate font-medium">
-                  {item.title}
-                </span>
+                <span className="max-w-22.5 sm:max-w-40 truncate font-medium">{item.title}</span>
                 {item.isAffordable ? (
                   <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                 ) : (

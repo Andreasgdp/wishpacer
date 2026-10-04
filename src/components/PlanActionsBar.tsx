@@ -54,7 +54,9 @@ export const PlanActionsBar: React.FC<PlanActionsBarProps> = ({
           title="Budget Settings"
         >
           <Settings className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-          <span>Budget<span className="hidden xs:inline"> Settings</span></span>
+          <span>
+            Budget<span className="hidden xs:inline"> Settings</span>
+          </span>
         </button>
 
         <button

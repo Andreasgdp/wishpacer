@@ -58,7 +58,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [hasInteracted, setHasInteracted] = useState<boolean>(false);
 
   // Tasteful Interactive Micro-Sandbox States for Feature Modules
-  const [sandboxPacingMode, setSandboxPacingMode] = useState<'sequential' | 'parallel'>('sequential');
+  const [sandboxPacingMode, setSandboxPacingMode] = useState<'sequential' | 'parallel'>(
+    'sequential'
+  );
   const [sandboxApyRate, setSandboxApyRate] = useState<number>(4.5);
   const [sandboxBonusActive, setSandboxBonusActive] = useState<boolean>(false);
 
@@ -186,7 +188,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       />
 
       {/* HERO SECTION: Dual-Pane Avionics Cockpit Above the Fold */}
-      <section id="hero" className="relative pt-10 pb-16 sm:pt-14 sm:pb-20 px-4 sm:px-6 lg:px-8 z-10">
+      <section
+        id="hero"
+        className="relative pt-10 pb-16 sm:pt-14 sm:pb-20 px-4 sm:px-6 lg:px-8 z-10"
+      >
         <div className="max-w-6xl mx-auto space-y-8 sm:space-y-10">
           {/* Headline & High-Precision System Overview */}
           <div className="max-w-3xl mx-auto text-center space-y-4">
@@ -199,14 +204,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#111714] dark:text-white leading-[1.08]">
               Your Wishlist, Funded.{' '}
-              <span className="text-[#1A6348] dark:text-emerald-400">
-                Automatically.
-              </span>
+              <span className="text-[#1A6348] dark:text-emerald-400">Automatically.</span>
             </h1>
 
             {/* Sub-headline */}
             <p className="max-w-2xl mx-auto text-base sm:text-lg text-[#32433A] dark:text-slate-300 font-normal leading-relaxed">
-              Organize dream purchases in a strict priority queue and let your savings cascade with compound interest.
+              Organize dream purchases in a strict priority queue and let your savings cascade with
+              compound interest.
             </p>
           </div>
 
@@ -373,7 +377,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                               : 'bg-[#1D2227] text-slate-300 hover:bg-[#252C32]'
                           }`}
                         >
-                          ${val}<span className="hidden xs:inline">/mo</span>
+                          ${val}
+                          <span className="hidden xs:inline">/mo</span>
                         </button>
                       ))}
                     </div>
@@ -517,9 +522,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         <span className="w-5 h-5 rounded-sm bg-emerald-400 text-slate-950 font-bold text-[11px] flex items-center justify-center">
                           1
                         </span>
-                        <span className="font-semibold text-white text-sm">
-                          Primary Wish Item
-                        </span>
+                        <span className="font-semibold text-white text-sm">Primary Wish Item</span>
                       </div>
                       <span className="text-emerald-300 font-bold text-sm">
                         ${itemPrice.toLocaleString()}
@@ -535,7 +538,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       </div>
                       <div className="text-xs text-slate-300 flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Funded: <strong className="text-emerald-300">{formattedDate}</strong></span>
+                        <span>
+                          Funded: <strong className="text-emerald-300">{formattedDate}</strong>
+                        </span>
                       </div>
                     </div>
 
@@ -548,7 +553,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <div className="p-2.5 rounded-xl bg-[#161B1F] border border-white/5 text-[11px] font-mono text-emerald-300/90 flex items-center gap-2">
                     <ArrowDownRight className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span>
-                      CASCADE VELOCITY: +${monthlySavings}/mo overflow + APY channeling into Queue #2
+                      CASCADE VELOCITY: +${monthlySavings}/mo overflow + APY channeling into Queue
+                      #2
                     </span>
                   </div>
 
@@ -571,13 +577,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="flex items-baseline justify-between pt-0.5">
                       <div className="text-xl font-bold text-slate-300 tabular-nums">
                         {calculation.item2FundedMonth}{' '}
-                        <span className="text-xs font-normal text-slate-500">
-                          Months
-                        </span>
+                        <span className="text-xs font-normal text-slate-500">Months</span>
                       </div>
                       <div className="text-xs text-slate-400 flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Funded: <strong className="text-slate-300">{formattedDateItem2}</strong></span>
+                        <span>
+                          Funded: <strong className="text-slate-300">{formattedDateItem2}</strong>
+                        </span>
                       </div>
                     </div>
 
@@ -589,13 +595,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   {/* Financial Metrics Breakdown */}
                   <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10 text-xs font-mono">
                     <div>
-                      <span className="text-slate-500 block text-[10px] uppercase">Total Contributions</span>
+                      <span className="text-slate-500 block text-[10px] uppercase">
+                        Total Contributions
+                      </span>
                       <span className="text-sm font-semibold text-white tabular-nums">
                         ${calculation.totalContributed.toLocaleString()}
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500 block text-[10px] uppercase">HYSA Yield Compound</span>
+                      <span className="text-slate-500 block text-[10px] uppercase">
+                        HYSA Yield Compound
+                      </span>
                       <span className="text-sm font-semibold text-emerald-400 tabular-nums">
                         +${calculation.interestEarned.toLocaleString()}
                       </span>
@@ -644,7 +654,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Engineered for Precision Pacing
             </h2>
             <p className="text-base text-[#384A41] dark:text-slate-300 leading-relaxed font-normal">
-              Everything you need to turn vague wishlists into sequential, achievable financial milestones.
+              Everything you need to turn vague wishlists into sequential, achievable financial
+              milestones.
             </p>
           </div>
 
@@ -662,11 +673,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
                   <Layers className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">
-                  Your Goals, Funded in Order
-                </h3>
+                <h3 className="text-lg font-bold text-white">Your Goals, Funded in Order</h3>
                 <p className="text-sm text-slate-300 leading-relaxed">
-                  Organize dream purchases in a strict priority queue and let your savings cascade automatically from Priority #1 into #2.
+                  Organize dream purchases in a strict priority queue and let your savings cascade
+                  automatically from Priority #1 into #2.
                 </p>
 
                 {/* Tasteful Micro-Sandbox 1: Sequential vs Parallel Comparison */}
@@ -736,11 +746,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
                   <TrendingUp className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">
-                  Contiguous Priority Queue
-                </h3>
+                <h3 className="text-lg font-bold text-white">Contiguous Priority Queue</h3>
                 <p className="text-sm text-slate-300 leading-relaxed">
-                  Rank items 1 through N. Unused monthly savings spill directly into next goal without leaving gaps or unallocated dead cash.
+                  Rank items 1 through N. Unused monthly savings spill directly into next goal
+                  without leaving gaps or unallocated dead cash.
                 </p>
 
                 {/* Tasteful Micro-Sandbox 2: Instant Yield Velocity */}
@@ -769,7 +778,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       {sandboxApyRate === 4.5 ? (
                         <span>+$189 compounding boost shaved 3 weeks off purchase date.</span>
                       ) : (
-                        <span className="text-slate-400">Zero interest earned. Full cash pacing delay.</span>
+                        <span className="text-slate-400">
+                          Zero interest earned. Full cash pacing delay.
+                        </span>
                       )}
                     </div>
                   </div>
@@ -798,11 +809,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
                   <Sliders className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">
-                  HYSA Yield Simulator
-                </h3>
+                <h3 className="text-lg font-bold text-white">HYSA Yield Simulator</h3>
                 <p className="text-sm text-slate-300 leading-relaxed">
-                  Account for high-yield cash APY interest compounding to accelerate purchase dates and bring forward your targets.
+                  Account for high-yield cash APY interest compounding to accelerate purchase dates
+                  and bring forward your targets.
                 </p>
 
                 {/* Tasteful Micro-Sandbox 3: What-If Windfall Pulse */}
@@ -848,11 +858,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
                 <FolderKanban className="w-4 h-4" />
               </div>
-              <h4 className="text-base font-bold text-white">
-                Multi-Plan Portfolio
-              </h4>
+              <h4 className="text-base font-bold text-white">Multi-Plan Portfolio</h4>
               <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                Maintain distinct plans for personal tech, home upgrades, travel, or gift goals with dedicated currencies and buffers.
+                Maintain distinct plans for personal tech, home upgrades, travel, or gift goals with
+                dedicated currencies and buffers.
               </p>
             </div>
 
@@ -864,11 +873,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
                 <Database className="w-4 h-4" />
               </div>
-              <h4 className="text-base font-bold text-white">
-                Local-First Hybrid Sync
-              </h4>
+              <h4 className="text-base font-bold text-white">Local-First Hybrid Sync</h4>
               <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                Instant offline speed with browser persistence and optional seamless cloud synchronization across devices when logged in.
+                Instant offline speed with browser persistence and optional seamless cloud
+                synchronization across devices when logged in.
               </p>
             </div>
 
@@ -880,11 +888,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
                 <Gauge className="w-4 h-4" />
               </div>
-              <h4 className="text-base font-bold text-white">
-                What-If Sandbox
-              </h4>
+              <h4 className="text-base font-bold text-white">What-If Sandbox</h4>
               <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                Test unexpected bonuses or monthly budget shifts on the fly to see instant completion shifts across your queue.
+                Test unexpected bonuses or monthly budget shifts on the fly to see instant
+                completion shifts across your queue.
               </p>
             </div>
           </div>
@@ -892,7 +899,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* DEEP-DIVE SECTION 2: Dashboard Immersion (Oxide Hardware Telemetry Aesthetic) */}
-      <section id="dashboard" className="dark py-20 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#0B0E11] text-white relative overflow-hidden z-10 border-t border-[#1C2128]">
+      <section
+        id="dashboard"
+        className="dark py-20 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#0B0E11] text-white relative overflow-hidden z-10 border-t border-[#1C2128]"
+      >
         {/* Soft Sfumato Glow */}
         <div
           className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"
@@ -912,7 +922,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </span>
             </h2>
             <p className="text-sm sm:text-base text-slate-400 leading-relaxed font-normal">
-              A masterclass in financial clarity. See your priority waterfall unfold with real-time feedback.
+              A masterclass in financial clarity. See your priority waterfall unfold with real-time
+              feedback.
             </p>
           </div>
 
@@ -972,9 +983,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="p-4 sm:p-5 border-b border-[#21262D] bg-[#161B22]/70 space-y-3 font-mono">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-white">
-                    Overall Wishlist Feasibility
-                  </span>
+                  <span className="font-semibold text-white">Overall Wishlist Feasibility</span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 text-[10px] border border-emerald-500/30">
                     2 of 3 funded
                   </span>
@@ -1030,9 +1039,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30 flex items-center gap-1">
                       <Check className="w-3 h-3" /> Fully funded
                     </span>
-                    <span className="text-base font-bold text-white">
-                      $350
-                    </span>
+                    <span className="text-base font-bold text-white">$350</span>
                   </div>
                 </div>
 
@@ -1053,16 +1060,32 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 {/* Action buttons inside mockup */}
                 <div className="flex justify-end gap-2 pt-1 border-t border-white/5 text-slate-400">
-                  <button type="button" aria-label="Mark completed" className="p-1 hover:text-white transition-colors">
+                  <button
+                    type="button"
+                    aria-label="Mark completed"
+                    className="p-1 hover:text-white transition-colors"
+                  >
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
                   </button>
-                  <button type="button" aria-label="Inspect item" className="p-1 hover:text-white transition-colors">
+                  <button
+                    type="button"
+                    aria-label="Inspect item"
+                    className="p-1 hover:text-white transition-colors"
+                  >
                     <Eye className="w-3.5 h-3.5" />
                   </button>
-                  <button type="button" aria-label="Edit item" className="p-1 hover:text-white transition-colors">
+                  <button
+                    type="button"
+                    aria-label="Edit item"
+                    className="p-1 hover:text-white transition-colors"
+                  >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
-                  <button type="button" aria-label="Delete item" className="p-1 hover:text-red-400 transition-colors">
+                  <button
+                    type="button"
+                    aria-label="Delete item"
+                    className="p-1 hover:text-red-400 transition-colors"
+                  >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -1071,7 +1094,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {/* Cascade Overflow Downward Flow Line */}
               <div className="flex items-center justify-center gap-2 text-xs text-emerald-400/90 py-1 font-mono">
                 <ArrowDownRight className="w-4 h-4 text-emerald-400" />
-                <span className="text-[11px] italic font-medium">Surplus savings cascade directly into queued items</span>
+                <span className="text-[11px] italic font-medium">
+                  Surplus savings cascade directly into queued items
+                </span>
               </div>
 
               {/* Item Card 2: Queued Progress */}
@@ -1088,12 +1113,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-slate-400">
-                      Cumulative: $850
-                    </span>
-                    <span className="text-base font-bold text-white">
-                      $500
-                    </span>
+                    <span className="text-xs text-slate-400">Cumulative: $850</span>
+                    <span className="text-base font-bold text-white">$500</span>
                   </div>
                 </div>
 
@@ -1168,9 +1189,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
                   <Target className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">
-                  Set Goals
-                </h3>
+                <h3 className="text-lg font-bold text-white">Set Goals</h3>
                 <p className="text-sm text-slate-300 leading-relaxed font-sans">
                   Set goals and rank by priority to let your queue organize automatically.
                 </p>
@@ -1189,9 +1208,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
                   <Wallet className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">
-                  Save Automatically
-                </h3>
+                <h3 className="text-lg font-bold text-white">Save Automatically</h3>
                 <p className="text-sm text-slate-300 leading-relaxed font-sans">
                   Simulate cash speed with each month's contribution, accelerating your dates.
                 </p>
@@ -1210,9 +1227,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
                   <TrendingUp className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white">
-                  Track Progress
-                </h3>
+                <h3 className="text-lg font-bold text-white">Track Progress</h3>
                 <p className="text-sm text-slate-300 leading-relaxed font-sans">
                   Track milestones, celebrate purchases, and watch savings cascade forward.
                 </p>
@@ -1267,39 +1282,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-white/5">
             {/* Structured Navigation Links */}
             <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-xs sm:text-sm font-medium text-slate-400">
-              <button
-                type="button"
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="hover:text-emerald-400 transition-colors"
-              >
-                Legal
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="hover:text-emerald-400 transition-colors"
-              >
-                Privacy
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="hover:text-emerald-400 transition-colors"
-              >
-                Support
-              </button>
+              <span className="text-slate-500 cursor-not-allowed">Legal (TBD)</span>
+              <span className="text-slate-500 cursor-not-allowed">Privacy (TBD)</span>
+              <span className="text-slate-500 cursor-not-allowed">Support (TBD)</span>
               <button
                 type="button"
                 onClick={() => {
                   document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="hover:text-emerald-400 transition-colors"
+                className="hover:text-emerald-400 transition-colors cursor-pointer"
               >
                 Features
               </button>
@@ -1308,7 +1299,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 onClick={() => {
                   document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="hover:text-emerald-400 transition-colors"
+                className="hover:text-emerald-400 transition-colors cursor-pointer"
               >
                 About
               </button>
@@ -1317,46 +1308,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Social Icons */}
             <div className="flex items-center gap-4 text-slate-400">
               <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Twitter"
-                className="hover:text-white transition-colors"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </a>
-              <a
-                href="https://github.com"
+                href="https://github.com/Andreasgdp/wishpacer"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="GitHub"
                 className="hover:text-white transition-colors"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                </svg>
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Instagram"
-                className="hover:text-white transition-colors"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                  />
                 </svg>
               </a>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-            <Logo variant="full" size="sm" onClick={() => onLaunchApp(getSimPayload())} badge="2.0" />
-            <p>
-              © {new Date().getFullYear()} WishPacer • Turn Dreams Into Timelines
-            </p>
+            <Logo
+              variant="full"
+              size="sm"
+              onClick={() => onLaunchApp(getSimPayload())}
+              badge="2.0"
+            />
+            <p>© {new Date().getFullYear()} WishPacer • Turn Dreams Into Timelines</p>
           </div>
         </div>
       </footer>

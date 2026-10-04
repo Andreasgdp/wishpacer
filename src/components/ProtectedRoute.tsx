@@ -79,12 +79,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         </div>
 
         <div className="space-y-3 pt-2 relative">
-          <Button
-            type="button"
-            size="lg"
-            onClick={handleSignIn}
-            className="w-full cursor-pointer"
-          >
+          <Button type="button" size="lg" onClick={handleSignIn} className="w-full cursor-pointer">
             <span>Sign In / Register</span>
             <ArrowRight className="w-4 h-4" />
           </Button>

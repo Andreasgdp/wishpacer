@@ -10,10 +10,8 @@ const buttonVariants = cva(
       variant: {
         default:
           'bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-xs active:scale-[0.99]',
-        destructive:
-          'bg-rose-600 text-white hover:bg-rose-700 shadow-xs active:bg-rose-800',
-        warning:
-          'bg-amber-600 text-white hover:bg-amber-700 shadow-xs active:bg-amber-800',
+        destructive: 'bg-rose-600 text-white hover:bg-rose-700 shadow-xs active:bg-rose-800',
+        warning: 'bg-amber-600 text-white hover:bg-amber-700 shadow-xs active:bg-amber-800',
         outline:
           'border border-black/10 dark:border-[#21262D] bg-white dark:bg-[#161B22] hover:bg-black/5 dark:hover:bg-[#22282E] text-slate-700 dark:text-slate-200 hover:border-black/20 dark:hover:border-[#30363D] shadow-xs',
         secondary:

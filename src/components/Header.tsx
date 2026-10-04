@@ -183,44 +183,47 @@ export const Header: React.FC<HeaderProps> = ({
                 />
               </>
             )}
-          {viewMode === 'landing' && (
-            <nav aria-label="Landing Page Navigation" className="hidden md:flex items-center gap-6 lg:gap-8 text-xs lg:text-sm font-medium text-[#2C4A3E] dark:text-slate-300">
-              <button
-                type="button"
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer"
+            {viewMode === 'landing' && (
+              <nav
+                aria-label="Landing Page Navigation"
+                className="hidden md:flex items-center gap-6 lg:gap-8 text-xs lg:text-sm font-medium text-[#2C4A3E] dark:text-slate-300"
               >
-                Home
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' })
-                }
-                className="hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer"
-              >
-                Calculator
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
-                }
-                className="hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer"
-              >
-                Features
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth' })
-                }
-                className="hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer"
-              >
-                Community
-              </button>
-            </nav>
-          )}
+                <button
+                  type="button"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  Home
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' })
+                  }
+                  className="hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  Calculator
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                  }
+                  className="hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  Features
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth' })
+                  }
+                  className="hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  Community
+                </button>
+              </nav>
+            )}
           </div>
 
           {/* Desktop / Tablet Actions (>= 640px) */}
@@ -580,7 +583,9 @@ export const Header: React.FC<HeaderProps> = ({
                         type="button"
                         onClick={() => {
                           setIsMobileMenuOpen(false);
-                          document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
+                          document
+                            .getElementById('calculator')
+                            ?.scrollIntoView({ behavior: 'smooth' });
                         }}
                         className="w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg"
                       >
@@ -590,7 +595,9 @@ export const Header: React.FC<HeaderProps> = ({
                         type="button"
                         onClick={() => {
                           setIsMobileMenuOpen(false);
-                          document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                          document
+                            .getElementById('features')
+                            ?.scrollIntoView({ behavior: 'smooth' });
                         }}
                         className="w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg"
                       >
@@ -600,7 +607,9 @@ export const Header: React.FC<HeaderProps> = ({
                         type="button"
                         onClick={() => {
                           setIsMobileMenuOpen(false);
-                          document.getElementById('dashboard')?.scrollIntoView({ behavior: 'smooth' });
+                          document
+                            .getElementById('dashboard')
+                            ?.scrollIntoView({ behavior: 'smooth' });
                         }}
                         className="w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg"
                       >

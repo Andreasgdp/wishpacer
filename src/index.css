@@ -5,19 +5,19 @@
 @layer base {
   :root {
     color-scheme: light;
-    --canvas-bg: #CCD7D0;
+    --canvas-bg: #ccd7d0;
     --canvas-text: #111714;
-    --surface-card: #E2EAE5;
-    --surface-elevated: #F0F5F2;
-    --border-primary: #A8B6AC;
+    --surface-card: #e2eae5;
+    --surface-elevated: #f0f5f2;
+    --border-primary: #a8b6ac;
   }
   :root.dark {
     color-scheme: dark;
-    --canvas-bg: #0B0E11;
-    --canvas-text: #E6EDF3;
-    --surface-card: #12161A;
-    --surface-elevated: #181D21;
-    --border-primary: #21262D;
+    --canvas-bg: #0b0e11;
+    --canvas-text: #e6edf3;
+    --surface-card: #12161a;
+    --surface-elevated: #181d21;
+    --border-primary: #21262d;
   }
   * {
     border-color: theme('colors.slate.200');

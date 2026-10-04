@@ -473,14 +473,22 @@ export const LandingPageWorkspace: React.FC = () => {
     <>
       <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
       <LandingPage
-        onLaunchApp={(simData) => {
-          if (simData && typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined') {
+        onLaunchApp={simData => {
+          if (
+            simData &&
+            typeof window !== 'undefined' &&
+            typeof window.sessionStorage !== 'undefined'
+          ) {
             window.sessionStorage.setItem('wishpacer_sim_carryover', JSON.stringify(simData));
           }
           navigate('/app');
         }}
-        onExploreDemo={(simData) => {
-          if (simData && typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined') {
+        onExploreDemo={simData => {
+          if (
+            simData &&
+            typeof window !== 'undefined' &&
+            typeof window.sessionStorage !== 'undefined'
+          ) {
             window.sessionStorage.setItem('wishpacer_sim_carryover', JSON.stringify(simData));
           }
           navigate('/demo');
@@ -545,7 +553,6 @@ export const DemoAppWorkspace: React.FC = () => {
       }
     }
   }, [demoPlanManager]);
-
 
   const handleOpenCreatePlanModal = () => {
     setPlanManageMode('create');
