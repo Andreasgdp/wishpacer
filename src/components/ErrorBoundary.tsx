@@ -32,8 +32,8 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
-          <div className="max-w-md w-full p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl text-center space-y-4">
+        <div className="min-h-screen flex items-center justify-center p-6 bg-[#CCD7D0] dark:bg-[#0B0E11] text-[#111714] dark:text-[#E6EDF3] font-sans">
+          <div className="max-w-md w-full p-8 rounded-3xl bg-[#E2EAE5]/95 dark:bg-[#12161A]/95 backdrop-blur-xl border border-black/10 dark:border-[#21262D] shadow-2xl text-center space-y-4">
             <div className="w-14 h-14 mx-auto rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
               <AlertTriangle className="w-7 h-7" />
             </div>
@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </p>
 
             {this.state.error && (
-              <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[11px] font-mono text-left max-h-32 overflow-y-auto">
+              <div className="p-3 rounded-xl bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 text-[11px] font-mono text-left max-h-32 overflow-y-auto">
                 {this.state.error.message}
               </div>
             )}
@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <button
               type="button"
               onClick={this.handleReset}
-              className="w-full py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg shadow-brand-600/20 transition-all"
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-glow-sm hover:from-emerald-400 hover:to-green-400 transition-all cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
               Reload Application

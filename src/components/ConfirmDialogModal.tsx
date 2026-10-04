@@ -52,18 +52,14 @@ export const ConfirmDialogModal: React.FC<ConfirmDialogModalProps> = ({
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="sm:justify-center gap-2 mt-4">
+        <AlertDialogFooter className="sm:justify-center mt-4">
           <AlertDialogCancel onClick={onClose}>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
+            variant={isDanger ? 'destructive' : 'warning'}
             onClick={() => {
               onConfirm();
               onClose();
             }}
-            className={
-              isDanger
-                ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                : 'bg-amber-600 hover:bg-amber-700 text-white'
-            }
           >
             <Trash2 className="w-3.5 h-3.5 mr-1" />
             {confirmLabel}

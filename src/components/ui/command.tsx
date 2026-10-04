@@ -15,12 +15,12 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
       <div
         ref={ref}
         className={cn(
-          'flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-950 dark:text-slate-50',
+          'flex h-full w-full flex-col overflow-hidden rounded-2xl border border-black/10 dark:border-[#21262D] bg-white/95 dark:bg-[#12161A]/95 backdrop-blur-2xl text-slate-950 dark:text-slate-50',
           className
         )}
         {...props}
       >
-        <div className="flex items-center border-b border-slate-200 dark:border-slate-800 px-3">
+        <div className="flex items-center border-b border-slate-200/80 dark:border-white/10 px-3">
           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
           <Input
             value={value}

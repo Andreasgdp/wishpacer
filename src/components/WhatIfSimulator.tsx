@@ -30,10 +30,10 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
   const rateDelta = simulatedSavingsRate - config.amountToSave;
 
   return (
-    <div className="bg-gradient-to-br from-amber-500/10 via-brand-500/5 to-purple-500/10 border border-amber-300/80 dark:border-amber-700/60 rounded-3xl p-5 shadow-sm transition-all duration-200 relative overflow-hidden">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-amber-200/60 dark:border-amber-800/40">
+    <div className="bg-amber-500/10 dark:bg-[#161B22] border border-amber-500/30 dark:border-amber-500/30 rounded-2xl p-5 shadow-sm relative overflow-hidden transition-all duration-150">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-amber-500/20 dark:border-amber-500/20">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20">
+          <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
             <TrendingUp className="w-5 h-5" />
           </div>
           <div>
@@ -41,7 +41,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
               <h2 className="text-sm font-bold text-slate-900 dark:text-white">
                 What-If Savings Scenario Tester
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
                 Interactive Simulation
               </span>
             </div>
@@ -57,7 +57,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
             <button
               type="button"
               onClick={onResetSimulation}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/80 dark:bg-[#181D21] text-slate-700 dark:text-slate-200 border border-black/10 dark:border-[#30363D] hover:bg-white dark:hover:bg-[#22282E] transition-colors min-h-8"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset</span>
@@ -67,7 +67,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
             <button
               type="button"
               onClick={() => onApplySimulation(simulatedSavingsRate, simulatedExtraBonus)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-xs transition-all cursor-pointer min-h-8"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Make Permanent</span>
@@ -181,7 +181,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
       </div>
 
       {/* Simulated Outcome Highlight */}
-      <div className="mt-4 p-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xs rounded-2xl border border-amber-200/80 dark:border-amber-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="mt-4 p-3 bg-white dark:bg-[#1E190B] rounded-xl border border-amber-200/90 dark:border-amber-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0" />
           <span className="text-xs text-slate-700 dark:text-slate-300">

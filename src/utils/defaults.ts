@@ -59,18 +59,25 @@ export const PLAN_COLORS: Record<
   { label: string; bg: string; text: string; ring: string; gradient: string }
 > = {
   violet: {
-    label: 'Violet',
-    bg: 'bg-violet-500',
-    text: 'text-violet-600 dark:text-violet-400',
-    ring: 'ring-violet-500',
-    gradient: 'from-violet-600 to-indigo-600',
+    label: 'Emerald Ink',
+    bg: 'bg-brand-900',
+    text: 'text-brand-900 dark:text-champagne-200',
+    ring: 'ring-brand-800',
+    gradient: 'from-brand-900 via-brand-800 to-brand-700',
+  },
+  champagne: {
+    label: 'Champagne',
+    bg: 'bg-champagne-300',
+    text: 'text-champagne-800 dark:text-champagne-200',
+    ring: 'ring-champagne-400',
+    gradient: 'from-champagne-200 via-champagne-300 to-champagne-400',
   },
   amber: {
-    label: 'Amber',
-    bg: 'bg-amber-500',
-    text: 'text-amber-600 dark:text-amber-400',
-    ring: 'ring-amber-500',
-    gradient: 'from-amber-500 to-orange-600',
+    label: 'Terracotta & Ochre',
+    bg: 'bg-terracotta',
+    text: 'text-terracotta dark:text-gold-ochre',
+    ring: 'ring-terracotta',
+    gradient: 'from-[#C16C4B] via-[#DDA05E] to-[#B48B53]',
   },
   emerald: {
     label: 'Emerald',

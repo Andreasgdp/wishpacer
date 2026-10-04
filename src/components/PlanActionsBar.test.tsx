@@ -55,7 +55,6 @@ describe('PlanActionsBar Component', () => {
 
     const budgetSettingsBtn = getByRoleFn!('button', { name: /Budget Settings/i });
     expect(budgetSettingsBtn).toBeTruthy();
-    expect(budgetSettingsBtn.className).toContain('bg-brand-50');
 
     await act(async () => {
       fireEvent.click(budgetSettingsBtn);

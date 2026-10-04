@@ -26,6 +26,30 @@ describe('Logo Component', () => {
     const { container } = render(<Logo variant="full" size="xl" />);
     expect(container.querySelector('svg')).not.toBeNull();
   });
+  it('renders the Wishing-Plan checklist and heart mark with Emerald Ink & Champagne colors', () => {
+    const { container } = render(<Logo variant="icon" size="md" />);
+    const svg = container.querySelector('svg');
+    expect(svg).not.toBeNull();
+    expect(svg?.getAttribute('viewBox')).toBe('0 0 642 582');
+
+    // Check for the notepad background rect with Champagne fill and Emerald Ink stroke
+    const rects = container.querySelectorAll('rect');
+    expect(rects.length).toBeGreaterThanOrEqual(6); // 1 background + 5 checklist rows
+
+    const champagneBg = Array.from(rects).find(r => r.getAttribute('fill') === '#F8E7C9');
+    expect(champagneBg).toBeDefined();
+    expect(champagneBg?.getAttribute('stroke')).toBe('#064E3B');
+
+    // Check for checklist rows and bullet dots in Emerald Ink
+    const emeraldRects = Array.from(rects).filter(r => r.getAttribute('fill') === '#064E3B');
+    expect(emeraldRects.length).toBe(5);
+
+    const circles = container.querySelectorAll('circle');
+    expect(circles.length).toBe(5);
+    circles.forEach(circle => {
+      expect(circle.getAttribute('fill')).toBe('#064E3B');
+    });
+  });
 
   it('calls onClick when clicked', () => {
     const handleClick = mock(() => {});

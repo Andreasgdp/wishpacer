@@ -28,3 +28,60 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
     disconnect() {}
   } as unknown as typeof ResizeObserver;
 }
+
+if (typeof win.fetch === 'function') {
+  const origFetch = win.fetch.bind(win);
+  win.fetch = (async (...args: Parameters<typeof origFetch>) => {
+    const [input] = args;
+    const url =
+      typeof input === 'string'
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input && typeof input === 'object' && 'url' in input
+            ? String(input.url)
+            : '';
+    if (
+      url.includes('clerk.browser.js') ||
+      url.includes('@clerk/clerk-js') ||
+      url.includes('speed-insights')
+    ) {
+      return new Response(
+        'window.Clerk = window.Clerk || { load: () => Promise.resolve(), loaded: true };',
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/javascript' },
+        }
+      );
+    }
+    return origFetch(...args);
+  }) as unknown as typeof win.fetch;
+}
+if (typeof globalThis.fetch === 'function') {
+  const origGlobalFetch = globalThis.fetch;
+  globalThis.fetch = (async (...args: Parameters<typeof origGlobalFetch>) => {
+    const [input] = args;
+    const url =
+      typeof input === 'string'
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input && typeof input === 'object' && 'url' in input
+            ? String(input.url)
+            : '';
+    if (
+      url.includes('clerk.browser.js') ||
+      url.includes('@clerk/clerk-js') ||
+      url.includes('speed-insights')
+    ) {
+      return new Response(
+        'window.Clerk = window.Clerk || { load: () => Promise.resolve(), loaded: true };',
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/javascript' },
+        }
+      );
+    }
+    return origGlobalFetch(...args);
+  }) as unknown as typeof fetch;
+}
