@@ -256,3 +256,31 @@ export const DEFAULT_STORE_DATA: AppStoreData = {
 export function getDefaultStoreData(): AppStoreData {
   return JSON.parse(JSON.stringify(DEFAULT_STORE_DATA));
 }
+
+export function createFreshSampleStoreData(
+  settings: GlobalSettings = DEFAULT_GLOBAL_SETTINGS
+): AppStoreData {
+  const now = new Date().toISOString();
+  const suffix = `${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+
+  const plans: Plan[] = DEFAULT_PLANS.map((defPlan, pIdx) => ({
+    ...JSON.parse(JSON.stringify(defPlan)),
+    id: `plan-sample-${suffix}-${pIdx}`,
+    items: defPlan.items.map((item, iIdx) => ({
+      ...JSON.parse(JSON.stringify(item)),
+      id: `wish-sample-${suffix}-${pIdx}-${iIdx}`,
+      createdAt: now,
+      updatedAt: now,
+    })),
+    createdAt: now,
+    updatedAt: now,
+  }));
+
+  return {
+    version: 3,
+    activePlanId: plans[0].id,
+    settings,
+    plans,
+    lastSaved: now,
+  };
+}
