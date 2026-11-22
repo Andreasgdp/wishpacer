@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, useParams, useMatch } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
 import { SpeedInsights } from '@vercel/speed-insights/react';
@@ -107,7 +107,6 @@ interface AppDashboardProps {
   effectiveConfig: PlanConfig;
   portfolioSummary: PortfolioSummary;
   isPortfolioView: boolean;
-  setIsPortfolioView: (isPortfolio: boolean) => void;
   showWhatIf: boolean;
   simulatedSavingsRate: number;
   simulatedExtraBonus: number;
@@ -135,7 +134,6 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
   effectiveConfig,
   portfolioSummary,
   isPortfolioView,
-  setIsPortfolioView,
   showWhatIf,
   simulatedSavingsRate,
   simulatedExtraBonus,
@@ -172,36 +170,6 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  // Route synchronization
-  useEffect(() => {
-    if (location.pathname === `${basePath}/portfolio`) {
-      if (!isPortfolioView) {
-        setIsPortfolioView(true);
-      }
-    } else if (planId) {
-      if (isPortfolioView) {
-        setIsPortfolioView(false);
-      }
-      if (storeData.activePlanId !== planId) {
-        const planExists = storeData.plans.some(p => p.id === planId);
-        if (planExists) {
-          actions.selectPlan(planId);
-        }
-      }
-    } else if (location.pathname === basePath) {
-      // Maintain active plan or portfolio according to state
-    }
-  }, [
-    location.pathname,
-    planId,
-    isPortfolioView,
-    storeData.activePlanId,
-    storeData.plans,
-    actions,
-    setIsPortfolioView,
-    basePath,
-  ]);
 
   // Render 404 if planId param was requested in plan route but does not exist
   if (planId && !storeData.plans.some(p => p.id === planId)) {
@@ -243,11 +211,9 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
         onNavigateLanding={() => navigate('/')}
         onNavigateApp={() => navigate('/app')}
         onSelectPlan={id => {
-          actions.selectPlan(id);
           navigate(`${basePath}/plan/${id}`);
         }}
         onSelectPortfolio={() => {
-          setIsPortfolioView(true);
           navigate(`${basePath}/portfolio`);
         }}
         onOpenNewPlanModal={handleOpenCreatePlanModal}
@@ -274,7 +240,6 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
               plans={storeData.plans}
               summary={portfolioSummary}
               onSelectPlan={id => {
-                actions.selectPlan(id);
                 navigate(`${basePath}/plan/${id}`);
               }}
               onOpenNewPlanModal={handleOpenCreatePlanModal}
@@ -402,11 +367,9 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
             showWhatIf={showWhatIf}
             purchasedCount={activePlanCalculation.purchasedItems.length}
             onSelectPlan={id => {
-              actions.selectPlan(id);
               navigate(`${basePath}/plan/${id}`);
             }}
             onSelectPortfolio={() => {
-              setIsPortfolioView(true);
               navigate(`${basePath}/portfolio`);
             }}
             onEditWish={item => {
@@ -497,14 +460,20 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
             currency={storeData.settings.currency}
             onSavePlan={planData => {
               if (planManageMode === 'create') {
-                actions.createPlan(planData);
+                const newPlanId = actions.createPlan(planData);
+                if (planId) {
+                  navigate(`${basePath}/plan/${newPlanId}`);
+                }
               } else {
                 actions.updatePlanMetadata(planData, modal.editingPlanTarget?.id);
               }
               modal.close();
             }}
             onDuplicatePlan={planIdToDup => {
-              actions.duplicatePlan(planIdToDup);
+              const dupId = actions.duplicatePlan(planIdToDup);
+              if (dupId && planId) {
+                navigate(`${basePath}/plan/${dupId}`);
+              }
               modal.close();
             }}
             onDeletePlan={planIdToDelete => {
@@ -678,8 +647,17 @@ export const DemoAppWorkspace: React.FC = () => {
   });
 
   // Demo Plan Manager (pre-populated with DEFAULT_PLANS sample data)
+  const demoPlanMatch = useMatch('/demo/plan/:planId');
+  const demoPortfolioMatch = useMatch('/demo/portfolio');
+  const demoRoutePlanId = demoPlanMatch?.params.planId;
+  const demoRouteView = demoPortfolioMatch ? 'portfolio' : demoRoutePlanId ? 'plan' : undefined;
+
   const demoRepo = useMemo(() => new InMemoryStorageRepository(getDefaultStoreData()), []);
-  const demoPlanManager = usePlanManager({ repository: demoRepo });
+  const demoPlanManager = usePlanManager({
+    repository: demoRepo,
+    routePlanId: demoRoutePlanId,
+    routeView: demoRouteView,
+  });
   // Apply Landing Simulator Session Carryover if user clicked "Activate Your Plan"
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.sessionStorage === 'undefined') return;
@@ -769,7 +747,6 @@ export const DemoAppWorkspace: React.FC = () => {
     effectiveConfig: demoPlanManager.effectiveConfig,
     portfolioSummary: demoPlanManager.portfolioSummary,
     isPortfolioView: demoPlanManager.isPortfolioView,
-    setIsPortfolioView: demoPlanManager.setIsPortfolioView,
     showWhatIf: demoPlanManager.showWhatIf,
     simulatedSavingsRate: demoPlanManager.simulatedSavingsRate,
     simulatedExtraBonus: demoPlanManager.simulatedExtraBonus,
@@ -840,11 +817,18 @@ export const ProtectedAppWorkspace: React.FC = () => {
   });
 
   // App Plan Manager (for real protected app routes)
+  const appPlanMatch = useMatch('/app/plan/:planId');
+  const appPortfolioMatch = useMatch('/app/portfolio');
+  const appRoutePlanId = appPlanMatch?.params.planId;
+  const appRouteView = appPortfolioMatch ? 'portfolio' : appRoutePlanId ? 'plan' : undefined;
+
   const appPlanManager = usePlanManager({
     isAuthLoaded,
     isSignedIn,
     userId,
     getToken,
+    routePlanId: appRoutePlanId,
+    routeView: appRouteView,
   });
 
   const handleOpenCreatePlanModal = () => {
@@ -926,7 +910,6 @@ export const ProtectedAppWorkspace: React.FC = () => {
     effectiveConfig: appPlanManager.effectiveConfig,
     portfolioSummary: appPlanManager.portfolioSummary,
     isPortfolioView: appPlanManager.isPortfolioView,
-    setIsPortfolioView: appPlanManager.setIsPortfolioView,
     showWhatIf: appPlanManager.showWhatIf,
     simulatedSavingsRate: appPlanManager.simulatedSavingsRate,
     simulatedExtraBonus: appPlanManager.simulatedExtraBonus,
