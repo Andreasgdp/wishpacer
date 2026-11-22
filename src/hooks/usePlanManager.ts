@@ -29,13 +29,15 @@ export interface PlanManagerOptions {
   userId?: string | null;
   getToken?: (options?: { skipCache?: boolean }) => Promise<string | null>;
   repository?: StorageRepository;
+  routePlanId?: string;
+  routeView?: 'plan' | 'portfolio';
 }
 
 export interface PlanManagerActions {
   selectPlan: (planId: string) => void;
-  createPlan: (planData: SavePlanInput) => void;
+  createPlan: (planData: SavePlanInput) => string;
   updatePlanMetadata: (planData: SavePlanInput, targetPlanId?: string) => void;
-  duplicatePlan: (planId: string) => void;
+  duplicatePlan: (planId: string) => string | undefined;
   deletePlan: (planId: string) => void;
   updateBudgetSettings: (newConfig: PlanConfig) => void;
   updateGlobalSettings: (newSettings: GlobalSettings) => void;
@@ -77,7 +79,7 @@ export interface PlanManager {
 }
 
 export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
-  const { getToken, repository, isSignedIn, userId } = options;
+  const { getToken, repository, isSignedIn, userId, routePlanId, routeView } = options;
   const isAuthLoaded = options.isAuthLoaded ?? true;
 
   const getTokenRef = useRef(getToken);
@@ -128,14 +130,35 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   const [simulatedSavingsRate, setSimulatedSavingsRate] = useState<number>(300);
   const [simulatedExtraBonus, setSimulatedExtraBonus] = useState<number>(0);
 
+  // Derive active plan ID & portfolio view directly from route when present (eliminates route/state ping-pong flicker)
+  const resolvedActivePlanId = useMemo(() => {
+    if (routePlanId && storeData.plans.some(p => p.id === routePlanId)) {
+      return routePlanId;
+    }
+    return storeData.activePlanId;
+  }, [routePlanId, storeData.plans, storeData.activePlanId]);
+
+  const effectiveStoreData = useMemo((): AppStoreData => {
+    if (storeData.activePlanId === resolvedActivePlanId) {
+      return storeData;
+    }
+    return {
+      ...storeData,
+      activePlanId: resolvedActivePlanId,
+    };
+  }, [storeData, resolvedActivePlanId]);
+
+  const effectiveIsPortfolioView =
+    routeView === 'portfolio' ? true : routeView === 'plan' ? false : isPortfolioView;
+
   // Active plan lookup
   const activePlan = useMemo(() => {
     return (
-      storeData.plans.find(p => p.id === storeData.activePlanId) ||
-      storeData.plans[0] ||
+      effectiveStoreData.plans.find(p => p.id === effectiveStoreData.activePlanId) ||
+      effectiveStoreData.plans[0] ||
       DEFAULT_STORE_DATA.plans[0]
     );
-  }, [storeData]);
+  }, [effectiveStoreData]);
 
   // Active SavingsPlan domain aggregate instance
   const activeSavingsPlan = useMemo(() => {
@@ -238,7 +261,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       setSimulatedExtraBonus(0);
       setShowWhatIf(false);
     }
-  }, [activePlan]);
+  }, [activePlan.id, activePlan.config.amountToSave]);
 
   // Persist store data and notify user via sonner toast if save fails
   const persistStore = useCallback(
@@ -315,19 +338,19 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   }, [storeData.plans, storeData.settings.currency]);
 
   // Action methods
-  const selectPlan = useCallback(
-    (planId: string) => {
-      setIsPortfolioView(false);
-      persistStore({
-        ...storeData,
+  const selectPlan = useCallback((planId: string) => {
+    setIsPortfolioView(false);
+    setStoreData(current => {
+      if (current.activePlanId === planId) return current;
+      return {
+        ...current,
         activePlanId: planId,
-      });
-    },
-    [storeData, persistStore]
-  );
+      };
+    });
+  }, []);
 
   const createPlan = useCallback(
-    (planData: SavePlanInput) => {
+    (planData: SavePlanInput): string => {
       const newPlanId = `plan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
       const planName = planData.name || 'New Savings Plan';
       const newPlan: Plan = {
@@ -362,13 +385,14 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         `Created plan "${newPlan.name}"`
       );
       setIsPortfolioView(false);
+      return newPlanId;
     },
     [storeData, persistStore]
   );
 
   const updatePlanMetadata = useCallback(
     (planData: SavePlanInput, targetPlanId?: string) => {
-      const planIdToUpdate = targetPlanId || storeData.activePlanId;
+      const planIdToUpdate = targetPlanId || resolvedActivePlanId;
       const updatedPlans = storeData.plans.map(p => {
         if (p.id === planIdToUpdate) {
           const updatedName = planData.name || p.name;
@@ -397,13 +421,13 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         'Plan details saved'
       );
     },
-    [storeData, persistStore]
+    [storeData, resolvedActivePlanId, persistStore]
   );
 
   const duplicatePlan = useCallback(
-    (planId: string) => {
+    (planId: string): string | undefined => {
       const sourcePlan = storeData.plans.find(p => p.id === planId);
-      if (!sourcePlan) return;
+      if (!sourcePlan) return undefined;
 
       const dupId = `plan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
       const now = new Date().toISOString();
@@ -434,6 +458,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         },
         `Duplicated "${sourcePlan.name}"`
       );
+      return dupId;
     },
     [storeData, persistStore]
   );
@@ -445,8 +470,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         return;
       }
       const filtered = storeData.plans.filter(p => p.id !== planId);
-      const nextActiveId =
-        storeData.activePlanId === planId ? filtered[0].id : storeData.activePlanId;
+      const nextActiveId = resolvedActivePlanId === planId ? filtered[0].id : resolvedActivePlanId;
 
       persistStore(
         {
@@ -457,7 +481,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         'Plan deleted'
       );
     },
-    [storeData, persistStore]
+    [storeData, resolvedActivePlanId, persistStore]
   );
 
   const updateBudgetSettings = useCallback(
@@ -488,7 +512,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       existingId?: string,
       targetPlanId?: string
     ) => {
-      if (targetPlanId && targetPlanId !== storeData.activePlanId) {
+      if (targetPlanId && targetPlanId !== resolvedActivePlanId) {
         const targetPlan = storeData.plans.find(p => p.id === targetPlanId);
         if (targetPlan) {
           const targetSavingsPlan = SavingsPlan.fromJSON(targetPlan);
@@ -530,7 +554,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
 
       updateActivePlanInStore(updatedPlan, toastMsg);
     },
-    [storeData, activeSavingsPlan, updateActivePlanInStore, persistStore]
+    [storeData, resolvedActivePlanId, activeSavingsPlan, updateActivePlanInStore, persistStore]
   );
 
   const deleteWishItem = useCallback(
@@ -599,15 +623,24 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     try {
       const token = getToken ? await getToken() : null;
       if (token) {
-        await fetch('/api/user/delete', {
+        const response = await fetch('/api/user/delete', {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+        if (!response.ok) {
+          toast.error(
+            'Could not erase your cloud account. Please try again or email contact@wishpacer.com.'
+          );
+          return;
+        }
       }
     } catch {
-      // Remote purge failed silently
+      toast.error(
+        'Network error while erasing your cloud account. Please try again or email contact@wishpacer.com.'
+      );
+      return;
     }
     localStorage.clear();
     toast.success('All user data permanently deleted.');
@@ -680,14 +713,14 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   );
 
   return {
-    storeData,
+    storeData: effectiveStoreData,
     activePlan,
     activeSavingsPlan,
     activePlanCalculation,
     effectiveConfig,
     portfolioSummary,
     isLoading,
-    isPortfolioView,
+    isPortfolioView: effectiveIsPortfolioView,
     setIsPortfolioView,
     showWhatIf,
     simulatedSavingsRate,

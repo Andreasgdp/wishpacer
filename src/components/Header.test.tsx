@@ -94,10 +94,13 @@ describe('Header Component', () => {
     onSignInClick: mock(() => {}),
   };
 
-  it('renders logo and plan switcher', () => {
-    const { getByRole, getAllByText } = render(<Header {...defaultProps} />);
+  it('renders logo and plan switcher without duplicate top-bar Landing Page or All Plans buttons', () => {
+    const { getByRole, getAllByText, queryByRole } = render(<Header {...defaultProps} />);
     expect(getAllByText('Vacation Plan').length).toBeGreaterThan(0);
     expect(getByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
+    expect(getByRole('button', { name: 'More options and settings' })).not.toBeNull();
+    expect(queryByRole('button', { name: 'Return to Landing Page' })).toBeNull();
+    expect(queryByRole('button', { name: 'View all savings plans portfolio' })).toBeNull();
   });
 
   it('handles Add Wish click from header button', () => {
@@ -166,6 +169,41 @@ describe('Header Component', () => {
     expect(themeButtons.length).toBeGreaterThan(0);
     fireEvent.click(themeButtons[0]);
     expect(onToggleDarkMode).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides user avatar/icon on landing page when signed out and shows it when signed in', () => {
+    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
+    }
+
+    const { container, queryByTitle, rerender } = render(
+      <Header
+        viewMode="landing"
+        onLaunchApp={mock(() => {})}
+        onExploreDemo={mock(() => {})}
+        onToggleDarkMode={mock(() => {})}
+      />
+    );
+
+    // No user icon or avatar circle when signed out on landing
+    expect(queryByTitle('Mock User Session')).toBeNull();
+    expect(container.querySelector('svg.lucide-user')).toBeNull();
+
+    // When signed in, show user avatar/button
+    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true, userId: 'user-landing-1' });
+    }
+
+    rerender(
+      <Header
+        viewMode="landing"
+        onLaunchApp={mock(() => {})}
+        onExploreDemo={mock(() => {})}
+        onToggleDarkMode={mock(() => {})}
+      />
+    );
+
+    expect(queryByTitle('Mock User Session')).not.toBeNull();
   });
   describe('Demo Mode', () => {
     it('renders interactive demo banner when isDemo is true', () => {

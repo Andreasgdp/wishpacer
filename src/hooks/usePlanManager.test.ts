@@ -401,5 +401,59 @@ describe('UI Custom Hooks Suite', () => {
       expect(result.current.activePlan.name).toBe('Cloud User Real Plan');
       expect(repo.saveCount).toBe(0);
     });
+
+    it('switches plans via selectPlan or routePlanId without triggering storage saves or mutating lastSaved', async () => {
+      const multiPlanStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'plan-test-1',
+        plans: [
+          sampleStore.plans[0],
+          {
+            ...sampleStore.plans[0],
+            id: 'plan-test-2',
+            name: 'Second Plan',
+            config: {
+              ...sampleStore.plans[0].config,
+              name: 'Second Plan',
+              amountToSave: 750,
+            },
+          },
+        ],
+        lastSaved: '2026-09-20T00:00:00.000Z',
+      };
+
+      const repo = new InMemoryStorageRepository(multiPlanStore);
+      const { result, rerender } = renderHook(
+        ({ routePlanId }: { routePlanId?: string }) =>
+          usePlanManager({
+            isAuthLoaded: true,
+            isSignedIn: true,
+            repository: repo,
+            routePlanId,
+            routeView: routePlanId ? 'plan' : undefined,
+          }),
+        { initialProps: { routePlanId: 'plan-test-1' as string | undefined } }
+      );
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(result.current.activePlan.id).toBe('plan-test-1');
+      expect(repo.saveCount).toBe(0);
+
+      // Route-driven switch updates activePlan atomically with zero saves
+      rerender({ routePlanId: 'plan-test-2' });
+      expect(result.current.activePlan.id).toBe('plan-test-2');
+      expect(result.current.activePlan.name).toBe('Second Plan');
+      expect(result.current.storeData.lastSaved).toBe('2026-09-20T00:00:00.000Z');
+      expect(repo.saveCount).toBe(0);
+
+      // Direct selectPlan also does not trigger remote/local save
+      act(() => {
+        result.current.actions.selectPlan('plan-test-1');
+      });
+      expect(repo.saveCount).toBe(0);
+    });
   });
 });
