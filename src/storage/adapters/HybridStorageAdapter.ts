@@ -1,10 +1,12 @@
 import type { AppStoreData } from '../../types/plan.js';
 import type { SaveResult, StorageRepository } from '../types.js';
-import { isNewer } from '../utils.js';
+import { hasValidLastSaved, isNewer } from '../utils.js';
 import { GUEST_STORAGE_KEY, LocalStorageAdapter } from './LocalStorageAdapter.js';
 
 export interface HybridStorageAdapterOptions {
   isSignedIn?: boolean;
+  localFastPathTimeoutMs?: number;
+  coldStartTimeoutMs?: number;
 }
 
 /**
@@ -14,6 +16,14 @@ export interface HybridStorageAdapterOptions {
 export class HybridStorageAdapter implements StorageRepository {
   private readonly listeners = new Set<(data: AppStoreData) => void>();
   private readonly isSignedIn: boolean;
+  private readonly localFastPathTimeoutMs: number;
+  private readonly coldStartTimeoutMs: number;
+  /**
+   * True when a signed-in session had no local user data and remote sync has not yet
+   * succeeded (meaning the UI only holds uninitialized example fallback data).
+   * While true, save() refuses to push to remote or cache example data as user data.
+   */
+  private isUnsyncedExampleFallback = false;
 
   constructor(
     private readonly local: StorageRepository = new LocalStorageAdapter(GUEST_STORAGE_KEY),
@@ -22,8 +32,12 @@ export class HybridStorageAdapter implements StorageRepository {
   ) {
     if (typeof options === 'boolean') {
       this.isSignedIn = options;
+      this.localFastPathTimeoutMs = 800;
+      this.coldStartTimeoutMs = 10000;
     } else {
       this.isSignedIn = options?.isSignedIn ?? Boolean(remote);
+      this.localFastPathTimeoutMs = options?.localFastPathTimeoutMs ?? 800;
+      this.coldStartTimeoutMs = options?.coldStartTimeoutMs ?? 10000;
     }
   }
 
@@ -47,31 +61,63 @@ export class HybridStorageAdapter implements StorageRepository {
   public async load(): Promise<AppStoreData> {
     // 1. Immediately read fast local storage
     const localData = await this.local.load();
+    const localHasRealData = hasValidLastSaved(localData);
 
-    // 2. If remote API sync is enabled, fetch remote data with background resolution & fast fallback
+    // 2. If remote API sync is enabled, fetch remote data with safe reconciliation
     if (this.isSignedIn && this.remote) {
+      if (!localHasRealData) {
+        // Local storage has no real user data yet (only uninitialized example defaults).
+        // Mark as unsynced fallback until remote returns real user data so nothing can
+        // accidentally stamp example data with a new timestamp and overwrite the DB.
+        this.isUnsyncedExampleFallback = true;
+      } else {
+        this.isUnsyncedExampleFallback = false;
+      }
+
       const remotePromise = this.remote
         .load()
         .then(async remoteData => {
-          if (remoteData && remoteData.plans && remoteData.plans.length > 0) {
-            if (isNewer(remoteData, localData)) {
-              // Remote data is newer than local storage; cache locally and notify subscribers
-              await this.local.save(remoteData);
-              this.notify(remoteData);
-              return remoteData;
-            } else if (isNewer(localData, remoteData)) {
-              // Local storage is newer than remote API (e.g. offline edits); push to remote
-              this.remote?.save(localData).catch(() => {});
-            }
+          const remoteHasRealData = Boolean(
+            remoteData &&
+            remoteData.plans &&
+            remoteData.plans.length > 0 &&
+            hasValidLastSaved(remoteData)
+          );
+
+          if (!remoteHasRealData) {
+            return null;
           }
-          return null;
+
+          this.isUnsyncedExampleFallback = false;
+
+          if (isNewer(remoteData, localData)) {
+            // Remote data is newer than local storage; cache locally (preserving remote lastSaved) and notify subscribers
+            await this.local.save(remoteData);
+            this.notify(remoteData);
+            return remoteData;
+          } else if (localHasRealData && isNewer(localData, remoteData)) {
+            // Local storage has real offline edits newer than remote API; push to remote
+            this.remote?.save(localData).catch(() => {});
+          }
+
+          return !localHasRealData ? remoteData : null;
         })
         .catch(() => {
           return null;
         });
 
-      const timeoutPromise = new Promise<null>(resolve => setTimeout(() => resolve(null), 800));
+      // Only use the fast 800ms fallback when local storage already holds real user data.
+      // On a fresh device/login (where localData is example defaults), wait for remote sync.
+      const timeoutMs = localHasRealData ? this.localFastPathTimeoutMs : this.coldStartTimeoutMs;
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
+      const timeoutPromise = new Promise<null>(resolve => {
+        timeoutId = setTimeout(() => resolve(null), timeoutMs);
+      });
+
       const resolvedRemoteData = await Promise.race([remotePromise, timeoutPromise]);
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
 
       if (resolvedRemoteData) {
         return resolvedRemoteData;
@@ -82,6 +128,16 @@ export class HybridStorageAdapter implements StorageRepository {
   }
 
   public async save(data: AppStoreData): Promise<SaveResult> {
+    if (this.isSignedIn && this.remote && this.isUnsyncedExampleFallback) {
+      return {
+        success: false,
+        localSaved: false,
+        remoteSaved: false,
+        error:
+          'Cloud sync has not completed yet. Reload to load your saved plans before saving changes.',
+      };
+    }
+
     const timestampedData: AppStoreData = {
       ...data,
       lastSaved: data.lastSaved || new Date().toISOString(),

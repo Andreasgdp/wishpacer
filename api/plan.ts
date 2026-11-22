@@ -2,7 +2,12 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { verifyToken } from '@clerk/backend';
 import fs from 'node:fs';
 import path from 'node:path';
-import { getUserStoreData, saveUserStoreData } from '../src/server/db/planService.js';
+import {
+  getUserStoreData,
+  InvalidStoreDataError,
+  saveUserStoreData,
+  StaleDataError,
+} from '../src/server/db/planService.js';
 import type { AppStoreData } from '../src/types/plan.js';
 
 const clerkSecretKey = process.env.CLERK_SECRET_KEY;
@@ -120,6 +125,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
     res.status(405).send('Method not allowed');
   } catch (err) {
+    if (err instanceof StaleDataError) {
+      res.status(409).json({ error: err.message });
+      return;
+    }
+    if (err instanceof InvalidStoreDataError) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
     const message = err instanceof Error ? err.message : 'Internal Server Error';
     console.error('Unhandled error in /api/plan handler:', err);
     res.status(500).json({ error: message });

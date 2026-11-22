@@ -13,7 +13,7 @@ import {
   exportActivePlanToCsvFile,
   importStoreFromJsonFile,
 } from '../utils/exporters/fileExporters';
-import { DEFAULT_STORE_DATA } from '../utils/defaults';
+import { createFreshSampleStoreData } from '../utils/defaults';
 import { ResponsiveOverlay } from './ResponsiveOverlay';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
@@ -79,7 +79,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   };
 
   const handleResetToDemo = () => {
-    onImportData(DEFAULT_STORE_DATA);
+    onImportData(createFreshSampleStoreData(storeData.settings));
   };
 
   return (

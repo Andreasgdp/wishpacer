@@ -16,18 +16,38 @@ export class ApiSyncAdapter implements StorageRepository {
       : fetch
   ) {}
 
+  private async resolveAuthToken(): Promise<string | null> {
+    if (!this.getToken) {
+      return null;
+    }
+
+    try {
+      const token = await this.getToken();
+      if (token) return token;
+    } catch {
+      // Fall through to cache-skipping retry
+    }
+
+    try {
+      const freshToken = await this.getToken({ skipCache: true });
+      if (freshToken) return freshToken;
+    } catch {
+      // Token unavailable
+    }
+
+    return null;
+  }
+
   public async load(): Promise<AppStoreData> {
     try {
       const headers: Record<string, string> = {};
       if (this.getToken) {
-        try {
-          const token = await this.getToken();
-          if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-          }
-        } catch {
-          // Token getter error or unauthenticated
+        const token = await this.resolveAuthToken();
+        if (!token) {
+          // Never fall back to unauthenticated guest endpoint when auth was expected
+          return getDefaultStoreData();
         }
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
       let res = await this.fetchFn(this.endpoint, { headers });
@@ -61,14 +81,16 @@ export class ApiSyncAdapter implements StorageRepository {
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (this.getToken) {
-        try {
-          const token = await this.getToken();
-          if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-          }
-        } catch {
-          // Proceed without auth header
+        const token = await this.resolveAuthToken();
+        if (!token) {
+          return {
+            success: false,
+            localSaved: false,
+            remoteSaved: false,
+            error: 'Authentication token unavailable',
+          };
         }
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
       let res = await this.fetchFn(this.endpoint, {

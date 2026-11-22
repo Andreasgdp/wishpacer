@@ -10,6 +10,14 @@ export const LEGACY_V2_STORAGE_KEY = 'saving_plan_app_store_v2';
 export const LEGACY_STORAGE_KEY = 'saving_plan_app_data_v1';
 
 /**
+ * Returns a user-scoped localStorage key so different signed-in accounts on the same
+ * browser never read or overwrite each other's cached store data.
+ */
+export function getUserStorageKey(userId?: string | null): string {
+  return userId ? `${USER_STORAGE_KEY}_${userId}` : USER_STORAGE_KEY;
+}
+
+/**
  * Fast local browser storage adapter using localStorage and multi-version schema migration.
  */
 export class LocalStorageAdapter implements StorageRepository {
@@ -85,7 +93,7 @@ export class LocalStorageAdapter implements StorageRepository {
     const payload: AppStoreData = {
       ...data,
       version: 3,
-      lastSaved: new Date().toISOString(),
+      lastSaved: data.lastSaved || new Date().toISOString(),
     };
 
     try {

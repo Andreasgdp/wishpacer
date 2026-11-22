@@ -356,5 +356,50 @@ describe('UI Custom Hooks Suite', () => {
         result.current.activePlanCalculation.items.some(i => i.title === 'Guest Private Wish')
       ).toBe(true);
     });
+
+    it('waits until isAuthLoaded is true before loading and committing signed-in user data', async () => {
+      const signedInStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'cloud-user-plan-1',
+        plans: [
+          {
+            ...sampleStore.plans[0],
+            id: 'cloud-user-plan-1',
+            name: 'Cloud User Real Plan',
+          },
+        ],
+        lastSaved: '2026-09-25T10:00:00.000Z',
+      };
+
+      const repo = new InMemoryStorageRepository(signedInStore);
+
+      const { result, rerender } = renderHook(
+        ({ isAuthLoaded, isSignedIn, userId }) =>
+          usePlanManager({
+            isAuthLoaded,
+            isSignedIn,
+            userId,
+            getToken: async () => 'mock-token',
+            repository: isSignedIn ? repo : undefined,
+          }),
+        { initialProps: { isAuthLoaded: false, isSignedIn: false, userId: null as string | null } }
+      );
+
+      // While auth is still loading, hook stays in loading state and does not save
+      expect(result.current.isLoading).toBe(true);
+
+      // Auth finishes loading as signed in
+      rerender({ isAuthLoaded: true, isSignedIn: true, userId: 'user-cloud-123' });
+
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.activePlan.id).toBe('cloud-user-plan-1');
+      expect(result.current.activePlan.name).toBe('Cloud User Real Plan');
+      expect(repo.saveCount).toBe(0);
+    });
   });
 });

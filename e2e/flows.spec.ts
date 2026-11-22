@@ -284,3 +284,268 @@ test.describe('WishPacer End-to-End User Flows', () => {
     }
   });
 });
+
+test.describe('Login Data Persistence & Overwrite Protection Regressions', () => {
+  test('Flow 10: Fresh login with slow cold-start /api/plan (>800ms) loads cloud data and never overwrites with example data', async ({
+    page,
+  }) => {
+    const cloudStore = {
+      version: 3,
+      activePlanId: 'user-e2e-coldstart-plan-1',
+      settings: {
+        currency: { code: 'USD', symbol: '$', position: 'prefix', decimals: 0 },
+      },
+      plans: [
+        {
+          id: 'user-e2e-coldstart-plan-1',
+          name: 'My Real Cloud Plan',
+          description: 'Persisted cloud savings plan',
+          icon: 'sparkles',
+          color: 'violet',
+          config: {
+            name: 'My Real Cloud Plan',
+            currentAmountSaved: 4200,
+            amountToSave: 750,
+            frequency: 'monthly',
+            savingsDayOfMonth: 15,
+            firstSavingDate: '2026-01-01',
+            emergencyBuffer: 500,
+            annualInterestRate: 4.5,
+          },
+          items: [
+            {
+              id: 'user-e2e-coldstart-wish-1',
+              title: 'MacBook Pro M4',
+              price: 2499,
+              category: 'Tech',
+              priority: 1,
+              isPurchased: false,
+              isPaused: false,
+              createdAt: '2026-09-25T10:00:00.000Z',
+              updatedAt: '2026-09-25T10:00:00.000Z',
+            },
+          ],
+          createdAt: '2026-09-25T10:00:00.000Z',
+          updatedAt: '2026-09-25T10:00:00.000Z',
+        },
+      ],
+      lastSaved: '2026-09-25T10:00:00.000Z',
+    };
+
+    const postedPayloads: unknown[] = [];
+
+    await page.route('**/api/plan', async route => {
+      if (route.request().method() === 'GET') {
+        // Simulate serverless cold-start latency (>800ms)
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(cloudStore),
+        });
+        return;
+      }
+
+      if (route.request().method() === 'POST') {
+        postedPayloads.push(route.request().postDataJSON());
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ success: true }),
+        });
+        return;
+      }
+
+      await route.continue();
+    });
+
+    await page.addInitScript(() => {
+      window.localStorage.clear();
+      window.localStorage.setItem('saving_plan_activated', 'true');
+      window.localStorage.setItem('saving_plan_onboarding_seen', 'true');
+      (window as unknown as Record<string, unknown>).__MOCK_AUTH__ = {
+        isLoaded: true,
+        isSignedIn: true,
+        userId: 'user-e2e-coldstart',
+      };
+    });
+
+    await page.goto('/app');
+
+    // Cloud plan & wish must appear, NOT example plans
+    await expect(page.getByRole('heading', { name: 'My Real Cloud Plan', level: 1 })).toBeVisible();
+    await expect(page.getByText('MacBook Pro M4').first()).toBeVisible();
+    await expect(page.getByText('Personal Wants & Tech')).not.toBeVisible();
+    expect(postedPayloads.length).toBe(0);
+
+    // Reloading should preserve remote lastSaved in local cache and NOT trigger a spurious POST
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'My Real Cloud Plan', level: 1 })).toBeVisible();
+    await page.waitForTimeout(300);
+    expect(postedPayloads.length).toBe(0);
+  });
+
+  test('Flow 11: Fresh login with failed /api/plan refuses to overwrite remote DB with example data', async ({
+    page,
+  }) => {
+    let postCount = 0;
+
+    await page.route('**/api/plan', async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'Database temporarily unavailable' }),
+        });
+        return;
+      }
+
+      if (route.request().method() === 'POST') {
+        postCount++;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ success: true }),
+        });
+        return;
+      }
+
+      await route.continue();
+    });
+
+    await page.addInitScript(() => {
+      window.localStorage.clear();
+      window.localStorage.setItem('saving_plan_activated', 'true');
+      window.localStorage.setItem('saving_plan_onboarding_seen', 'true');
+      (window as unknown as Record<string, unknown>).__MOCK_AUTH__ = {
+        isLoaded: true,
+        isSignedIn: true,
+        userId: 'user-e2e-outage',
+      };
+    });
+
+    await page.goto('/app');
+
+    // Even if user interacts with the fallback UI (e.g. switching plan), no POST may overwrite cloud DB
+    await page.getByRole('button', { name: /Switch savings plan/i }).click();
+    await page.getByLabel('Select House & Living Needs plan').click();
+
+    await expect(page.getByText(/Cloud sync has not completed yet/i)).toBeVisible();
+    expect(postCount).toBe(0);
+  });
+
+  test('Flow 12: Switching signed-in accounts isolates localStorage so Account A never overwrites Account B', async ({
+    page,
+  }) => {
+    let postCount = 0;
+
+    const accountBCloudStore = {
+      version: 3,
+      activePlanId: 'user-b-plan-1',
+      settings: {
+        currency: { code: 'USD', symbol: '$', position: 'prefix', decimals: 0 },
+      },
+      plans: [
+        {
+          id: 'user-b-plan-1',
+          name: 'Account B Cloud Plan',
+          description: 'Belongs to Account B',
+          icon: 'home',
+          color: 'emerald',
+          config: {
+            name: 'Account B Cloud Plan',
+            currentAmountSaved: 1500,
+            amountToSave: 400,
+            frequency: 'monthly',
+            savingsDayOfMonth: 1,
+            firstSavingDate: '2026-01-01',
+            emergencyBuffer: 200,
+            annualInterestRate: 3,
+          },
+          items: [],
+          createdAt: '2026-09-01T12:00:00.000Z',
+          updatedAt: '2026-09-01T12:00:00.000Z',
+        },
+      ],
+      lastSaved: '2026-09-01T12:00:00.000Z',
+    };
+
+    await page.route('**/api/plan', async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(accountBCloudStore),
+        });
+        return;
+      }
+
+      if (route.request().method() === 'POST') {
+        postCount++;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ success: true }),
+        });
+        return;
+      }
+
+      await route.continue();
+    });
+
+    await page.addInitScript(() => {
+      window.localStorage.clear();
+      window.localStorage.setItem('saving_plan_activated', 'true');
+      window.localStorage.setItem('saving_plan_onboarding_seen', 'true');
+
+      // Account A previously cached a newer store on this browser
+      window.localStorage.setItem(
+        'saving_plan_user_store_v3_user-a',
+        JSON.stringify({
+          version: 3,
+          activePlanId: 'user-a-plan-1',
+          settings: {
+            currency: { code: 'USD', symbol: '$', position: 'prefix', decimals: 0 },
+          },
+          plans: [
+            {
+              id: 'user-a-plan-1',
+              name: 'Account A Secret Plan',
+              icon: 'sparkles',
+              color: 'violet',
+              config: {
+                name: 'Account A Secret Plan',
+                currentAmountSaved: 9999,
+                amountToSave: 999,
+                frequency: 'monthly',
+                savingsDayOfMonth: 1,
+                firstSavingDate: '2026-01-01',
+                emergencyBuffer: 0,
+                annualInterestRate: 0,
+              },
+              items: [],
+              createdAt: '2026-11-01T12:00:00.000Z',
+              updatedAt: '2026-11-01T12:00:00.000Z',
+            },
+          ],
+          lastSaved: '2026-11-01T12:00:00.000Z',
+        })
+      );
+
+      // Now sign in as Account B
+      (window as unknown as Record<string, unknown>).__MOCK_AUTH__ = {
+        isLoaded: true,
+        isSignedIn: true,
+        userId: 'user-b',
+      };
+    });
+
+    await page.goto('/app');
+
+    await expect(
+      page.getByRole('heading', { name: 'Account B Cloud Plan', level: 1 })
+    ).toBeVisible();
+    await expect(page.getByText('Account A Secret Plan')).not.toBeVisible();
+    expect(postCount).toBe(0);
+  });
+});

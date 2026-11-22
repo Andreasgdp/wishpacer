@@ -4,6 +4,20 @@ import { plans, users, wishItems } from './schema.js';
 import type { AppStoreData, GlobalSettings, Plan, PlanConfig, WishItem } from '../../types/plan.js';
 import { DEFAULT_GLOBAL_SETTINGS, DEFAULT_PLANS } from '../../utils/defaults.js';
 
+export class StaleDataError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'StaleDataError';
+  }
+}
+
+export class InvalidStoreDataError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidStoreDataError';
+  }
+}
+
 export async function getUserStoreData(userId: string): Promise<AppStoreData> {
   await ensureTablesExist();
 
@@ -188,7 +202,47 @@ function extractMaxTimestamp(userUpdatedAt?: string, plansList: Plan[] = []): st
 
 export async function saveUserStoreData(userId: string, data: AppStoreData): Promise<void> {
   await ensureTablesExist();
-  const saveTimestamp = data.lastSaved || new Date().toISOString();
+
+  if (!data || !Array.isArray(data.plans) || data.plans.length === 0) {
+    throw new InvalidStoreDataError('Cannot save store data without at least one plan');
+  }
+
+  const incomingTs = data.lastSaved ? Date.parse(data.lastSaved) : NaN;
+  const hasValidIncomingTs = !isNaN(incomingTs) && incomingTs > 0;
+
+  // Fetch existing user plans and timestamps before modifying anything
+  const existingPlans = await db.select().from(plans).where(eq(plans.userId, userId));
+  const existingUserRows = await db
+    .select({ updatedAt: users.updatedAt })
+    .from(users)
+    .where(eq(users.id, userId));
+
+  if (existingPlans.length > 0) {
+    // Never allow uninitialized default/example data (1970-01-01) to overwrite real user data
+    if (!hasValidIncomingTs) {
+      throw new StaleDataError(
+        'Refusing to overwrite existing user plans with uninitialized store data'
+      );
+    }
+
+    // Compute current max timestamp in DB and reject strictly older payloads
+    let maxDbTs =
+      existingUserRows[0]?.updatedAt && !isNaN(Date.parse(existingUserRows[0].updatedAt))
+        ? Date.parse(existingUserRows[0].updatedAt)
+        : 0;
+    for (const ep of existingPlans) {
+      const pTs = Date.parse(ep.updatedAt);
+      if (!isNaN(pTs) && pTs > maxDbTs) maxDbTs = pTs;
+    }
+
+    if (incomingTs < maxDbTs) {
+      throw new StaleDataError(
+        'Incoming store data is older than the latest saved data on the server'
+      );
+    }
+  }
+
+  const saveTimestamp = hasValidIncomingTs ? data.lastSaved : new Date().toISOString();
 
   // 1. Update user settings
   await db
@@ -213,23 +267,28 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
       },
     });
 
-  // 2. Sync plans and wish items
-  const existingPlans = await db.select().from(plans).where(eq(plans.userId, userId));
-  const newPlanIds = new Set(data.plans.map(p => p.id));
+  // 2. Upsert plans and wish items FIRST (preventing partial-failure data loss)
+  //    and scope any conflicting primary keys that belong to another user so ownership
+  //    is NEVER stolen across accounts.
+  const finalPlanIds = new Set<string>();
 
-  // Delete removed plans
-  for (const ep of existingPlans) {
-    if (!newPlanIds.has(ep.id)) {
-      await db.delete(plans).where(eq(plans.id, ep.id));
-    }
-  }
-
-  // Upsert plans and wishes
   for (const p of data.plans) {
+    const conflictingPlan = await db
+      .select({ id: plans.id, userId: plans.userId })
+      .from(plans)
+      .where(eq(plans.id, p.id));
+
+    const effectivePlanId =
+      conflictingPlan.length > 0 && conflictingPlan[0].userId !== userId
+        ? `${userId}-${p.id}`
+        : p.id;
+
+    finalPlanIds.add(effectivePlanId);
+
     await db
       .insert(plans)
       .values({
-        id: p.id,
+        id: effectivePlanId,
         userId,
         name: p.name,
         description: p.description,
@@ -248,7 +307,6 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
       .onConflictDoUpdate({
         target: plans.id,
         set: {
-          userId,
           name: p.name,
           description: p.description,
           icon: p.icon || 'sparkles',
@@ -264,23 +322,37 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
         },
       });
 
-    const existingWishes = await db.select().from(wishItems).where(eq(wishItems.planId, p.id));
-    const newWishIds = new Set(p.items.map(w => w.id));
-
-    // Delete removed wish items
-    for (const ew of existingWishes) {
-      if (!newWishIds.has(ew.id)) {
-        await db.delete(wishItems).where(eq(wishItems.id, ew.id));
-      }
-    }
+    const existingWishes = await db
+      .select()
+      .from(wishItems)
+      .where(eq(wishItems.planId, effectivePlanId));
+    const finalWishIds = new Set<string>();
 
     // Upsert wish items
     for (const item of p.items) {
+      const conflictingWish = await db
+        .select({ id: wishItems.id, planId: wishItems.planId })
+        .from(wishItems)
+        .where(eq(wishItems.id, item.id));
+
+      let effectiveWishId = item.id;
+      if (conflictingWish.length > 0 && conflictingWish[0].planId !== effectivePlanId) {
+        const ownerPlan = await db
+          .select({ userId: plans.userId })
+          .from(plans)
+          .where(eq(plans.id, conflictingWish[0].planId));
+        if (ownerPlan.length > 0 && ownerPlan[0].userId !== userId) {
+          effectiveWishId = `${userId}-${item.id}`;
+        }
+      }
+
+      finalWishIds.add(effectiveWishId);
+
       await db
         .insert(wishItems)
         .values({
-          id: item.id,
-          planId: p.id,
+          id: effectiveWishId,
+          planId: effectivePlanId,
           title: item.title,
           price: item.price,
           category: item.category,
@@ -298,6 +370,7 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
         .onConflictDoUpdate({
           target: wishItems.id,
           set: {
+            planId: effectivePlanId,
             title: item.title,
             price: item.price,
             category: item.category,
@@ -312,6 +385,20 @@ export async function saveUserStoreData(userId: string, data: AppStoreData): Pro
             updatedAt: item.updatedAt || saveTimestamp,
           },
         });
+    }
+
+    // Delete removed wish items AFTER upserts succeed
+    for (const ew of existingWishes) {
+      if (!finalWishIds.has(ew.id)) {
+        await db.delete(wishItems).where(eq(wishItems.id, ew.id));
+      }
+    }
+  }
+
+  // 3. Delete removed plans AFTER all upserts succeed
+  for (const ep of existingPlans) {
+    if (!finalPlanIds.has(ep.id)) {
+      await db.delete(plans).where(eq(plans.id, ep.id));
     }
   }
 }
