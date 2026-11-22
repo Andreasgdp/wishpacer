@@ -426,9 +426,9 @@ test.describe('Login Data Persistence & Overwrite Protection Regressions', () =>
 
     await page.goto('/app');
 
-    // Even if user interacts with the fallback UI (e.g. switching plan), no POST may overwrite cloud DB
-    await page.getByRole('button', { name: /Switch savings plan/i }).click();
-    await page.getByLabel('Select House & Living Needs plan').click();
+    // Even if user makes an edit on the fallback UI (e.g. saving budget settings), no POST may overwrite cloud DB
+    await page.getByRole('button', { name: 'Budget Settings', exact: true }).click();
+    await page.getByRole('button', { name: 'Save Configuration' }).click();
 
     await expect(page.getByText(/Cloud sync has not completed yet/i)).toBeVisible();
     expect(postCount).toBe(0);
@@ -546,6 +546,130 @@ test.describe('Login Data Persistence & Overwrite Protection Regressions', () =>
       page.getByRole('heading', { name: 'Account B Cloud Plan', level: 1 })
     ).toBeVisible();
     await expect(page.getByText('Account A Secret Plan')).not.toBeVisible();
+    expect(postCount).toBe(0);
+  });
+
+  test('Flow 13: Switching between plans in signed-in app does not flicker back or fire POST /api/plan', async ({
+    page,
+  }) => {
+    let postCount = 0;
+
+    const multiPlanCloudStore = {
+      version: 3,
+      activePlanId: 'plan-alpha',
+      settings: {
+        currency: { code: 'USD', symbol: '$', position: 'prefix', decimals: 0 },
+      },
+      plans: [
+        {
+          id: 'plan-alpha',
+          name: 'Alpha Savings Plan',
+          description: 'First plan',
+          icon: 'laptop',
+          color: 'violet',
+          config: {
+            name: 'Alpha Savings Plan',
+            currentAmountSaved: 1000,
+            amountToSave: 300,
+            frequency: 'monthly',
+            savingsDayOfMonth: 1,
+            firstSavingDate: '2026-01-01',
+            emergencyBuffer: 100,
+            annualInterestRate: 0,
+          },
+          items: [],
+          createdAt: '2026-09-20T10:00:00.000Z',
+          updatedAt: '2026-09-20T10:00:00.000Z',
+        },
+        {
+          id: 'plan-beta',
+          name: 'Beta Savings Plan',
+          description: 'Second plan',
+          icon: 'home',
+          color: 'emerald',
+          config: {
+            name: 'Beta Savings Plan',
+            currentAmountSaved: 2500,
+            amountToSave: 600,
+            frequency: 'monthly',
+            savingsDayOfMonth: 15,
+            firstSavingDate: '2026-01-01',
+            emergencyBuffer: 200,
+            annualInterestRate: 0,
+          },
+          items: [],
+          createdAt: '2026-09-20T10:00:00.000Z',
+          updatedAt: '2026-09-20T10:00:00.000Z',
+        },
+      ],
+      lastSaved: '2026-09-20T10:00:00.000Z',
+    };
+
+    await page.route('**/api/plan', async route => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(multiPlanCloudStore),
+        });
+        return;
+      }
+
+      if (route.request().method() === 'POST') {
+        postCount++;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ success: true }),
+        });
+        return;
+      }
+
+      await route.continue();
+    });
+
+    await page.addInitScript(() => {
+      window.localStorage.clear();
+      window.localStorage.setItem('saving_plan_activated', 'true');
+      window.localStorage.setItem('saving_plan_onboarding_seen', 'true');
+      (window as unknown as Record<string, unknown>).__MOCK_AUTH__ = {
+        isLoaded: true,
+        isSignedIn: true,
+        userId: 'user-e2e-switch',
+      };
+    });
+
+    await page.goto('/app/plan/plan-alpha');
+    await expect(page.getByRole('heading', { name: 'Alpha Savings Plan', level: 1 })).toBeVisible();
+
+    // Observe h1 heading text mutations to detect any ping-pong flicker (Beta -> Alpha -> Beta)
+    await page.evaluate(() => {
+      const h1 = document.querySelector('h1');
+      const history: string[] = [];
+      (window as unknown as Record<string, unknown>).__HEADING_HISTORY__ = history;
+      if (h1) {
+        const obs = new MutationObserver(() => {
+          const text = h1.textContent?.trim() || '';
+          if (history[history.length - 1] !== text) {
+            history.push(text);
+          }
+        });
+        obs.observe(h1, { childList: true, characterData: true, subtree: true });
+      }
+    });
+
+    // Switch from Alpha -> Beta
+    await page.getByRole('button', { name: /Switch savings plan/i }).click();
+    await page.getByLabel('Select Beta Savings Plan plan').click();
+    await expect(page.getByRole('heading', { name: 'Beta Savings Plan', level: 1 })).toBeVisible();
+
+    const historyAfterSwitch = await page.evaluate(
+      () => (window as unknown as Record<string, string[]>).__HEADING_HISTORY__
+    );
+    // Heading must transition directly to Beta without flickering back to Alpha
+    expect(historyAfterSwitch).toEqual(['Beta Savings Plan']);
+
+    // Switching plans must not trigger any POST /api/plan writes
     expect(postCount).toBe(0);
   });
 });
