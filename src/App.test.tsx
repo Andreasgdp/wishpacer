@@ -6,6 +6,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClerkProviderWithTheme } from './components/ClerkProviderWithTheme';
 import { App } from './App';
+import { createBlankStoreData, savePendingCloudImport } from './storage/migrationHelpers';
+import { getUserStorageKey, GUEST_STORAGE_KEY } from './storage/adapters/LocalStorageAdapter';
 
 beforeEach(() => {
   localStorage.setItem('saving_plan_onboarding_seen', 'true');
@@ -71,6 +73,33 @@ describe('App Client-Side Routing', () => {
     const { findByRole, findByText } = renderAppWithRoute('/demo');
     expect(await findByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
     expect(await findByText(/Interactive Demo Mode • Changes are temporary/i)).not.toBeNull();
+  });
+
+  it('atomically carries over all simulated queue items, prices, rate, frequency, buffer, and APY from landing into /demo', async () => {
+    window.sessionStorage.setItem(
+      'wishpacer_sim_carryover',
+      JSON.stringify({
+        itemTitle: 'MacBook Pro M4',
+        itemPrice: 2400,
+        monthlySavings: 450,
+        frequency: 'biweekly',
+        hysaRate: 5.2,
+        bonusAmount: 1000,
+        emergencyBuffer: 500,
+        items: [
+          { title: 'MacBook Pro M4', price: 2400, category: 'Tech', isPurchased: false },
+          { title: 'Secondary Queued Goal', price: 1200, category: 'Hobbies', isPurchased: false },
+          { title: 'Weekend Cabin Trip', price: 600, category: 'Travel', isPurchased: false },
+        ],
+      })
+    );
+
+    const { findAllByText } = renderAppWithRoute('/demo');
+    expect((await findAllByText('MacBook Pro M4')).length).toBeGreaterThan(0);
+    expect((await findAllByText('Secondary Queued Goal')).length).toBeGreaterThan(0);
+    expect((await findAllByText(/\$2,400/)).length).toBeGreaterThan(0);
+    expect((await findAllByText(/\$1,200/)).length).toBeGreaterThan(0);
+    expect((await findAllByText(/\$500 buffer/i)).length).toBeGreaterThan(0);
   });
 
   it('renders Demo Portfolio Overview on route "/demo/portfolio"', async () => {
@@ -304,6 +333,97 @@ describe('App Client-Side Routing', () => {
       expect(
         await findByRole('heading', { name: /House & Living Needs/i, level: 1 })
       ).not.toBeNull();
+    });
+  });
+
+  describe('3-Layer Workspace Architecture (/demo, /local, /app)', () => {
+    it('strictly isolates /demo from /local so /demo never reads or mutates saved local workspace data', async () => {
+      // Seed real persisted data in /local (GUEST_STORAGE_KEY)
+      const localStore = createBlankStoreData();
+      localStore.plans[0].name = 'Private Local Only Plan';
+      localStore.plans[0].config.name = 'Private Local Only Plan';
+      const localJsonBefore = JSON.stringify(localStore);
+      localStorage.setItem(GUEST_STORAGE_KEY, localJsonBefore);
+
+      // 1. Render /demo -> must show demo sample data, NEVER the user's private local plan
+      const { findByRole, queryByText, unmount } = renderAppWithRoute('/demo');
+      expect(
+        await findByRole('heading', { name: /Personal Wants & Tech/i, level: 1 })
+      ).not.toBeNull();
+      expect(queryByText(/Private Local Only Plan/i)).toBeNull();
+
+      // Local storage must remain byte-for-byte untouched after visiting /demo
+      expect(localStorage.getItem(GUEST_STORAGE_KEY)).toBe(localJsonBefore);
+      unmount();
+
+      // 2. Render /local -> must show ONLY the user's private local plan
+      const localView = renderAppWithRoute('/local');
+      expect(
+        await localView.findByRole('heading', { name: /Private Local Only Plan/i, level: 1 })
+      ).not.toBeNull();
+    });
+
+    it('renders persistent Local Workspace on "/local" without requiring sign-in', async () => {
+      const { findByText, findByRole, queryByText } = renderAppWithRoute('/local');
+      expect(await findByText(/Local Workspace • Saved privately in this browser/i)).not.toBeNull();
+      expect(await findByRole('button', { name: /Sync to Cloud/i })).not.toBeNull();
+      expect(queryByText(/Interactive Demo Mode • Changes are temporary/i)).toBeNull();
+      expect(queryByText(/Sign In Required to Access App/i)).toBeNull();
+    });
+
+    it('renders Local Portfolio Overview on "/local/portfolio"', async () => {
+      const { findByText } = renderAppWithRoute('/local/portfolio');
+      expect(await findByText(/Savings Portfolio Overview/i)).not.toBeNull();
+      expect(await findByText(/Local Workspace • Saved privately in this browser/i)).not.toBeNull();
+    });
+
+    it('prompts for safe merge confirmation on "/app" when a pending local/demo import is staged without overwriting cloud plans', async () => {
+      const existingCloudStore = createBlankStoreData();
+      existingCloudStore.plans[0].name = 'Existing Cloud Plan';
+      existingCloudStore.plans[0].config.name = 'Existing Cloud Plan';
+      localStorage.setItem(
+        getUserStorageKey('user-cloud-safe'),
+        JSON.stringify(existingCloudStore)
+      );
+
+      const incomingLocalStore = createBlankStoreData();
+      incomingLocalStore.plans[0].name = 'Imported Local Plan';
+      incomingLocalStore.plans[0].config.name = 'Imported Local Plan';
+      savePendingCloudImport('local', incomingLocalStore);
+
+      if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+        window.__SET_MOCK_AUTH__({
+          isLoaded: true,
+          isSignedIn: true,
+          userId: 'user-cloud-safe',
+        });
+      }
+
+      const { findByText, findByRole } = renderAppWithRoute('/app');
+
+      // Confirmation modal appears before anything touches cloud plans
+      expect(await findByText(/Import Plans to Your Cloud Account/i)).not.toBeNull();
+      expect(await findByText(/DATA SAFETY CHECK/i)).not.toBeNull();
+
+      const mergeBtn = await findByRole('button', {
+        name: /Merge Into My Cloud Plans \(Recommended\)/i,
+      });
+      fireEvent.click(mergeBtn);
+
+      // Imported plan becomes active, AND existing cloud plan is preserved in storage
+      expect(
+        await findByRole('heading', { name: /Imported Local Plan/i, level: 1 })
+      ).not.toBeNull();
+
+      const persistedRaw = localStorage.getItem(getUserStorageKey('user-cloud-safe'));
+      expect(persistedRaw).not.toBeNull();
+      const persisted = JSON.parse(persistedRaw!);
+      expect(persisted.plans.some((p: { name: string }) => p.name === 'Existing Cloud Plan')).toBe(
+        true
+      );
+      expect(persisted.plans.some((p: { name: string }) => p.name === 'Imported Local Plan')).toBe(
+        true
+      );
     });
   });
 });

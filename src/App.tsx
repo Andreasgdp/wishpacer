@@ -25,7 +25,22 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useTheme } from './context/ThemeContext';
 import { createFreshSampleStoreData, getDefaultStoreData } from './utils/defaults';
-import { InMemoryStorageRepository } from './storage';
+import {
+  GUEST_STORAGE_KEY,
+  hasValidLastSaved,
+  InMemoryStorageRepository,
+  LocalStorageAdapter,
+} from './storage';
+import {
+  clearPendingCloudImport,
+  cloneStoreDataWithFreshIds,
+  createBlankStoreData,
+  inspectLocalWorkspace,
+  mergeStoreData,
+  readPendingCloudImport,
+  savePendingCloudImport,
+  type PendingCloudImport,
+} from './storage/migrationHelpers';
 
 // Route & feature code-splitting for near-instant initial load on low-end hardware
 const LandingPage = lazy(() =>
@@ -90,6 +105,9 @@ const OnboardingModal = lazy(() =>
 const ConfirmDialogModal = lazy(() =>
   import('./components/ConfirmDialogModal').then(m => ({ default: m.ConfirmDialogModal }))
 );
+const WorkspaceTransferModal = lazy(() =>
+  import('./components/WorkspaceTransferModal').then(m => ({ default: m.WorkspaceTransferModal }))
+);
 
 const TOASTER_OPTIONS = {
   classNames: {
@@ -107,6 +125,7 @@ const RouteFallback: React.FC = () => (
 
 interface AppDashboardProps {
   isDemo?: boolean;
+  isLocal?: boolean;
   storeData: AppStoreData;
   activePlan: Plan;
   activePlanCalculation: PlanCalculationResult;
@@ -130,10 +149,13 @@ interface AppDashboardProps {
   handleConfirmLoadSamplePlan: () => void;
   handleOpenCreatePlanModal: () => void;
   handleOpenEditPlanModal: (planToEdit?: Plan) => void;
+  onOpenGraduateModal?: () => void;
+  onSyncLocalToCloud?: () => void;
 }
 
 const AppDashboard: React.FC<AppDashboardProps> = ({
   isDemo = false,
+  isLocal = false,
   storeData,
   activePlan,
   activePlanCalculation,
@@ -157,13 +179,15 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
   handleConfirmLoadSamplePlan,
   handleOpenCreatePlanModal,
   handleOpenEditPlanModal,
+  onOpenGraduateModal,
+  onSyncLocalToCloud,
 }) => {
   const { planId } = useParams<{ planId?: string }>();
   const location = useLocation();
   const navigate = useNavigate();
   const [isCommandOpen, setIsCommandOpen] = useState(false);
 
-  const basePath = isDemo ? '/demo' : '/app';
+  const basePath = isDemo ? '/demo' : isLocal ? '/local' : '/app';
 
   // Global Cmd+K / Ctrl+K shortcut for Command Palette
   useEffect(() => {
@@ -208,6 +232,7 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
       {/* Header */}
       <Header
         isDemo={isDemo}
+        isLocal={isLocal}
         plans={storeData.plans}
         activePlanId={storeData.activePlanId}
         isPortfolioView={isPortfolioView}
@@ -216,6 +241,8 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
         viewMode={location.pathname === '/' ? 'landing' : 'app'}
         onNavigateLanding={() => navigate('/')}
         onNavigateApp={() => navigate('/app')}
+        onOpenGraduateModal={onOpenGraduateModal}
+        onSyncLocalToCloud={onSyncLocalToCloud}
         onSelectPlan={id => {
           navigate(`${basePath}/plan/${id}`);
         }}
@@ -596,6 +623,7 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
 
 export const LandingPageWorkspace: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
+  const { isSignedIn } = useAppAuth();
   const navigate = useNavigate();
 
   return (
@@ -608,14 +636,7 @@ export const LandingPageWorkspace: React.FC = () => {
       />
       <Suspense fallback={<RouteFallback />}>
         <LandingPage
-          onLaunchApp={simData => {
-            if (
-              simData &&
-              typeof window !== 'undefined' &&
-              typeof window.sessionStorage !== 'undefined'
-            ) {
-              window.sessionStorage.setItem('wishpacer_sim_carryover', JSON.stringify(simData));
-            }
+          onLaunchApp={() => {
             navigate('/app');
           }}
           onExploreDemo={simData => {
@@ -628,8 +649,12 @@ export const LandingPageWorkspace: React.FC = () => {
             }
             navigate('/demo');
           }}
+          onOpenLocal={() => {
+            navigate('/local');
+          }}
           onToggleDarkMode={toggleDarkMode}
           darkMode={darkMode}
+          isSignedIn={Boolean(isSignedIn)}
         />
       </Suspense>
     </>
@@ -638,11 +663,13 @@ export const LandingPageWorkspace: React.FC = () => {
 
 export const DemoAppWorkspace: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
+  const { isSignedIn } = useAppAuth();
   const navigate = useNavigate();
   const modal = useModalRegistry();
 
   const [planManageMode, setPlanManageMode] = useState<'create' | 'edit'>('create');
   const [isQuickAdd, setIsQuickAdd] = useState(false);
+  const [showGraduateModal, setShowGraduateModal] = useState(false);
 
   const [isActivated, setIsActivated] = useState<boolean>(() => {
     return localStorage.getItem('saving_plan_activated') === 'true';
@@ -658,46 +685,89 @@ export const DemoAppWorkspace: React.FC = () => {
   const demoRoutePlanId = demoPlanMatch?.params.planId;
   const demoRouteView = demoPortfolioMatch ? 'portfolio' : demoRoutePlanId ? 'plan' : undefined;
 
-  const demoRepo = useMemo(() => new InMemoryStorageRepository(getDefaultStoreData()), []);
+  const demoRepo = useMemo(() => {
+    const initialData = getDefaultStoreData();
+
+    // Atomically apply Landing Simulator Session Carryover before mount (avoids stale-closure overwrites)
+    if (typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined') {
+      const raw = window.sessionStorage.getItem('wishpacer_sim_carryover');
+      if (raw) {
+        window.sessionStorage.removeItem('wishpacer_sim_carryover');
+        try {
+          const carryover = JSON.parse(raw) as {
+            itemTitle?: string;
+            itemPrice?: number;
+            monthlySavings?: number;
+            frequency?: 'monthly' | 'biweekly' | 'weekly';
+            hysaRate?: number;
+            bonusAmount?: number;
+            emergencyBuffer?: number;
+            items?: Array<{
+              title: string;
+              price: number;
+              category: string;
+              notes?: string;
+              isPurchased?: boolean;
+            }>;
+          };
+          const primaryPlan = initialData.plans[0];
+          if (primaryPlan) {
+            const now = new Date().toISOString();
+            if (Array.isArray(carryover.items) && carryover.items.length > 0) {
+              let activePriority = 1;
+              primaryPlan.items = carryover.items.map((item, idx) => {
+                const isPurchased = Boolean(item.isPurchased);
+                return {
+                  id: `wish-sim-${idx + 1}`,
+                  title: item.title || `Goal #${idx + 1}`,
+                  price: typeof item.price === 'number' && item.price > 0 ? item.price : 100,
+                  category: item.category || 'Other',
+                  priority: isPurchased ? carryover.items!.length : activePriority++,
+                  notes: item.notes,
+                  isPurchased,
+                  isPaused: false,
+                  createdAt: now,
+                  updatedAt: now,
+                };
+              });
+            } else if (primaryPlan.items[0]) {
+              if (carryover.itemTitle && carryover.itemTitle.trim()) {
+                primaryPlan.items[0].title = carryover.itemTitle.trim();
+              }
+              if (typeof carryover.itemPrice === 'number' && carryover.itemPrice > 0) {
+                primaryPlan.items[0].price = carryover.itemPrice;
+              }
+            }
+            if (typeof carryover.monthlySavings === 'number' && carryover.monthlySavings > 0) {
+              primaryPlan.config.amountToSave = carryover.monthlySavings;
+            }
+            if (carryover.frequency) {
+              primaryPlan.config.frequency = carryover.frequency;
+            }
+            if (typeof carryover.hysaRate === 'number' && carryover.hysaRate >= 0) {
+              primaryPlan.config.annualInterestRate = carryover.hysaRate;
+            }
+            if (typeof carryover.emergencyBuffer === 'number' && carryover.emergencyBuffer >= 0) {
+              primaryPlan.config.emergencyBuffer = carryover.emergencyBuffer;
+            }
+            if (typeof carryover.bonusAmount === 'number' && carryover.bonusAmount >= 0) {
+              primaryPlan.config.currentAmountSaved = carryover.bonusAmount;
+            }
+            initialData.lastSaved = now;
+          }
+        } catch {
+          // ignore invalid carryover payload
+        }
+      }
+    }
+
+    return new InMemoryStorageRepository(initialData);
+  }, []);
   const demoPlanManager = usePlanManager({
     repository: demoRepo,
     routePlanId: demoRoutePlanId,
     routeView: demoRouteView,
   });
-  // Apply Landing Simulator Session Carryover if user clicked "Activate Your Plan"
-  useEffect(() => {
-    if (typeof window === 'undefined' || typeof window.sessionStorage === 'undefined') return;
-    const raw = window.sessionStorage.getItem('wishpacer_sim_carryover');
-    if (raw) {
-      window.sessionStorage.removeItem('wishpacer_sim_carryover');
-      try {
-        const carryover = JSON.parse(raw);
-        if (carryover.itemPrice && demoPlanManager.activePlan?.items?.[0]) {
-          const firstItem = demoPlanManager.activePlan.items[0];
-          demoPlanManager.actions.saveWishItem(
-            {
-              title: firstItem.title,
-              price: carryover.itemPrice,
-              category: firstItem.category,
-              priority: firstItem.priority,
-              url: firstItem.url,
-              notes: firstItem.notes,
-            },
-            firstItem.id
-          );
-        }
-        if (carryover.monthlySavings) {
-          demoPlanManager.actions.updateBudgetSettings({
-            ...demoPlanManager.effectiveConfig,
-            amountToSave: carryover.monthlySavings,
-            annualInterestRate: carryover.hysaRate ?? 4.5,
-          });
-        }
-      } catch {
-        // ignore invalid carryover payload
-      }
-    }
-  }, [demoPlanManager]);
 
   const handleOpenCreatePlanModal = () => {
     setPlanManageMode('create');
@@ -746,6 +816,37 @@ export const DemoAppWorkspace: React.FC = () => {
     });
   };
 
+  const handleSaveDemoToLocal = async (
+    strategy: 'merge' | 'replace' | 'fresh',
+    keepDemoData: boolean
+  ) => {
+    const localAdapter = new LocalStorageAdapter(GUEST_STORAGE_KEY);
+    const incomingData = keepDemoData
+      ? cloneStoreDataWithFreshIds(demoPlanManager.storeData)
+      : createBlankStoreData(demoPlanManager.storeData.settings);
+
+    if (strategy === 'merge') {
+      const existing = inspectLocalWorkspace();
+      const merged = existing.data ? mergeStoreData(existing.data, incomingData) : incomingData;
+      await localAdapter.save(merged);
+    } else {
+      await localAdapter.save(incomingData);
+    }
+
+    setShowGraduateModal(false);
+    navigate('/local');
+  };
+
+  const handleProceedDemoToCloud = (keepDemoData: boolean) => {
+    if (keepDemoData) {
+      savePendingCloudImport('demo', demoPlanManager.storeData);
+    } else {
+      clearPendingCloudImport();
+    }
+    setShowGraduateModal(false);
+    navigate('/app');
+  };
+
   const demoDashboardProps = {
     storeData: demoPlanManager.storeData,
     activePlan: demoPlanManager.activePlan,
@@ -770,28 +871,199 @@ export const DemoAppWorkspace: React.FC = () => {
     handleConfirmLoadSamplePlan,
     handleOpenCreatePlanModal,
     handleOpenEditPlanModal: (planToEdit?: Plan) => handleOpenEditPlanModal(planToEdit),
+    onOpenGraduateModal: () => setShowGraduateModal(true),
   };
 
   return (
-    <Routes>
-      <Route path="/" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
-      <Route
-        path="/plan/:planId"
-        element={<AppDashboard {...demoDashboardProps} isDemo={true} />}
-      />
-      <Route path="/portfolio" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
-      <Route
-        path="*"
-        element={
-          <Suspense fallback={<RouteFallback />}>
-            <NotFoundPage
-              onReturnToApp={() => navigate('/demo')}
-              onGoToLanding={() => navigate('/')}
-            />
-          </Suspense>
-        }
-      />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
+        <Route
+          path="/plan/:planId"
+          element={<AppDashboard {...demoDashboardProps} isDemo={true} />}
+        />
+        <Route path="/portfolio" element={<AppDashboard {...demoDashboardProps} isDemo={true} />} />
+        <Route
+          path="*"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <NotFoundPage
+                onReturnToApp={() => navigate('/demo')}
+                onGoToLanding={() => navigate('/')}
+              />
+            </Suspense>
+          }
+        />
+      </Routes>
+      {showGraduateModal && (
+        <Suspense fallback={null}>
+          <WorkspaceTransferModal
+            isOpen={showGraduateModal}
+            onClose={() => setShowGraduateModal(false)}
+            mode="demo-graduate"
+            sourceData={demoPlanManager.storeData}
+            isSignedIn={Boolean(isSignedIn)}
+            onSaveToLocal={handleSaveDemoToLocal}
+            onOpenExistingLocal={() => {
+              setShowGraduateModal(false);
+              navigate('/local');
+            }}
+            onProceedToCloud={handleProceedDemoToCloud}
+          />
+        </Suspense>
+      )}
+    </>
+  );
+};
+
+export const LocalAppWorkspace: React.FC = () => {
+  const { darkMode, toggleDarkMode } = useTheme();
+  const { isSignedIn } = useAppAuth();
+  const navigate = useNavigate();
+  const modal = useModalRegistry();
+
+  const [planManageMode, setPlanManageMode] = useState<'create' | 'edit'>('create');
+  const [isQuickAdd, setIsQuickAdd] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+
+  const [isActivated, setIsActivated] = useState<boolean>(() => {
+    return localStorage.getItem('saving_plan_activated') === 'true';
+  });
+
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(() => {
+    return localStorage.getItem('saving_plan_onboarding_seen') === 'true';
+  });
+
+  const localPlanMatch = useMatch('/local/plan/:planId');
+  const localPortfolioMatch = useMatch('/local/portfolio');
+  const localRoutePlanId = localPlanMatch?.params.planId;
+  const localRouteView = localPortfolioMatch ? 'portfolio' : localRoutePlanId ? 'plan' : undefined;
+
+  // Strictly isolated localStorage repository (GUEST_STORAGE_KEY) — never writes to cloud or signed-in caches
+  const localRepo = useMemo(() => new LocalStorageAdapter(GUEST_STORAGE_KEY), []);
+  const localPlanManager = usePlanManager({
+    repository: localRepo,
+    routePlanId: localRoutePlanId,
+    routeView: localRouteView,
+  });
+
+  const handleOpenCreatePlanModal = () => {
+    setPlanManageMode('create');
+    modal.open('createPlan');
+  };
+
+  const handleOpenEditPlanModal = (planToEdit?: Plan) => {
+    const targetPlan = planToEdit || localPlanManager.activePlan;
+    setPlanManageMode('edit');
+    modal.open('editPlan', { plan: targetPlan });
+  };
+
+  const handleActivate = (code: string) => {
+    const validCode = (import.meta.env.VITE_DEV_ACTIVATION_CODE || 'SAVINGS2026')
+      .trim()
+      .toLowerCase();
+    if (code.toLowerCase() === validCode) {
+      localStorage.setItem('saving_plan_activated', 'true');
+      setIsActivated(true);
+      modal.close();
+      return true;
+    }
+    return false;
+  };
+
+  const handleCloseOnboarding = () => {
+    localStorage.setItem('saving_plan_onboarding_seen', 'true');
+    setHasSeenOnboarding(true);
+    modal.close();
+  };
+
+  const handleConfirmLoadSamplePlan = () => {
+    modal.open('confirmDialog', {
+      confirm: {
+        title: 'Load Interactive Sample Plan',
+        description:
+          'Loading the sample plan will replace your current local savings plans and wishlists with sample data. Do you wish to continue?',
+        confirmLabel: 'Load Sample Data',
+        variant: 'warning',
+        onConfirm: () => {
+          localPlanManager.actions.importStoreData(
+            createFreshSampleStoreData(localPlanManager.storeData.settings)
+          );
+        },
+      },
+    });
+  };
+
+  const handleProceedLocalToCloud = () => {
+    savePendingCloudImport('local', localPlanManager.storeData);
+    setShowSyncModal(false);
+    navigate('/app');
+  };
+
+  const localDashboardProps = {
+    storeData: localPlanManager.storeData,
+    activePlan: localPlanManager.activePlan,
+    activePlanCalculation: localPlanManager.activePlanCalculation,
+    effectiveConfig: localPlanManager.effectiveConfig,
+    portfolioSummary: localPlanManager.portfolioSummary,
+    isPortfolioView: localPlanManager.isPortfolioView,
+    showWhatIf: localPlanManager.showWhatIf,
+    simulatedSavingsRate: localPlanManager.simulatedSavingsRate,
+    simulatedExtraBonus: localPlanManager.simulatedExtraBonus,
+    actions: localPlanManager.actions,
+    darkMode,
+    toggleDarkMode,
+    modal,
+    planManageMode,
+    isQuickAdd,
+    setIsQuickAdd,
+    isActivated,
+    hasSeenOnboarding,
+    handleActivate,
+    handleCloseOnboarding,
+    handleConfirmLoadSamplePlan,
+    handleOpenCreatePlanModal,
+    handleOpenEditPlanModal: (planToEdit?: Plan) => handleOpenEditPlanModal(planToEdit),
+    onSyncLocalToCloud: () => setShowSyncModal(true),
+  };
+
+  return (
+    <>
+      <Routes>
+        <Route path="/" element={<AppDashboard {...localDashboardProps} isLocal={true} />} />
+        <Route
+          path="/plan/:planId"
+          element={<AppDashboard {...localDashboardProps} isLocal={true} />}
+        />
+        <Route
+          path="/portfolio"
+          element={<AppDashboard {...localDashboardProps} isLocal={true} />}
+        />
+        <Route
+          path="*"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <NotFoundPage
+                onReturnToApp={() => navigate('/local')}
+                onGoToLanding={() => navigate('/')}
+              />
+            </Suspense>
+          }
+        />
+      </Routes>
+      {showSyncModal && (
+        <Suspense fallback={null}>
+          <WorkspaceTransferModal
+            isOpen={showSyncModal}
+            onClose={() => setShowSyncModal(false)}
+            mode="local-to-cloud"
+            sourceData={localPlanManager.storeData}
+            isSignedIn={Boolean(isSignedIn)}
+            onProceedToCloud={handleProceedLocalToCloud}
+          />
+        </Suspense>
+      )}
+    </>
   );
 };
 
@@ -813,6 +1085,7 @@ export const ProtectedAppWorkspace: React.FC = () => {
   const modal = useModalRegistry();
   const [planManageMode, setPlanManageMode] = useState<'create' | 'edit'>('create');
   const [isQuickAdd, setIsQuickAdd] = useState(false);
+  const [pendingCloudImport, setPendingCloudImport] = useState<PendingCloudImport | null>(null);
 
   const [isActivated, setIsActivated] = useState<boolean>(() => {
     return localStorage.getItem('saving_plan_activated') === 'true';
@@ -836,6 +1109,33 @@ export const ProtectedAppWorkspace: React.FC = () => {
     routePlanId: appRoutePlanId,
     routeView: appRouteView,
   });
+
+  // Only inspect pending Demo/Local -> Cloud import AFTER cloud session is signed in and loaded
+  useEffect(() => {
+    if (!isSignedIn || !isActivated || appPlanManager.isLoading) return;
+    const pending = readPendingCloudImport();
+    if (pending) {
+      setPendingCloudImport(pending);
+    }
+  }, [isSignedIn, isActivated, appPlanManager.isLoading]);
+
+  const handleConfirmCloudImport = (strategy: 'merge' | 'replace') => {
+    if (!pendingCloudImport) return;
+    const cloudHasRealData = hasValidLastSaved(appPlanManager.storeData);
+    const nextStore =
+      strategy === 'merge' && cloudHasRealData
+        ? mergeStoreData(appPlanManager.storeData, pendingCloudImport.data)
+        : cloneStoreDataWithFreshIds(pendingCloudImport.data);
+
+    appPlanManager.actions.importStoreData(nextStore);
+    clearPendingCloudImport();
+    setPendingCloudImport(null);
+  };
+
+  const handleDismissCloudImport = () => {
+    clearPendingCloudImport();
+    setPendingCloudImport(null);
+  };
 
   const handleOpenCreatePlanModal = () => {
     setPlanManageMode('create');
@@ -992,6 +1292,20 @@ export const ProtectedAppWorkspace: React.FC = () => {
           />
         </Suspense>
       )}
+      {pendingCloudImport && (
+        <Suspense fallback={null}>
+          <WorkspaceTransferModal
+            isOpen={Boolean(pendingCloudImport)}
+            onClose={handleDismissCloudImport}
+            mode="confirm-cloud-import"
+            pendingImport={pendingCloudImport}
+            existingCloudData={appPlanManager.storeData}
+            cloudHasRealData={hasValidLastSaved(appPlanManager.storeData)}
+            onConfirmCloudImport={handleConfirmCloudImport}
+            onDismissCloudImport={handleDismissCloudImport}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
@@ -1003,6 +1317,7 @@ export const AppContent: React.FC = () => {
     <Routes>
       <Route path="/" element={<LandingPageWorkspace />} />
       <Route path="/demo/*" element={<DemoAppWorkspace />} />
+      <Route path="/local/*" element={<LocalAppWorkspace />} />
       <Route path="/app/*" element={<ProtectedAppWorkspace />} />
       <Route
         path="/privacy"

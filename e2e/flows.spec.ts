@@ -672,4 +672,69 @@ test.describe('Login Data Persistence & Overwrite Protection Regressions', () =>
     // Switching plans must not trigger any POST /api/plan writes
     expect(postCount).toBe(0);
   });
+
+  test('Flow 14: 3-Layer Workspace Isolation (/demo vs /local) and Explicit Merge Graduation', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('saving_plan_onboarding_seen', 'true');
+    });
+
+    // 1. Add a unique wish in persistent /local workspace
+    await page.goto('/local');
+    await expect(page.getByText('Local Workspace • Saved privately in this browser')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Add Wish' }).first().click();
+    await page.getByPlaceholder(/Robotstøvsuger/i).fill('LOCAL_E2E_CAMERA');
+    await page.getByPlaceholder('0.00').fill('850');
+    await page.getByRole('button', { name: 'Add to Plan' }).click();
+    await expect(page.getByText('LOCAL_E2E_CAMERA').first()).toBeVisible();
+
+    // Reload /local to confirm local persistence
+    await page.reload();
+    await expect(page.getByText('LOCAL_E2E_CAMERA').first()).toBeVisible();
+
+    // 2. Navigate to /demo -> /local data MUST NOT appear in /demo
+    await page.goto('/demo');
+    await expect(page.getByText('Interactive Demo Mode • Changes are temporary')).toBeVisible();
+    await expect(page.getByText('LOCAL_E2E_CAMERA')).not.toBeVisible();
+
+    // 3. Add a wish in /demo -> MUST NOT leak into /local
+    await page.getByRole('button', { name: 'Add Wish' }).first().click();
+    await page.getByPlaceholder(/Robotstøvsuger/i).fill('DEMO_E2E_BIKE');
+    await page.getByPlaceholder('0.00').fill('620');
+    await page.getByRole('button', { name: 'Add to Plan' }).click();
+    await expect(page.getByText('DEMO_E2E_BIKE').first()).toBeVisible();
+
+    await page.goto('/local');
+    await expect(page.getByText('LOCAL_E2E_CAMERA').first()).toBeVisible();
+    await expect(page.getByText('DEMO_E2E_BIKE')).not.toBeVisible();
+
+    // 4. Explicit user-approved graduation from /demo -> /local via Merge preserves existing /local plans
+    await page.goto('/demo');
+    await page.getByRole('button', { name: 'Add Wish' }).first().click();
+    await page.getByPlaceholder(/Robotstøvsuger/i).fill('DEMO_MERGED_SPEAKER');
+    await page.getByPlaceholder('0.00').fill('410');
+    await page.getByRole('button', { name: 'Add to Plan' }).click();
+    await expect(page.getByText('DEMO_MERGED_SPEAKER').first()).toBeVisible();
+
+    await page.getByRole('button', { name: 'Keep This Plan' }).click();
+    await expect(page.getByText(/Start Using WishPacer/i)).toBeVisible();
+    await expect(
+      page.getByText(/Nothing will be overwritten unless you choose Replace/i)
+    ).toBeVisible();
+
+    await page
+      .getByRole('button', { name: /Add Demo Plans to Local Workspace \(Merge\)/i })
+      .click();
+    await page.waitForURL('**/local**');
+
+    // Imported demo plan is active with DEMO_MERGED_SPEAKER
+    await expect(page.getByText('DEMO_MERGED_SPEAKER').first()).toBeVisible();
+
+    // Switch back to original local plan to prove zero data loss
+    await page.getByRole('button', { name: /Switch savings plan/i }).click();
+    await page.getByLabel('Select Personal Wants & Tech plan').click();
+    await expect(page.getByText('LOCAL_E2E_CAMERA').first()).toBeVisible();
+  });
 });
