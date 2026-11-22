@@ -32,8 +32,8 @@ describe('LandingPage Component', () => {
     expect(onExploreDemo).toHaveBeenCalledTimes(1);
   });
 
-  it('updates mini-calculator projection when sliders change', () => {
-    const { getByLabelText, getByText } = render(
+  it('updates mini-calculator projection and live-linked launchpad when sliders change', () => {
+    const { getByLabelText, getAllByText } = render(
       <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />
     );
 
@@ -45,10 +45,10 @@ describe('LandingPage Component', () => {
 
     expect(priceSlider.value).toBe('5000');
     expect(savingsSlider.value).toBe('500');
-    expect(getByText(/\$5,000/)).not.toBeNull();
+    expect(getAllByText(/\$5,000/).length).toBeGreaterThan(0);
   });
 
-  it('renders feature grid cards and how it works section', () => {
+  it('renders architectural bento spec grid, live dashboard preview, and workflow steps', () => {
     const { getByText, getAllByText } = render(
       <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />
     );
@@ -59,19 +59,23 @@ describe('LandingPage Component', () => {
     expect(getByText(/What-If Sandbox/i)).not.toBeNull();
     expect(getByText(/Multi-Plan Portfolio/i)).not.toBeNull();
     expect(getByText(/Local-First Hybrid Sync/i)).not.toBeNull();
-    expect(getByText(/How WishPacer Works/i)).not.toBeNull();
+    expect(getByText(/How WishPacer Works in Practice/i)).not.toBeNull();
   });
 
-  it('renders as a standalone lightweight component using local state for the calculator', () => {
-    const { getByLabelText, getByText } = render(
+  it('allows interactive cascade testing inside the live-linked dashboard preview', () => {
+    const { getByRole, getByText } = render(
       <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />
     );
 
-    expect(getByText(/WishPacer 2.0 • Turn Dreams Into Timelines/i)).not.toBeNull();
-    expect(getByText(/Simulate Your Goal/i)).not.toBeNull();
-    const priceSlider = getByLabelText(/Target Item Price/i) as HTMLInputElement;
-    expect(priceSlider.value).toBe('2400');
+    const markPurchasedBtn = getByRole('button', { name: /Mark #1 Purchased/i });
+    fireEvent.click(markPurchasedBtn);
+    expect(getByText(/Queue Recalibrated 1\.\.N/i)).not.toBeNull();
+
+    const swapBtn = getByRole('button', { name: /Swap #1 & #2/i });
+    fireEvent.click(swapBtn);
+    expect(getByRole('button', { name: /Restore #1/i })).not.toBeNull();
   });
+
   it('supports accessible ARIA slider attributes, quick presets, and windfall simulation', () => {
     const { getByLabelText, getByText, getByRole } = render(
       <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />

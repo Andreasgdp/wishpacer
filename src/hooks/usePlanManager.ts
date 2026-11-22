@@ -10,6 +10,7 @@ import {
   type StorageRepository,
 } from '../storage/index.js';
 import { LocalStorageAdapter } from '../storage/adapters/LocalStorageAdapter.js';
+import { clearLocalWorkspaceStorage } from '../storage/migrationHelpers.js';
 import type {
   AppStoreData,
   GlobalSettings,
@@ -108,9 +109,19 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     );
   }, [repository, isSignedIn, userId, stableGetToken]);
 
-  // Synchronously load local store data on initial mount to eliminate loading flashes
+  // True when caller supplied an isolated non-localStorage repository (e.g. InMemoryStorageRepository for /demo)
+  const isIsolatedMemoryRepo = Boolean(repository && !(repository instanceof LocalStorageAdapter));
+
+  // Synchronously load local store data on initial mount to eliminate loading flashes.
+  // Isolated in-memory repositories (like /demo) MUST NEVER read from localStorage.
   const [storeData, setStoreData] = useState<AppStoreData>(() => {
+    if (isIsolatedMemoryRepo) {
+      return getDefaultStoreData();
+    }
     try {
+      if (repository instanceof LocalStorageAdapter) {
+        return repository.loadSync();
+      }
       const localAdapter = new LocalStorageAdapter(
         isSignedIn ? getUserStorageKey(userId) : GUEST_STORAGE_KEY
       );
@@ -218,9 +229,16 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       isMounted = false;
       unsubscribe?.();
     };
-  }, [storageRepo, isAuthLoaded, isSignedIn, activeAuthSessionKey, applyNewerStoreData]);
+  }, [
+    storageRepo,
+    isAuthLoaded,
+    isSignedIn,
+    isIsolatedMemoryRepo,
+    activeAuthSessionKey,
+    applyNewerStoreData,
+  ]);
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || isIsolatedMemoryRepo) return;
 
     const handleFocusOrVisibility = () => {
       if (document.visibilityState === 'visible' && isAuthLoaded) {
@@ -254,7 +272,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(intervalId);
     };
-  }, [syncWithStorage, isAuthLoaded]);
+  }, [syncWithStorage, isAuthLoaded, isIsolatedMemoryRepo]);
   useEffect(() => {
     if (activePlan) {
       setSimulatedSavingsRate(activePlan.config.amountToSave);
@@ -620,6 +638,24 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   );
 
   const deleteAccountData = useCallback(async () => {
+    // In isolated in-memory mode (/demo), never touch localStorage or remote accounts.
+    if (isIsolatedMemoryRepo) {
+      const resetDemo = getDefaultStoreData();
+      setStoreData(resetDemo);
+      await storageRepo.save(resetDemo);
+      toast.success('Demo session reset.');
+      return;
+    }
+
+    // In local-only mode (no signed-in cloud account), ONLY clear the local workspace key
+    // so cached signed-in user stores on the same browser are never affected.
+    if (!isSignedIn) {
+      clearLocalWorkspaceStorage();
+      toast.success('Local workspace data permanently erased.');
+      window.location.reload();
+      return;
+    }
+
     try {
       const token = getToken ? await getToken() : null;
       if (token) {
@@ -645,7 +681,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     localStorage.clear();
     toast.success('All user data permanently deleted.');
     window.location.reload();
-  }, [getToken]);
+  }, [getToken, isSignedIn, isIsolatedMemoryRepo, storageRepo]);
 
   const applySimulation = useCallback(
     (newRate: number, extraBonus: number) => {
