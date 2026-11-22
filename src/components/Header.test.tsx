@@ -167,6 +167,41 @@ describe('Header Component', () => {
     fireEvent.click(themeButtons[0]);
     expect(onToggleDarkMode).toHaveBeenCalledTimes(1);
   });
+
+  it('hides user avatar/icon on landing page when signed out and shows it when signed in', () => {
+    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: false });
+    }
+
+    const { container, queryByTitle, rerender } = render(
+      <Header
+        viewMode="landing"
+        onLaunchApp={mock(() => {})}
+        onExploreDemo={mock(() => {})}
+        onToggleDarkMode={mock(() => {})}
+      />
+    );
+
+    // No user icon or avatar circle when signed out on landing
+    expect(queryByTitle('Mock User Session')).toBeNull();
+    expect(container.querySelector('svg.lucide-user')).toBeNull();
+
+    // When signed in, show user avatar/button
+    if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
+      window.__SET_MOCK_AUTH__({ isLoaded: true, isSignedIn: true, userId: 'user-landing-1' });
+    }
+
+    rerender(
+      <Header
+        viewMode="landing"
+        onLaunchApp={mock(() => {})}
+        onExploreDemo={mock(() => {})}
+        onToggleDarkMode={mock(() => {})}
+      />
+    );
+
+    expect(queryByTitle('Mock User Session')).not.toBeNull();
+  });
   describe('Demo Mode', () => {
     it('renders interactive demo banner when isDemo is true', () => {
       if (typeof window !== 'undefined' && window.__SET_MOCK_AUTH__) {
