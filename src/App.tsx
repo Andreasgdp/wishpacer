@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
-import confetti from 'canvas-confetti';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { PlanActionsBar } from './components/PlanActionsBar';
 import {
@@ -20,30 +19,85 @@ import type {
   PortfolioSummary,
 } from './types/plan';
 import { Header } from './components/Header';
-import { LandingPage } from './components/LandingPage';
 import { MetricsOverview } from './components/MetricsOverview';
 import { WishList } from './components/WishList';
-import { WishModal } from './components/WishModal';
-import { PlanSettingsModal } from './components/PlanSettingsModal';
-import { GlobalSettingsModal } from './components/GlobalSettingsModal';
-import { PlanManagementModal } from './components/PlanManagementModal';
-import { PortfolioOverview } from './components/PortfolioOverview';
-import { WhatIfSimulator } from './components/WhatIfSimulator';
-import { MilestoneTimeline } from './components/MilestoneTimeline';
-import { PurchasedHistoryModal } from './components/PurchasedHistoryModal';
-import { ExportImportModal } from './components/ExportImportModal';
-import { ThinkingOrbLoader } from './components/ThinkingOrbLoader';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { PrivacyModal } from './components/PrivacyModal';
-import { SupportModal } from './components/SupportModal';
-import { ActivationWallModal } from './components/ActivationWallModal';
-import { OnboardingModal } from './components/OnboardingModal';
-import { ConfirmDialogModal } from './components/ConfirmDialogModal';
-import { NotFoundPage } from './components/NotFoundPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useTheme } from './context/ThemeContext';
 import { DEFAULT_PLANS, getDefaultStoreData } from './utils/defaults';
 import { InMemoryStorageRepository } from './storage';
+
+// Route & feature code-splitting for near-instant initial load on low-end hardware
+const LandingPage = lazy(() =>
+  import('./components/LandingPage').then(m => ({ default: m.LandingPage }))
+);
+const PortfolioOverview = lazy(() =>
+  import('./components/PortfolioOverview').then(m => ({ default: m.PortfolioOverview }))
+);
+const WhatIfSimulator = lazy(() =>
+  import('./components/WhatIfSimulator').then(m => ({ default: m.WhatIfSimulator }))
+);
+const MilestoneTimeline = lazy(() =>
+  import('./components/MilestoneTimeline').then(m => ({ default: m.MilestoneTimeline }))
+);
+const CommandPalette = lazy(() =>
+  import('./components/CommandPalette').then(m => ({ default: m.CommandPalette }))
+);
+const NotFoundPage = lazy(() =>
+  import('./components/NotFoundPage').then(m => ({ default: m.NotFoundPage }))
+);
+const ThinkingOrbLoader = lazy(() =>
+  import('./components/ThinkingOrbLoader').then(m => ({ default: m.ThinkingOrbLoader }))
+);
+
+// Lazy-loaded modals (fetched only when opened)
+const WishModal = lazy(() =>
+  import('./components/WishModal').then(m => ({ default: m.WishModal }))
+);
+const PlanSettingsModal = lazy(() =>
+  import('./components/PlanSettingsModal').then(m => ({ default: m.PlanSettingsModal }))
+);
+const GlobalSettingsModal = lazy(() =>
+  import('./components/GlobalSettingsModal').then(m => ({ default: m.GlobalSettingsModal }))
+);
+const PlanManagementModal = lazy(() =>
+  import('./components/PlanManagementModal').then(m => ({ default: m.PlanManagementModal }))
+);
+const PurchasedHistoryModal = lazy(() =>
+  import('./components/PurchasedHistoryModal').then(m => ({ default: m.PurchasedHistoryModal }))
+);
+const ExportImportModal = lazy(() =>
+  import('./components/ExportImportModal').then(m => ({ default: m.ExportImportModal }))
+);
+const PrivacyModal = lazy(() =>
+  import('./components/PrivacyModal').then(m => ({ default: m.PrivacyModal }))
+);
+const SupportModal = lazy(() =>
+  import('./components/SupportModal').then(m => ({ default: m.SupportModal }))
+);
+const ActivationWallModal = lazy(() =>
+  import('./components/ActivationWallModal').then(m => ({ default: m.ActivationWallModal }))
+);
+const OnboardingModal = lazy(() =>
+  import('./components/OnboardingModal').then(m => ({ default: m.OnboardingModal }))
+);
+const ConfirmDialogModal = lazy(() =>
+  import('./components/ConfirmDialogModal').then(m => ({ default: m.ConfirmDialogModal }))
+);
+
+const TOASTER_OPTIONS = {
+  classNames: {
+    toast:
+      'rounded-xl border border-slate-300/90 dark:border-[#21262D] bg-white dark:bg-[#12161A] text-[#111714] dark:text-[#E6EDF3] shadow-lg font-sans',
+    description: 'text-slate-500 dark:text-[#8B949E] text-xs',
+  },
+};
+
+const RouteFallback: React.FC = () => (
+  <div className="min-h-screen bg-[#CCD7D0] dark:bg-[#0B0E11] flex items-center justify-center">
+    <div className="w-6 h-6 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+  </div>
+);
 
 interface AppDashboardProps {
   isDemo?: boolean;
@@ -103,8 +157,21 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
   const { planId } = useParams<{ planId?: string }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
 
   const basePath = isDemo ? '/demo' : '/app';
+
+  // Global Cmd+K / Ctrl+K shortcut for Command Palette
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Route synchronization
   useEffect(() => {
@@ -139,7 +206,12 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
   // Render 404 if planId param was requested in plan route but does not exist
   if (planId && !storeData.plans.some(p => p.id === planId)) {
     return (
-      <NotFoundPage onReturnToApp={() => navigate(basePath)} onGoToLanding={() => navigate('/')} />
+      <Suspense fallback={<RouteFallback />}>
+        <NotFoundPage
+          onReturnToApp={() => navigate(basePath)}
+          onGoToLanding={() => navigate('/')}
+        />
+      </Suspense>
     );
   }
 
@@ -152,7 +224,12 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
       >
         <div className="w-full h-full bg-radial-glow-light dark:bg-radial-glow-dark" />
       </div>
-      <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
+      <Toaster
+        position="bottom-right"
+        theme={darkMode ? 'dark' : 'light'}
+        richColors
+        toastOptions={TOASTER_OPTIONS}
+      />
 
       {/* Header */}
       <Header
@@ -185,38 +262,43 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
         onOpenPrivacyModal={() => modal.open('privacy')}
         onOpenSupportModal={() => modal.open('support')}
         onOpenOnboardingModal={() => modal.open('onboarding')}
+        onOpenCommandPalette={() => setIsCommandOpen(true)}
         isActivated={isActivated}
         onSignInClick={() => modal.open('activation')}
       />
 
       <main className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full space-y-4 sm:space-y-6 relative z-10">
         {isPortfolioView ? (
-          <PortfolioOverview
-            plans={storeData.plans}
-            summary={portfolioSummary}
-            onSelectPlan={id => {
-              actions.selectPlan(id);
-              navigate(`${basePath}/plan/${id}`);
-            }}
-            onOpenNewPlanModal={handleOpenCreatePlanModal}
-            onEditPlan={handleOpenEditPlanModal}
-          />
+          <Suspense fallback={null}>
+            <PortfolioOverview
+              plans={storeData.plans}
+              summary={portfolioSummary}
+              onSelectPlan={id => {
+                actions.selectPlan(id);
+                navigate(`${basePath}/plan/${id}`);
+              }}
+              onOpenNewPlanModal={handleOpenCreatePlanModal}
+              onEditPlan={handleOpenEditPlanModal}
+            />
+          </Suspense>
         ) : (
           <>
             {showWhatIf && (
-              <WhatIfSimulator
-                config={activePlan.config}
-                result={activePlanCalculation}
-                simulatedSavingsRate={simulatedSavingsRate}
-                simulatedExtraBonus={simulatedExtraBonus}
-                onUpdateSimulation={(rate, bonus) => {
-                  actions.setSimulatedSavingsRate(rate);
-                  actions.setSimulatedExtraBonus(bonus);
-                }}
-                onApplySimulation={actions.applySimulation}
-                onResetSimulation={actions.resetSimulation}
-                onClose={() => actions.setShowWhatIf(false)}
-              />
+              <Suspense fallback={null}>
+                <WhatIfSimulator
+                  config={activePlan.config}
+                  result={activePlanCalculation}
+                  simulatedSavingsRate={simulatedSavingsRate}
+                  simulatedExtraBonus={simulatedExtraBonus}
+                  onUpdateSimulation={(rate, bonus) => {
+                    actions.setSimulatedSavingsRate(rate);
+                    actions.setSimulatedExtraBonus(bonus);
+                  }}
+                  onApplySimulation={actions.applySimulation}
+                  onResetSimulation={actions.resetSimulation}
+                  onClose={() => actions.setShowWhatIf(false)}
+                />
+              </Suspense>
             )}
             {/* Plan Action Header / Bar */}
             <PlanActionsBar
@@ -273,12 +355,18 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
                 onTogglePurchased={itemId => {
                   const item = activePlanCalculation.items.find(i => i.id === itemId);
                   if (item && !item.isPurchased) {
-                    confetti({
-                      particleCount: 80,
-                      spread: 60,
-                      origin: { y: 0.7 },
-                      colors: ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B'],
-                    });
+                    void import('canvas-confetti')
+                      .then(({ default: confetti }) => {
+                        confetti({
+                          particleCount: 80,
+                          spread: 60,
+                          origin: { y: 0.7 },
+                          colors: ['#38D39F', '#38BDF8', '#F59E0B', '#10B981'],
+                        });
+                      })
+                      .catch(() => {
+                        // Ignore confetti load failure
+                      });
                   }
                   actions.toggleWishPurchased(itemId);
                 }}
@@ -293,174 +381,240 @@ const AppDashboard: React.FC<AppDashboardProps> = ({
             </section>
 
             {/* Milestone Timeline & Schedule */}
-            <MilestoneTimeline config={effectiveConfig} result={activePlanCalculation} />
+            <Suspense fallback={null}>
+              <MilestoneTimeline config={effectiveConfig} result={activePlanCalculation} />
+            </Suspense>
           </>
         )}
       </main>
 
-      {/* Modals */}
-      <WishModal
-        isOpen={modal.isOpen('addWish') || modal.isOpen('editWish')}
-        onClose={modal.close}
-        onSave={(itemData, existingId, targetPlanId) => {
-          actions.saveWishItem(itemData, existingId, targetPlanId);
-          modal.close();
-        }}
-        editingItem={modal.editingWishItem}
-        currency={storeData.settings.currency}
-        currentCount={activePlan.items.length}
-        plans={storeData.plans}
-        activePlanId={storeData.activePlanId}
-        isQuickAdd={isQuickAdd}
-      />
-
-      <PlanSettingsModal
-        isOpen={modal.isOpen('settings')}
-        onClose={modal.close}
-        config={activePlan.config}
-        currency={storeData.settings.currency}
-        onSave={newConfig => {
-          actions.updateBudgetSettings(newConfig);
-          modal.close();
-        }}
-      />
-
-      <GlobalSettingsModal
-        isOpen={modal.isOpen('globalSettings')}
-        onClose={modal.close}
-        settings={storeData.settings}
-        onSaveSettings={newSettings => {
-          actions.updateGlobalSettings(newSettings);
-          modal.close();
-        }}
-        onOpenPrivacyModal={() => modal.open('privacy')}
-        onOpenSupportModal={() => modal.open('support')}
-        onDeleteAccountData={() => {
-          modal.open('confirmDialog', {
-            confirm: {
-              title: 'Delete Account & Erase Data',
-              description:
-                'Are you sure you want to permanently erase all your savings plans, wishlists, and database records? This cannot be undone.',
-              confirmLabel: 'Erase All Data',
-              variant: 'danger',
-              onConfirm: () => actions.deleteAccountData(),
-            },
-          });
-        }}
-      />
-
-      <PlanManagementModal
-        isOpen={modal.isOpen('createPlan') || modal.isOpen('editPlan')}
-        onClose={modal.close}
-        mode={planManageMode}
-        editingPlan={modal.editingPlanTarget}
-        plansCount={storeData.plans.length}
-        currency={storeData.settings.currency}
-        onSavePlan={planData => {
-          if (planManageMode === 'create') {
-            actions.createPlan(planData);
-          } else {
-            actions.updatePlanMetadata(planData, modal.editingPlanTarget?.id);
-          }
-          modal.close();
-        }}
-        onDuplicatePlan={planIdToDup => {
-          actions.duplicatePlan(planIdToDup);
-          modal.close();
-        }}
-        onDeletePlan={planIdToDelete => {
-          modal.close();
-          const targetPlan = storeData.plans.find(p => p.id === planIdToDelete);
-          setTimeout(() => {
-            modal.open('confirmDialog', {
-              confirm: {
-                title: 'Delete Savings Plan',
-                description: `Are you sure you want to delete "${targetPlan?.name || 'this plan'}"?`,
-                confirmLabel: 'Delete Plan',
-                variant: 'danger',
-                onConfirm: () => {
-                  actions.deletePlan(planIdToDelete);
-                  if (planId === planIdToDelete) {
-                    navigate(basePath);
-                  }
-                },
-              },
-            });
-          }, 150);
-        }}
-      />
-
-      <PurchasedHistoryModal
-        isOpen={modal.isOpen('history')}
-        onClose={modal.close}
-        purchasedItems={activePlanCalculation.purchasedItems}
-        currency={storeData.settings.currency}
-        onRestoreToPlan={actions.toggleWishPurchased}
-        onDelete={itemId => {
-          modal.open('confirmDialog', {
-            confirm: {
-              title: 'Remove Purchased History Item',
-              description: 'Are you sure you want to delete this purchased item from history?',
-              confirmLabel: 'Delete Item',
-              variant: 'danger',
-              onConfirm: () => actions.deleteWishItem(itemId),
-            },
-          });
-        }}
-      />
-
-      <ExportImportModal
-        isOpen={modal.isOpen('exportImport')}
-        onClose={modal.close}
-        storeData={storeData}
-        activePlan={activePlan}
-        onImportData={data => {
-          modal.open('confirmDialog', {
-            confirm: {
-              title: 'Overwrite Data with Import File',
-              description:
-                'Importing this backup file will replace your current savings plans and settings. Are you sure you want to proceed?',
-              confirmLabel: 'Overwrite & Import',
-              variant: 'warning',
-              onConfirm: () => {
-                actions.importStoreData(data);
-                modal.close();
-              },
-            },
-          });
-        }}
-      />
-
-      <PrivacyModal isOpen={modal.isOpen('privacy')} onClose={modal.close} />
-
-      <SupportModal isOpen={modal.isOpen('support')} onClose={modal.close} />
-      <ActivationWallModal
-        isOpen={modal.isOpen('activation')}
-        onClose={modal.close}
-        onActivate={handleActivate}
-      />
-
-      <OnboardingModal
-        isOpen={!hasSeenOnboarding || modal.isOpen('onboarding')}
-        onClose={handleCloseOnboarding}
-        onLoadSamplePlan={() => {
-          handleCloseOnboarding();
-          handleConfirmLoadSamplePlan();
-        }}
-      />
-
-      {modal.isOpen('confirmDialog') && modal.confirmPayload && (
-        <ConfirmDialogModal
-          isOpen={modal.isOpen('confirmDialog')}
-          title={modal.confirmPayload.title}
-          description={modal.confirmPayload.description}
-          confirmLabel={modal.confirmPayload.confirmLabel}
-          cancelLabel={modal.confirmPayload.cancelLabel}
-          variant={modal.confirmPayload.variant}
-          onConfirm={modal.confirmPayload.onConfirm}
-          onClose={modal.close}
-        />
+      {/* Command Palette (Cmd+K / Ctrl+K) */}
+      {isCommandOpen && (
+        <Suspense fallback={null}>
+          <CommandPalette
+            open={isCommandOpen}
+            onOpenChange={setIsCommandOpen}
+            plans={storeData.plans}
+            activePlanId={storeData.activePlanId}
+            activeItems={activePlanCalculation.activeItems}
+            currency={storeData.settings.currency}
+            darkMode={darkMode}
+            showWhatIf={showWhatIf}
+            purchasedCount={activePlanCalculation.purchasedItems.length}
+            onSelectPlan={id => {
+              actions.selectPlan(id);
+              navigate(`${basePath}/plan/${id}`);
+            }}
+            onSelectPortfolio={() => {
+              setIsPortfolioView(true);
+              navigate(`${basePath}/portfolio`);
+            }}
+            onEditWish={item => {
+              setIsQuickAdd(false);
+              modal.open('editWish', { wishItem: item });
+            }}
+            onOpenAddWish={() => {
+              setIsQuickAdd(false);
+              modal.open('addWish');
+            }}
+            onOpenNewPlan={handleOpenCreatePlanModal}
+            onOpenBudgetSettings={() => modal.open('settings')}
+            onOpenGlobalSettings={() => modal.open('globalSettings')}
+            onToggleWhatIf={() => actions.setShowWhatIf(!showWhatIf)}
+            onOpenHistory={() => modal.open('history')}
+            onOpenExport={() => modal.open('exportImport')}
+            onToggleDarkMode={toggleDarkMode}
+            onNavigateLanding={() => navigate('/')}
+          />
+        </Suspense>
       )}
+
+      {/* Lazy Modals — mounted & fetched only when opened */}
+      <Suspense fallback={null}>
+        {(modal.isOpen('addWish') || modal.isOpen('editWish')) && (
+          <WishModal
+            isOpen={modal.isOpen('addWish') || modal.isOpen('editWish')}
+            onClose={modal.close}
+            onSave={(itemData, existingId, targetPlanId) => {
+              actions.saveWishItem(itemData, existingId, targetPlanId);
+              modal.close();
+            }}
+            editingItem={modal.editingWishItem}
+            currency={storeData.settings.currency}
+            currentCount={activePlan.items.length}
+            plans={storeData.plans}
+            activePlanId={storeData.activePlanId}
+            isQuickAdd={isQuickAdd}
+          />
+        )}
+
+        {modal.isOpen('settings') && (
+          <PlanSettingsModal
+            isOpen={modal.isOpen('settings')}
+            onClose={modal.close}
+            config={activePlan.config}
+            currency={storeData.settings.currency}
+            onSave={newConfig => {
+              actions.updateBudgetSettings(newConfig);
+              modal.close();
+            }}
+          />
+        )}
+
+        {modal.isOpen('globalSettings') && (
+          <GlobalSettingsModal
+            isOpen={modal.isOpen('globalSettings')}
+            onClose={modal.close}
+            settings={storeData.settings}
+            onSaveSettings={newSettings => {
+              actions.updateGlobalSettings(newSettings);
+              modal.close();
+            }}
+            onOpenPrivacyModal={() => modal.open('privacy')}
+            onOpenSupportModal={() => modal.open('support')}
+            onDeleteAccountData={() => {
+              modal.open('confirmDialog', {
+                confirm: {
+                  title: 'Delete Account & Erase Data',
+                  description:
+                    'Are you sure you want to permanently erase all your savings plans, wishlists, and database records? This cannot be undone.',
+                  confirmLabel: 'Erase All Data',
+                  variant: 'danger',
+                  onConfirm: () => actions.deleteAccountData(),
+                },
+              });
+            }}
+          />
+        )}
+
+        {(modal.isOpen('createPlan') || modal.isOpen('editPlan')) && (
+          <PlanManagementModal
+            isOpen={modal.isOpen('createPlan') || modal.isOpen('editPlan')}
+            onClose={modal.close}
+            mode={planManageMode}
+            editingPlan={modal.editingPlanTarget}
+            plansCount={storeData.plans.length}
+            currency={storeData.settings.currency}
+            onSavePlan={planData => {
+              if (planManageMode === 'create') {
+                actions.createPlan(planData);
+              } else {
+                actions.updatePlanMetadata(planData, modal.editingPlanTarget?.id);
+              }
+              modal.close();
+            }}
+            onDuplicatePlan={planIdToDup => {
+              actions.duplicatePlan(planIdToDup);
+              modal.close();
+            }}
+            onDeletePlan={planIdToDelete => {
+              modal.close();
+              const targetPlan = storeData.plans.find(p => p.id === planIdToDelete);
+              setTimeout(() => {
+                modal.open('confirmDialog', {
+                  confirm: {
+                    title: 'Delete Savings Plan',
+                    description: `Are you sure you want to delete "${targetPlan?.name || 'this plan'}"?`,
+                    confirmLabel: 'Delete Plan',
+                    variant: 'danger',
+                    onConfirm: () => {
+                      actions.deletePlan(planIdToDelete);
+                      if (planId === planIdToDelete) {
+                        navigate(basePath);
+                      }
+                    },
+                  },
+                });
+              }, 150);
+            }}
+          />
+        )}
+
+        {modal.isOpen('history') && (
+          <PurchasedHistoryModal
+            isOpen={modal.isOpen('history')}
+            onClose={modal.close}
+            purchasedItems={activePlanCalculation.purchasedItems}
+            currency={storeData.settings.currency}
+            onRestoreToPlan={actions.toggleWishPurchased}
+            onDelete={itemId => {
+              modal.open('confirmDialog', {
+                confirm: {
+                  title: 'Remove Purchased History Item',
+                  description: 'Are you sure you want to delete this purchased item from history?',
+                  confirmLabel: 'Delete Item',
+                  variant: 'danger',
+                  onConfirm: () => actions.deleteWishItem(itemId),
+                },
+              });
+            }}
+          />
+        )}
+
+        {modal.isOpen('exportImport') && (
+          <ExportImportModal
+            isOpen={modal.isOpen('exportImport')}
+            onClose={modal.close}
+            storeData={storeData}
+            activePlan={activePlan}
+            onImportData={data => {
+              modal.open('confirmDialog', {
+                confirm: {
+                  title: 'Overwrite Data with Import File',
+                  description:
+                    'Importing this backup file will replace your current savings plans and settings. Are you sure you want to proceed?',
+                  confirmLabel: 'Overwrite & Import',
+                  variant: 'warning',
+                  onConfirm: () => {
+                    actions.importStoreData(data);
+                    modal.close();
+                  },
+                },
+              });
+            }}
+          />
+        )}
+
+        {modal.isOpen('privacy') && (
+          <PrivacyModal isOpen={modal.isOpen('privacy')} onClose={modal.close} />
+        )}
+
+        {modal.isOpen('support') && (
+          <SupportModal isOpen={modal.isOpen('support')} onClose={modal.close} />
+        )}
+
+        {modal.isOpen('activation') && (
+          <ActivationWallModal
+            isOpen={modal.isOpen('activation')}
+            onClose={modal.close}
+            onActivate={handleActivate}
+          />
+        )}
+
+        {(!hasSeenOnboarding || modal.isOpen('onboarding')) && (
+          <OnboardingModal
+            isOpen={!hasSeenOnboarding || modal.isOpen('onboarding')}
+            onClose={handleCloseOnboarding}
+            onLoadSamplePlan={() => {
+              handleCloseOnboarding();
+              handleConfirmLoadSamplePlan();
+            }}
+          />
+        )}
+
+        {modal.isOpen('confirmDialog') && modal.confirmPayload && (
+          <ConfirmDialogModal
+            isOpen={modal.isOpen('confirmDialog')}
+            title={modal.confirmPayload.title}
+            description={modal.confirmPayload.description}
+            confirmLabel={modal.confirmPayload.confirmLabel}
+            cancelLabel={modal.confirmPayload.cancelLabel}
+            variant={modal.confirmPayload.variant}
+            onConfirm={modal.confirmPayload.onConfirm}
+            onClose={modal.close}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };
@@ -471,31 +625,38 @@ export const LandingPageWorkspace: React.FC = () => {
 
   return (
     <>
-      <Toaster position="bottom-right" theme={darkMode ? 'dark' : 'light'} richColors />
-      <LandingPage
-        onLaunchApp={simData => {
-          if (
-            simData &&
-            typeof window !== 'undefined' &&
-            typeof window.sessionStorage !== 'undefined'
-          ) {
-            window.sessionStorage.setItem('wishpacer_sim_carryover', JSON.stringify(simData));
-          }
-          navigate('/app');
-        }}
-        onExploreDemo={simData => {
-          if (
-            simData &&
-            typeof window !== 'undefined' &&
-            typeof window.sessionStorage !== 'undefined'
-          ) {
-            window.sessionStorage.setItem('wishpacer_sim_carryover', JSON.stringify(simData));
-          }
-          navigate('/demo');
-        }}
-        onToggleDarkMode={toggleDarkMode}
-        darkMode={darkMode}
+      <Toaster
+        position="bottom-right"
+        theme={darkMode ? 'dark' : 'light'}
+        richColors
+        toastOptions={TOASTER_OPTIONS}
       />
+      <Suspense fallback={<RouteFallback />}>
+        <LandingPage
+          onLaunchApp={simData => {
+            if (
+              simData &&
+              typeof window !== 'undefined' &&
+              typeof window.sessionStorage !== 'undefined'
+            ) {
+              window.sessionStorage.setItem('wishpacer_sim_carryover', JSON.stringify(simData));
+            }
+            navigate('/app');
+          }}
+          onExploreDemo={simData => {
+            if (
+              simData &&
+              typeof window !== 'undefined' &&
+              typeof window.sessionStorage !== 'undefined'
+            ) {
+              window.sessionStorage.setItem('wishpacer_sim_carryover', JSON.stringify(simData));
+            }
+            navigate('/demo');
+          }}
+          onToggleDarkMode={toggleDarkMode}
+          darkMode={darkMode}
+        />
+      </Suspense>
     </>
   );
 };
@@ -643,10 +804,12 @@ export const DemoAppWorkspace: React.FC = () => {
       <Route
         path="*"
         element={
-          <NotFoundPage
-            onReturnToApp={() => navigate('/demo')}
-            onGoToLanding={() => navigate('/')}
-          />
+          <Suspense fallback={<RouteFallback />}>
+            <NotFoundPage
+              onReturnToApp={() => navigate('/demo')}
+              onGoToLanding={() => navigate('/')}
+            />
+          </Suspense>
         }
       />
     </Routes>
@@ -750,13 +913,15 @@ export const ProtectedAppWorkspace: React.FC = () => {
 
   if (appPlanManager.isLoading || shouldBlockAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <ThinkingOrbLoader
-          state="searching"
-          size={64}
-          label="Loading your savings plans..."
-          dark={darkMode}
-        />
+      <div className="min-h-screen flex items-center justify-center bg-[#CCD7D0] dark:bg-[#0B0E11]">
+        <Suspense fallback={<RouteFallback />}>
+          <ThinkingOrbLoader
+            state="searching"
+            size={64}
+            label="Loading your savings plans..."
+            dark={darkMode}
+          />
+        </Suspense>
       </div>
     );
   }
@@ -827,18 +992,24 @@ export const ProtectedAppWorkspace: React.FC = () => {
         <Route
           path="*"
           element={
-            <NotFoundPage
-              onReturnToApp={() => navigate('/app')}
-              onGoToLanding={() => navigate('/')}
-            />
+            <Suspense fallback={<RouteFallback />}>
+              <NotFoundPage
+                onReturnToApp={() => navigate('/app')}
+                onGoToLanding={() => navigate('/')}
+              />
+            </Suspense>
           }
         />
       </Routes>
-      <ActivationWallModal
-        isOpen={modal.isOpen('activation')}
-        onClose={modal.close}
-        onActivate={handleActivate}
-      />
+      {modal.isOpen('activation') && (
+        <Suspense fallback={null}>
+          <ActivationWallModal
+            isOpen={modal.isOpen('activation')}
+            onClose={modal.close}
+            onActivate={handleActivate}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
@@ -854,10 +1025,12 @@ export const AppContent: React.FC = () => {
       <Route
         path="*"
         element={
-          <NotFoundPage
-            onReturnToApp={() => navigate('/app')}
-            onGoToLanding={() => navigate('/')}
-          />
+          <Suspense fallback={<RouteFallback />}>
+            <NotFoundPage
+              onReturnToApp={() => navigate('/app')}
+              onGoToLanding={() => navigate('/')}
+            />
+          </Suspense>
         }
       />
     </Routes>
