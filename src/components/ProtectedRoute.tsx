@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
-import { Lock, Sparkles, ArrowRight } from 'lucide-react';
+import { Lock, Sparkles, ArrowRight, HardDrive } from 'lucide-react';
 import { useAppAuth } from '../hooks';
 import { Button } from './ui/button';
 
@@ -75,16 +75,27 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           </p>
         </div>
 
-        <div className="space-y-3 pt-2 relative">
+        <div className="space-y-2.5 pt-2 relative">
           <Button type="button" size="lg" onClick={handleSignIn} className="w-full cursor-pointer">
             <span>Sign In / Register</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </Button>
 
           <Button
             type="button"
             variant="outline"
             size="lg"
+            onClick={() => navigate('/local')}
+            className="w-full cursor-pointer"
+          >
+            <HardDrive className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>Continue in Local Workspace (No Account)</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="default"
             onClick={() => navigate('/demo')}
             className="w-full cursor-pointer"
           >

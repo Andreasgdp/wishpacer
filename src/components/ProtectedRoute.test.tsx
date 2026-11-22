@@ -42,6 +42,7 @@ describe('ProtectedRoute Component', () => {
       )
     ).not.toBeNull();
     expect(getByText('Sign In / Register')).not.toBeNull();
+    expect(getByText('Continue in Local Workspace (No Account)')).not.toBeNull();
     expect(getByText('Explore Interactive Demo First')).not.toBeNull();
   });
 
