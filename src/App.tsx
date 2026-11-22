@@ -24,7 +24,7 @@ import { WishList } from './components/WishList';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useTheme } from './context/ThemeContext';
-import { DEFAULT_PLANS, getDefaultStoreData } from './utils/defaults';
+import { createFreshSampleStoreData, getDefaultStoreData } from './utils/defaults';
 import { InMemoryStorageRepository } from './storage';
 
 // Route & feature code-splitting for near-instant initial load on low-end hardware
@@ -754,13 +754,9 @@ export const DemoAppWorkspace: React.FC = () => {
         confirmLabel: 'Load Sample Data',
         variant: 'warning',
         onConfirm: () => {
-          demoPlanManager.actions.importStoreData({
-            version: 3,
-            lastSaved: new Date().toISOString(),
-            activePlanId: DEFAULT_PLANS[0].id,
-            plans: DEFAULT_PLANS,
-            settings: demoPlanManager.storeData.settings,
-          });
+          demoPlanManager.actions.importStoreData(
+            createFreshSampleStoreData(demoPlanManager.storeData.settings)
+          );
         },
       },
     });
@@ -818,7 +814,7 @@ export const DemoAppWorkspace: React.FC = () => {
 
 export const ProtectedAppWorkspace: React.FC = () => {
   const { darkMode, toggleDarkMode } = useTheme();
-  const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAppAuth();
+  const { getToken, isSignedIn, isLoaded: isAuthLoaded, userId } = useAppAuth();
   const clerk = useClerk();
   const navigate = useNavigate();
 
@@ -847,6 +843,7 @@ export const ProtectedAppWorkspace: React.FC = () => {
   const appPlanManager = usePlanManager({
     isAuthLoaded,
     isSignedIn,
+    userId,
     getToken,
   });
 
@@ -894,13 +891,9 @@ export const ProtectedAppWorkspace: React.FC = () => {
         confirmLabel: 'Load Sample Data',
         variant: 'warning',
         onConfirm: () => {
-          appPlanManager.actions.importStoreData({
-            version: 3,
-            lastSaved: new Date().toISOString(),
-            activePlanId: DEFAULT_PLANS[0].id,
-            plans: DEFAULT_PLANS,
-            settings: appPlanManager.storeData.settings,
-          });
+          appPlanManager.actions.importStoreData(
+            createFreshSampleStoreData(appPlanManager.storeData.settings)
+          );
         },
       },
     });

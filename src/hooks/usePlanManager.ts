@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { SavingsPlan } from '../domain/SavingsPlan.js';
 import {
   createStorageRepository,
+  getUserStorageKey,
   GUEST_STORAGE_KEY,
   isNewer,
   USER_STORAGE_KEY,
@@ -25,6 +26,7 @@ import { DEFAULT_STORE_DATA, getDefaultStoreData } from '../utils/defaults.js';
 export interface PlanManagerOptions {
   isAuthLoaded?: boolean;
   isSignedIn?: boolean;
+  userId?: string | null;
   getToken?: (options?: { skipCache?: boolean }) => Promise<string | null>;
   repository?: StorageRepository;
 }
@@ -75,7 +77,8 @@ export interface PlanManager {
 }
 
 export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
-  const { getToken, repository, isSignedIn } = options;
+  const { getToken, repository, isSignedIn, userId } = options;
+  const isAuthLoaded = options.isAuthLoaded ?? true;
 
   const getTokenRef = useRef(getToken);
   useEffect(() => {
@@ -95,15 +98,19 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     }
     return (
       repository ||
-      createStorageRepository({ getToken: stableGetToken, isSignedIn: Boolean(isSignedIn) })
+      createStorageRepository({
+        getToken: stableGetToken,
+        isSignedIn: Boolean(isSignedIn),
+        userId,
+      })
     );
-  }, [repository, isSignedIn, stableGetToken]);
+  }, [repository, isSignedIn, userId, stableGetToken]);
 
   // Synchronously load local store data on initial mount to eliminate loading flashes
   const [storeData, setStoreData] = useState<AppStoreData>(() => {
     try {
       const localAdapter = new LocalStorageAdapter(
-        isSignedIn ? USER_STORAGE_KEY : GUEST_STORAGE_KEY
+        isSignedIn ? getUserStorageKey(userId) : GUEST_STORAGE_KEY
       );
       return localAdapter.loadSync();
     } catch {
@@ -111,7 +118,9 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     }
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(!isAuthLoaded);
+  const isLoadingRef = useRef(isLoading);
+  isLoadingRef.current = isLoading;
   const [isPortfolioView, setIsPortfolioView] = useState(false);
 
   // What-if simulator state
@@ -150,13 +159,20 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       // Storage sync failed silently
     }
   }, [storageRepo, applyNewerStoreData]);
-  const activeAuthSessionKey = `${Boolean(isSignedIn)}`;
+  const activeAuthSessionKey = `${Boolean(isSignedIn)}:${userId ?? ''}`;
   const lastCommittedAuthSessionKey = useRef<string>(activeAuthSessionKey);
 
   // Initial load and repository subscription
   useEffect(() => {
+    if (!isAuthLoaded) {
+      setIsLoading(true);
+      isLoadingRef.current = true;
+      return;
+    }
+
     let isMounted = true;
     setIsLoading(true);
+    isLoadingRef.current = true;
 
     const targetSessionKey = activeAuthSessionKey;
     storageRepo.load().then(loaded => {
@@ -167,6 +183,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       } else {
         applyNewerStoreData(loaded);
       }
+      isLoadingRef.current = false;
       setIsLoading(false);
     });
 
@@ -178,12 +195,12 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       isMounted = false;
       unsubscribe?.();
     };
-  }, [storageRepo, isSignedIn, activeAuthSessionKey, applyNewerStoreData]);
+  }, [storageRepo, isAuthLoaded, isSignedIn, activeAuthSessionKey, applyNewerStoreData]);
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const handleFocusOrVisibility = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'visible' && isAuthLoaded) {
         syncWithStorage();
       }
     };
@@ -193,9 +210,12 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         !e.key ||
         e.key === 'saving_plan_app_store_v3' ||
         e.key === GUEST_STORAGE_KEY ||
-        e.key === USER_STORAGE_KEY
+        e.key === USER_STORAGE_KEY ||
+        e.key.startsWith(`${USER_STORAGE_KEY}_`)
       ) {
-        syncWithStorage();
+        if (isAuthLoaded) {
+          syncWithStorage();
+        }
       }
     };
 
@@ -211,7 +231,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(intervalId);
     };
-  }, [syncWithStorage]);
+  }, [syncWithStorage, isAuthLoaded]);
   useEffect(() => {
     if (activePlan) {
       setSimulatedSavingsRate(activePlan.config.amountToSave);
@@ -223,6 +243,11 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
   // Persist store data and notify user via sonner toast if save fails
   const persistStore = useCallback(
     async (nextStore: AppStoreData, successToast?: string) => {
+      if (isSignedIn && isLoadingRef.current) {
+        toast.warning('Still loading your saved plans. Please wait a moment and try again.');
+        return;
+      }
+
       const timestampedStore: AppStoreData = {
         ...nextStore,
         lastSaved: new Date().toISOString(),
@@ -236,7 +261,7 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
         toast.success(successToast);
       }
     },
-    [storageRepo]
+    [storageRepo, isSignedIn]
   );
 
   const updateActivePlanInStore = useCallback(

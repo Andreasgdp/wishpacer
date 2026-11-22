@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import {
   ApiSyncAdapter,
   createStorageRepository,
+  getUserStorageKey,
   GUEST_STORAGE_KEY,
   HybridStorageAdapter,
   InMemoryStorageRepository,
@@ -12,6 +13,7 @@ import {
   USER_STORAGE_KEY,
   type StorageRepository,
 } from './index.js';
+import { getDefaultStoreData } from '../utils/defaults.js';
 import type { AppStoreData } from '../types/plan.js';
 
 const sampleStore: AppStoreData = {
@@ -441,6 +443,170 @@ describe('Storage Seam & Repository Adapters', () => {
       const localAfter = await localRepo.load();
       expect(localAfter.activePlanId).toBe('user-custom-plan-999');
       expect(localAfter.plans[0].name).toBe('User Real Financial Plan');
+    });
+
+    it('preserves remote lastSaved when caching locally so subsequent loads do not spuriously overwrite remote', async () => {
+      const mockMap = new Map<string, string>();
+      const mockStorage: Storage = {
+        length: 0,
+        clear: () => mockMap.clear(),
+        getItem: k => mockMap.get(k) ?? null,
+        key: () => null,
+        removeItem: k => mockMap.delete(k),
+        setItem: (k, v) => {
+          mockMap.set(k, v);
+        },
+      };
+
+      const remoteStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'cloud-plan-1',
+        lastSaved: '2026-09-20T09:00:00.000Z',
+      };
+
+      const localRepo = new LocalStorageAdapter(getUserStorageKey('user-a'), mockStorage);
+      const remoteRepo = new InMemoryStorageRepository(remoteStore);
+      const hybrid = new HybridStorageAdapter(localRepo, remoteRepo, { isSignedIn: true });
+
+      const firstLoad = await hybrid.load();
+      expect(firstLoad.activePlanId).toBe('cloud-plan-1');
+      expect(firstLoad.lastSaved).toBe('2026-09-20T09:00:00.000Z');
+
+      // Local cache must keep the exact remote timestamp, NOT Date.now()
+      const cachedLocal = await localRepo.load();
+      expect(cachedLocal.lastSaved).toBe('2026-09-20T09:00:00.000Z');
+
+      // Second load must NOT push cached local copy back to remote
+      await hybrid.load();
+      await Promise.resolve();
+      expect(remoteRepo.saveCount).toBe(0);
+    });
+
+    it('isolates cached local storage per userId so User A data never leaks into or overwrites User B', async () => {
+      const mockMap = new Map<string, string>();
+      const mockStorage: Storage = {
+        length: 0,
+        clear: () => mockMap.clear(),
+        getItem: k => mockMap.get(k) ?? null,
+        key: () => null,
+        removeItem: k => mockMap.delete(k),
+        setItem: (k, v) => {
+          mockMap.set(k, v);
+        },
+      };
+
+      const userALocal = new LocalStorageAdapter(getUserStorageKey('user-a'), mockStorage);
+      const userBLocal = new LocalStorageAdapter(getUserStorageKey('user-b'), mockStorage);
+
+      await userALocal.save({
+        ...sampleStore,
+        activePlanId: 'user-a-plan',
+        lastSaved: '2026-10-01T12:00:00.000Z',
+      });
+
+      const userBRemote = new InMemoryStorageRepository({
+        ...sampleStore,
+        activePlanId: 'user-b-plan',
+        lastSaved: '2026-09-01T12:00:00.000Z',
+      });
+
+      const userBHybrid = new HybridStorageAdapter(userBLocal, userBRemote, { isSignedIn: true });
+      const loaded = await userBHybrid.load();
+
+      expect(loaded.activePlanId).toBe('user-b-plan');
+      expect(userBRemote.saveCount).toBe(0);
+    });
+
+    it('waits past 800ms on cold-start fresh login instead of falling back to example data', async () => {
+      const localRepo = new InMemoryStorageRepository(getDefaultStoreData());
+      const slowRemoteStore: AppStoreData = {
+        ...sampleStore,
+        activePlanId: 'real-user-plan',
+        plans: [
+          {
+            ...sampleStore.plans[0],
+            id: 'real-user-plan',
+            name: 'My Real Savings Plan',
+          },
+        ],
+        lastSaved: '2026-09-22T10:00:00.000Z',
+      };
+
+      const slowRemoteRepo: StorageRepository = {
+        load: async () => {
+          await new Promise(resolve => setTimeout(resolve, 60));
+          return slowRemoteStore;
+        },
+        save: async () => ({ success: true, localSaved: true, remoteSaved: true }),
+      };
+
+      // Simulate fastPath timeout (20ms) < remote latency (60ms) < coldStart timeout (500ms)
+      const hybrid = new HybridStorageAdapter(localRepo, slowRemoteRepo, {
+        isSignedIn: true,
+        localFastPathTimeoutMs: 20,
+        coldStartTimeoutMs: 500,
+      });
+
+      const loaded = await hybrid.load();
+      expect(loaded.activePlanId).toBe('real-user-plan');
+      expect(loaded.plans[0].name).toBe('My Real Savings Plan');
+    });
+
+    it('blocks save() from overwriting remote DB with example data if initial remote load failed on fresh login', async () => {
+      const localRepo = new InMemoryStorageRepository(getDefaultStoreData());
+      let remoteSaveCalled = false;
+
+      const failingRemoteRepo: StorageRepository = {
+        load: async () => getDefaultStoreData(), // Simulates ApiSyncAdapter failure (1970 timestamp)
+        save: async () => {
+          remoteSaveCalled = true;
+          return { success: true, localSaved: true, remoteSaved: true };
+        },
+      };
+
+      const hybrid = new HybridStorageAdapter(localRepo, failingRemoteRepo, {
+        isSignedIn: true,
+        coldStartTimeoutMs: 100,
+      });
+
+      // Fresh login where remote load fails
+      const loaded = await hybrid.load();
+      expect(loaded.lastSaved).toBe('1970-01-01T00:00:00.000Z');
+
+      // Attempting to save (e.g. clicking a plan or editing example data) MUST be blocked
+      const saveRes = await hybrid.save({
+        ...loaded,
+        lastSaved: new Date().toISOString(),
+      });
+
+      expect(saveRes.success).toBe(false);
+      expect(saveRes.remoteSaved).toBe(false);
+      expect(remoteSaveCalled).toBe(false);
+    });
+
+    it('ApiSyncAdapter retries token fetch with skipCache when initial token is null and avoids unauthenticated requests', async () => {
+      let fetchCalled = false;
+      const mockFetch = (async () => {
+        fetchCalled = true;
+        return new Response(JSON.stringify({ exists: false }), { status: 200 });
+      }) as unknown as typeof fetch;
+
+      let skipCacheCalled = false;
+      const nullTokenGetter = async (opts?: { skipCache?: boolean }) => {
+        if (opts?.skipCache) skipCacheCalled = true;
+        return null;
+      };
+
+      const adapter = new ApiSyncAdapter(nullTokenGetter, '/api/plan', mockFetch);
+      const loaded = await adapter.load();
+
+      expect(skipCacheCalled).toBe(true);
+      expect(fetchCalled).toBe(false);
+      expect(loaded.lastSaved).toBe('1970-01-01T00:00:00.000Z');
+
+      const saveRes = await adapter.save(sampleStore);
+      expect(saveRes.success).toBe(false);
+      expect(fetchCalled).toBe(false);
     });
   });
 });
