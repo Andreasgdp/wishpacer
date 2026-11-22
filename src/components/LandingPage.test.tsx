@@ -94,14 +94,16 @@ describe('LandingPage Component', () => {
     expect(getByText(/Live Engine/i)).not.toBeNull();
   });
 
-  it('renders updated footer links indicating TBD and only repository GitHub link', () => {
-    const { getByText, getByLabelText, queryByLabelText } = render(
+  it('renders live footer links for Terms, Privacy, Support, and repository GitHub link', () => {
+    const { getByRole, getByLabelText, queryByLabelText } = render(
       <LandingPage onLaunchApp={() => {}} onExploreDemo={() => {}} />
     );
 
-    expect(getByText('Legal (TBD)')).not.toBeNull();
-    expect(getByText('Privacy (TBD)')).not.toBeNull();
-    expect(getByText('Support (TBD)')).not.toBeNull();
+    expect(getByRole('link', { name: 'Terms' }).getAttribute('href')).toBe('/terms');
+    expect(getByRole('link', { name: 'Privacy' }).getAttribute('href')).toBe('/privacy');
+    expect(getByRole('link', { name: 'Support' }).getAttribute('href')).toBe(
+      'mailto:support@wishpacer.com'
+    );
 
     const githubLink = getByLabelText('GitHub');
     expect(githubLink.getAttribute('href')).toBe('https://github.com/Andreasgdp/wishpacer');

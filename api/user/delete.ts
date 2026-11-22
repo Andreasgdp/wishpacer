@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { verifyToken } from '@clerk/backend';
+import { createClerkClient, verifyToken } from '@clerk/backend';
 import { deleteUserStoreData } from '../../src/server/db/planService.js';
 
 const clerkSecretKey = process.env.CLERK_SECRET_KEY;
@@ -37,9 +37,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     console.log(`[API /api/user/delete] Hard-deleting all store data for user: ${userId}`);
     await deleteUserStoreData(userId);
 
+    if (clerkSecretKey && !clerkSecretKey.includes('placeholder')) {
+      const clerkClient = createClerkClient({ secretKey: clerkSecretKey });
+      await clerkClient.users.deleteUser(userId);
+      console.log(`[API /api/user/delete] Deleted Clerk auth account for user: ${userId}`);
+    }
+
     res.status(200).json({
       success: true,
-      message: 'User account data permanently deleted',
+      message: 'User account and all cloud data permanently deleted',
       deletedAt: new Date().toISOString(),
     });
   } catch (err) {

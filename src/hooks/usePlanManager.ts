@@ -623,15 +623,24 @@ export function usePlanManager(options: PlanManagerOptions = {}): PlanManager {
     try {
       const token = getToken ? await getToken() : null;
       if (token) {
-        await fetch('/api/user/delete', {
+        const response = await fetch('/api/user/delete', {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+        if (!response.ok) {
+          toast.error(
+            'Could not erase your cloud account. Please try again or email contact@wishpacer.com.'
+          );
+          return;
+        }
       }
     } catch {
-      // Remote purge failed silently
+      toast.error(
+        'Network error while erasing your cloud account. Please try again or email contact@wishpacer.com.'
+      );
+      return;
     }
     localStorage.clear();
     toast.success('All user data permanently deleted.');

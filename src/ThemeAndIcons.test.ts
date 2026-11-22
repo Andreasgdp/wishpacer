@@ -32,10 +32,10 @@ describe('Theme and Icons Overhaul Verification', () => {
     expect(html).toContain('<meta name="apple-mobile-web-app-capable" content="yes" />');
     expect(html).toContain('<meta name="apple-mobile-web-app-title" content="WishPacer" />');
     expect(html).toContain(
-      '<meta name="theme-color" content="#F8E7C9" media="(prefers-color-scheme: light)" />'
+      '<meta name="theme-color" content="#CCD7D0" media="(prefers-color-scheme: light)" />'
     );
     expect(html).toContain(
-      '<meta name="theme-color" content="#2A2A2A" media="(prefers-color-scheme: dark)" />'
+      '<meta name="theme-color" content="#0B0E11" media="(prefers-color-scheme: dark)" />'
     );
   });
 

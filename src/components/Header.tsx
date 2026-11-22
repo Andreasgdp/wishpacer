@@ -7,6 +7,7 @@ import {
   FolderKanban,
   Globe,
   MoreVertical,
+  MoreHorizontal,
   X,
   Sparkles,
   HelpCircle,
@@ -15,10 +16,18 @@ import {
   Layout,
   ArrowRight,
   Search,
+  Home,
 } from 'lucide-react';
 import { SignedIn, UserButton, useClerk } from '@clerk/clerk-react';
 import { useAppAuth } from '../hooks';
 import { Button } from './ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 import type { Plan, PlanCalculationResult } from '../types/plan';
 import { PlanSwitcher } from './PlanSwitcher';
 import { Logo } from './Logo';
@@ -231,7 +240,7 @@ export const Header: React.FC<HeaderProps> = ({
                   }
                   className="hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  Community
+                  Preview
                 </button>
               </nav>
             )}
@@ -305,7 +314,7 @@ export const Header: React.FC<HeaderProps> = ({
                     onClick={onOpenCommandPalette}
                     aria-label="Open command palette"
                     title="Quick Command Menu (⌘K / Ctrl+K)"
-                    className="hidden lg:inline-flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium rounded-xl text-slate-600 dark:text-slate-300 bg-white/80 dark:bg-[#161B22] border border-slate-300/80 dark:border-[#21262D] hover:border-slate-400 dark:hover:border-[#30363D] hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
+                    className="hidden md:inline-flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium rounded-xl text-slate-600 dark:text-slate-300 bg-white/80 dark:bg-[#161B22] border border-slate-300/80 dark:border-[#21262D] hover:border-slate-400 dark:hover:border-[#30363D] hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
                   >
                     <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="text-slate-500 dark:text-slate-400">Jump...</span>
@@ -315,108 +324,81 @@ export const Header: React.FC<HeaderProps> = ({
                   </button>
                 )}
 
-                {/* View Mode Toggle Button */}
-                <button
-                  type="button"
-                  onClick={onNavigateLanding}
-                  aria-label="Return to Landing Page"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/[0.08] transition-colors shrink-0"
-                  title="Return to WishPacer Landing Page"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span className="hidden xl:inline">Landing Page</span>
-                </button>
-
-                {/* Portfolio View Button */}
-                <button
-                  type="button"
-                  onClick={onSelectPortfolio}
-                  aria-label="View all savings plans portfolio"
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-xl transition-all border shrink-0 ${
-                    isPortfolioView
-                      ? 'bg-emerald-500 text-slate-950 font-semibold border-emerald-400 shadow-glow-sm'
-                      : 'bg-slate-100 dark:bg-white/[0.05] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/[0.08]'
-                  }`}
-                >
-                  <FolderKanban className="w-3.5 h-3.5" />
-                  <span className="hidden xl:inline">All Plans</span>
-                </button>
-
-                {/* Global Settings (Currency) */}
-                {onOpenGlobalSettingsModal && (
-                  <button
-                    type="button"
-                    onClick={onOpenGlobalSettingsModal}
-                    aria-label="Global Currency Settings"
-                    className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-200/60 dark:border-white/10 transition-colors shrink-0"
-                  >
-                    <Globe className="w-4 h-4 text-brand-600 dark:text-brand-400" />
-                  </button>
-                )}
-
-                {/* Export / Backup */}
-                {onOpenExportModal && (
-                  <button
-                    type="button"
-                    onClick={onOpenExportModal}
-                    aria-label="Backup or Import"
-                    className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-200/60 dark:border-white/10 transition-colors shrink-0"
-                  >
-                    <Download className="w-4 h-4" />
-                  </button>
-                )}
-
-                {/* Support / Help */}
-                {onOpenSupportModal && (
-                  <button
-                    type="button"
-                    onClick={onOpenSupportModal}
-                    aria-label="Help and Support"
-                    className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-200/60 dark:border-white/10 transition-colors shrink-0"
-                  >
-                    <HelpCircle className="w-4 h-4 text-sky-500" />
-                  </button>
-                )}
-
-                {/* Privacy Policy */}
-                {onOpenPrivacyModal && (
-                  <button
-                    type="button"
-                    onClick={onOpenPrivacyModal}
-                    aria-label="Privacy Policy"
-                    className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-200/60 dark:border-white/10 transition-colors shrink-0"
-                  >
-                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  </button>
-                )}
-
-                {/* Guided Tour / Feature Guide */}
-                {onOpenOnboardingModal && (
-                  <button
-                    type="button"
-                    onClick={onOpenOnboardingModal}
-                    aria-label="Feature Tour and Guide"
-                    className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-200/60 dark:border-white/10 transition-colors shrink-0"
-                  >
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                  </button>
-                )}
-
                 {/* Dark Mode Toggle */}
                 {onToggleDarkMode && (
                   <button
                     type="button"
                     onClick={onToggleDarkMode}
                     aria-label="Toggle theme"
-                    className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-200/60 dark:border-white/10 transition-colors shrink-0"
+                    title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-300/70 dark:border-[#21262D] transition-colors shrink-0"
                   >
                     {darkMode ? (
-                      <Sun className="w-4 h-4 text-amber-400" />
+                      <Sun className="w-4 h-4 text-amber-400 shrink-0" />
                     ) : (
-                      <Moon className="w-4 h-4 text-slate-600" />
+                      <Moon className="w-4 h-4 text-slate-600 shrink-0" />
                     )}
                   </button>
                 )}
+
+                {/* Consolidated Utilities & Settings Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="More options and settings"
+                      title="Settings, Backup, Help & Legal"
+                      className="p-1.5 lg:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-300/70 dark:border-[#21262D] transition-colors shrink-0"
+                    >
+                      <MoreHorizontal className="w-4 h-4 shrink-0" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    {onOpenGlobalSettingsModal && (
+                      <DropdownMenuItem onSelect={onOpenGlobalSettingsModal}>
+                        <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span>Global Settings &amp; Currency</span>
+                      </DropdownMenuItem>
+                    )}
+                    {onOpenExportModal && (
+                      <DropdownMenuItem onSelect={onOpenExportModal}>
+                        <Download className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
+                        <span>Backup &amp; Import JSON</span>
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuSeparator />
+
+                    {onOpenOnboardingModal && (
+                      <DropdownMenuItem onSelect={onOpenOnboardingModal}>
+                        <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span>Feature Tour</span>
+                      </DropdownMenuItem>
+                    )}
+                    {onOpenSupportModal && (
+                      <DropdownMenuItem onSelect={onOpenSupportModal}>
+                        <HelpCircle className="w-4 h-4 text-sky-500 shrink-0" />
+                        <span>Help &amp; Support</span>
+                      </DropdownMenuItem>
+                    )}
+                    {onOpenPrivacyModal && (
+                      <DropdownMenuItem onSelect={onOpenPrivacyModal}>
+                        <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>Privacy &amp; Legal</span>
+                      </DropdownMenuItem>
+                    )}
+
+                    {onNavigateLanding && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={onNavigateLanding}>
+                          <Home className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
+                          <span>Landing Page</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 {/* Primary Add Action */}
                 {isPortfolioView && onOpenNewPlanModal && (
@@ -428,7 +410,7 @@ export const Header: React.FC<HeaderProps> = ({
                     aria-label="Create new plan"
                     className="shrink-0"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-3.5 h-3.5 shrink-0" />
                     <span className="hidden lg:inline">New Plan</span>
                   </Button>
                 )}
@@ -441,7 +423,7 @@ export const Header: React.FC<HeaderProps> = ({
                     aria-label="Add Wish"
                     className="shrink-0"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-3.5 h-3.5 shrink-0" />
                     <span>Add Wish</span>
                   </Button>
                 )}
@@ -469,7 +451,7 @@ export const Header: React.FC<HeaderProps> = ({
                         aria-label="Sign In"
                         className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold shadow-xs hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
                       >
-                        <UserIcon className="w-3.5 h-3.5" />
+                        <UserIcon className="w-3.5 h-3.5 shrink-0" />
                         <span className="hidden lg:inline">Sign In</span>
                       </button>
                     )}
@@ -650,7 +632,7 @@ export const Header: React.FC<HeaderProps> = ({
                         }}
                         className="w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg"
                       >
-                        Community
+                        Preview
                       </button>
                     </div>
                     {handleAppLaunch && (

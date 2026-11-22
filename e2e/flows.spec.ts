@@ -165,13 +165,15 @@ test.describe('WishPacer End-to-End User Flows', () => {
     await page.getByRole('button', { name: 'Load Interactive Sample Plan' }).click();
     await page.getByRole('button', { name: 'Load Sample Data' }).click();
 
-    // Open Privacy Policy
-    await page.getByRole('button', { name: 'Privacy Policy' }).click();
+    // Open Privacy Policy from consolidated More menu
+    await page.getByRole('button', { name: 'More options and settings' }).click();
+    await page.getByRole('menuitem', { name: /Privacy/i }).click();
     await expect(page.getByText('Privacy Policy & Transparency')).toBeVisible();
     await page.getByRole('button', { name: 'I Understand' }).click();
 
-    // Open Support Modal
-    await page.getByRole('button', { name: /Help/i }).first().click();
+    // Open Support Modal from consolidated More menu
+    await page.getByRole('button', { name: 'More options and settings' }).click();
+    await page.getByRole('menuitem', { name: /Help/i }).click();
     await expect(page.getByText('Get assistance or share product feedback')).toBeVisible();
   });
 
@@ -180,11 +182,9 @@ test.describe('WishPacer End-to-End User Flows', () => {
     await page.getByRole('button', { name: 'Load Interactive Sample Plan' }).click();
     await page.getByRole('button', { name: 'Load Sample Data' }).click();
 
-    // Open Global Settings
-    await page
-      .getByRole('button', { name: /Global Currency/i })
-      .first()
-      .click();
+    // Open Global Settings from consolidated More menu
+    await page.getByRole('button', { name: 'More options and settings' }).click();
+    await page.getByRole('menuitem', { name: /Global Settings/i }).click();
     await expect(page.getByText('Global App Settings')).toBeVisible();
 
     // Trigger Account Data Erasure
@@ -261,7 +261,7 @@ test.describe('WishPacer End-to-End User Flows', () => {
     const themeColorLight = page.locator(
       'meta[name="theme-color"][media="(prefers-color-scheme: light)"]'
     );
-    await expect(themeColorLight).toHaveAttribute('content', '#F8E7C9');
+    await expect(themeColorLight).toHaveAttribute('content', '#CCD7D0');
 
     // 2. Dismiss onboarding modal
     await page.getByRole('button', { name: 'Close' }).first().click();

@@ -94,10 +94,13 @@ describe('Header Component', () => {
     onSignInClick: mock(() => {}),
   };
 
-  it('renders logo and plan switcher', () => {
-    const { getByRole, getAllByText } = render(<Header {...defaultProps} />);
+  it('renders logo and plan switcher without duplicate top-bar Landing Page or All Plans buttons', () => {
+    const { getByRole, getAllByText, queryByRole } = render(<Header {...defaultProps} />);
     expect(getAllByText('Vacation Plan').length).toBeGreaterThan(0);
     expect(getByRole('button', { name: /Switch savings plan/i })).not.toBeNull();
+    expect(getByRole('button', { name: 'More options and settings' })).not.toBeNull();
+    expect(queryByRole('button', { name: 'Return to Landing Page' })).toBeNull();
+    expect(queryByRole('button', { name: 'View all savings plans portfolio' })).toBeNull();
   });
 
   it('handles Add Wish click from header button', () => {
