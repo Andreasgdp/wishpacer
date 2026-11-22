@@ -6,6 +6,9 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      screens: {
+        xs: '420px',
+      },
       colors: {
         forest: {
           DEFAULT: '#041A10',
