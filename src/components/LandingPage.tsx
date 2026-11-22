@@ -1280,6 +1280,71 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
+      {/* OPEN SOURCE & TRANSPARENCY SECTION */}
+      <section
+        id="open-source"
+        className="content-auto py-16 sm:py-20 px-4 sm:px-6 lg:px-8 z-10 relative border-t border-black/10 dark:border-[#1C2128]"
+      >
+        <div className="max-w-5xl mx-auto space-y-10">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold text-emerald-800 dark:text-emerald-400 uppercase tracking-widest">
+              <span>TRANSPARENCY // OPEN_SOURCE_AGPL_3</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#111714] dark:text-white tracking-tight">
+              Open Source, Local-First &amp; Sustainable
+            </h2>
+            <p className="text-sm sm:text-base text-[#384A41] dark:text-slate-300 leading-relaxed">
+              Inspect the code, self-host for free under AGPL-3.0, or use our managed cloud sync to
+              back the project.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-[#181D21] dark:bg-[#12161A] text-white rounded-2xl p-6 border border-black/10 dark:border-[#21262D] shadow-md flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-2 border-b border-white/10">
+                  <span>TIER-01 // LOCAL_OR_SELF_HOST</span>
+                  <span className="text-emerald-400 font-semibold">FREE</span>
+                </div>
+                <h3 className="text-lg font-bold text-white">Local-First &amp; Self-Hostable</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Use WishPacer directly in your browser with data stored locally on your device—no
+                  account required—or deploy your own instance from our open-source AGPL-3.0
+                  repository.
+                </p>
+              </div>
+              <a
+                href="https://github.com/Andreasgdp/wishpacer"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-mono font-semibold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1.5 self-start pt-1"
+              >
+                <span>View Source on GitHub</span>
+                <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+              </a>
+            </div>
+
+            <div className="bg-[#181D21] dark:bg-[#12161A] text-white rounded-2xl p-6 border border-black/10 dark:border-[#21262D] shadow-md flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-2 border-b border-white/10">
+                  <span>TIER-02 // MANAGED_CLOUD_SYNC</span>
+                  <span className="text-slate-300 font-semibold">OPTIONAL PAID</span>
+                </div>
+                <h3 className="text-lg font-bold text-white">Managed Cloud Sync</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Want automatic sync across devices with zero setup? Our optional hosted Cloud Sync
+                  plan funds managed infrastructure, reliable cloud backups, and ongoing development
+                  of WishPacer.
+                </p>
+              </div>
+              <div className="text-[11px] font-mono text-slate-400 pt-1">
+                No ads • No data selling • Export JSON anytime
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* REPEAT CTAs SECTION: Clear Final Choice */}
       <section className="dark py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#0B0E11] text-white border-t border-[#1C2128] relative overflow-hidden z-10">
         <div className="max-w-4xl mx-auto text-center space-y-6">
@@ -1322,9 +1387,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-white/5">
             {/* Structured Navigation Links */}
             <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 text-xs sm:text-sm font-medium text-slate-400">
-              <span className="text-slate-500 cursor-not-allowed">Legal (TBD)</span>
-              <span className="text-slate-500 cursor-not-allowed">Privacy (TBD)</span>
-              <span className="text-slate-500 cursor-not-allowed">Support (TBD)</span>
+              <a href="/terms" className="hover:text-emerald-400 transition-colors">
+                Terms
+              </a>
+              <a href="/privacy" className="hover:text-emerald-400 transition-colors">
+                Privacy
+              </a>
+              <a
+                href="mailto:support@wishpacer.com"
+                className="hover:text-emerald-400 transition-colors"
+              >
+                Support
+              </a>
               <button
                 type="button"
                 onClick={() => {
@@ -1341,7 +1415,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 }}
                 className="hover:text-emerald-400 transition-colors cursor-pointer"
               >
-                About
+                Preview
               </button>
             </div>
 

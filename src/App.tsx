@@ -46,6 +46,12 @@ const CommandPalette = lazy(() =>
 const NotFoundPage = lazy(() =>
   import('./components/NotFoundPage').then(m => ({ default: m.NotFoundPage }))
 );
+const PrivacyPolicyPage = lazy(() =>
+  import('./components/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage }))
+);
+const TermsOfServicePage = lazy(() =>
+  import('./components/TermsOfServicePage').then(m => ({ default: m.TermsOfServicePage }))
+);
 const ThinkingOrbLoader = lazy(() =>
   import('./components/ThinkingOrbLoader').then(m => ({ default: m.ThinkingOrbLoader }))
 );
@@ -998,6 +1004,22 @@ export const AppContent: React.FC = () => {
       <Route path="/" element={<LandingPageWorkspace />} />
       <Route path="/demo/*" element={<DemoAppWorkspace />} />
       <Route path="/app/*" element={<ProtectedAppWorkspace />} />
+      <Route
+        path="/privacy"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <PrivacyPolicyPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/terms"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <TermsOfServicePage />
+          </Suspense>
+        }
+      />
       <Route
         path="*"
         element={
