@@ -15,8 +15,6 @@ import {
 } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { Search, Plus, Filter, Sparkles, ListOrdered } from 'lucide-react';
-import * as m from 'motion/react-m';
-import { AnimatePresence } from 'motion/react';
 import type { ComputedWishItem, CurrencyConfig } from '../types/plan';
 import { WishItemCard } from './WishItemCard';
 import { Input } from './ui/input';
@@ -207,31 +205,21 @@ export const WishList: React.FC<WishListProps> = ({
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-3">
-              <AnimatePresence mode="popLayout" initial={false}>
-                {filteredItems.map((item, idx) => (
-                  <m.div
-                    key={item.id}
-                    layout
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.96 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  >
-                    <WishItemCard
-                      item={item}
-                      currency={currency}
-                      index={idx}
-                      totalActive={filteredItems.length}
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                      onTogglePurchased={onTogglePurchased}
-                      onTogglePaused={onTogglePaused}
-                      onMoveUp={onMoveUp}
-                      onMoveDown={onMoveDown}
-                    />
-                  </m.div>
-                ))}
-              </AnimatePresence>
+              {filteredItems.map((item, idx) => (
+                <WishItemCard
+                  key={item.id}
+                  item={item}
+                  currency={currency}
+                  index={idx}
+                  totalActive={filteredItems.length}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onTogglePurchased={onTogglePurchased}
+                  onTogglePaused={onTogglePaused}
+                  onMoveUp={onMoveUp}
+                  onMoveDown={onMoveDown}
+                />
+              ))}
             </div>
           </SortableContext>
         </DndContext>

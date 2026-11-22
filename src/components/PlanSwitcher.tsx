@@ -68,14 +68,22 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
   const activeColor = PLAN_COLORS[activePlan?.color || 'violet'] || PLAN_COLORS.violet;
 
   useEffect(() => {
+    if (!isOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -125,7 +133,7 @@ export const PlanSwitcher: React.FC<PlanSwitcherProps> = ({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-[280px] xs:w-72 sm:w-80 bg-[#E2EAE5]/95 dark:bg-[#12161A]/95 backdrop-blur-2xl rounded-2xl border border-black/10 dark:border-[#21262D] shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="absolute left-0 top-full mt-2 w-[280px] xs:w-72 sm:w-80 bg-white dark:bg-[#12161A] rounded-2xl border border-slate-300/90 dark:border-[#21262D] shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
             Savings Plans ({plans.length})
           </div>

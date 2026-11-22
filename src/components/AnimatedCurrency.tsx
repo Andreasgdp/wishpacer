@@ -10,28 +10,26 @@ interface AnimatedCurrencyProps {
   format?: Format;
 }
 
-export const AnimatedCurrency: React.FC<AnimatedCurrencyProps> = ({
-  value,
-  currency = DEFAULT_GLOBAL_SETTINGS.currency,
-  className,
-  format,
-}) => {
-  const prefix = currency?.position === 'prefix' ? currency?.symbol : undefined;
-  const suffix = currency?.position === 'suffix' ? ` ${currency?.symbol}` : undefined;
+export const AnimatedCurrency: React.FC<AnimatedCurrencyProps> = React.memo(
+  ({ value, currency = DEFAULT_GLOBAL_SETTINGS.currency, className, format }) => {
+    const prefix = currency?.position === 'prefix' ? currency?.symbol : undefined;
+    const suffix = currency?.position === 'suffix' ? ` ${currency?.symbol}` : undefined;
 
-  return (
-    <NumberFlow
-      value={value}
-      prefix={prefix}
-      suffix={suffix}
-      format={{
-        maximumFractionDigits: currency?.decimals ?? 0,
-        ...format,
-      }}
-      className={className}
-      transformTiming={{ duration: 500, easing: 'ease-out' }}
-      spinTiming={{ duration: 500, easing: 'ease-out' }}
-      isolate
-    />
-  );
-};
+    return (
+      <NumberFlow
+        value={value}
+        prefix={prefix}
+        suffix={suffix}
+        format={{
+          maximumFractionDigits: currency?.decimals ?? 0,
+          ...format,
+        }}
+        className={className}
+        transformTiming={{ duration: 400, easing: 'ease-out' }}
+        spinTiming={{ duration: 400, easing: 'ease-out' }}
+        isolate
+      />
+    );
+  }
+);
+AnimatedCurrency.displayName = 'AnimatedCurrency';

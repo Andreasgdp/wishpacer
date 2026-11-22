@@ -11,10 +11,10 @@ const Slider = React.forwardRef<
     className={cn('relative flex w-full touch-none select-none items-center', className)}
     {...props}
   >
-    <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
-      <SliderPrimitive.Range className="absolute h-full bg-gradient-to-r from-emerald-500 to-green-400" />
+    <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-slate-200 dark:bg-[#262C31]">
+      <SliderPrimitive.Range className="absolute h-full bg-emerald-500 dark:bg-[#38D39F]" />
     </SliderPrimitive.Track>
-    <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-emerald-500 bg-white ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-emerald-400 dark:bg-[#0B0E11] dark:ring-offset-[#0B0E11] shadow-[0_0_10px_rgba(34,197,94,0.4)] cursor-grab active:cursor-grabbing" />
+    <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-emerald-600 bg-white ring-offset-white transition-transform duration-150 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-[#38D39F] dark:bg-[#12161A] dark:ring-offset-[#0B0E11] shadow-sm cursor-grab active:cursor-grabbing" />
   </SliderPrimitive.Root>
 ));
 Slider.displayName = SliderPrimitive.Root.displayName;
