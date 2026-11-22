@@ -17,6 +17,26 @@ Before creating or editing any UI component, page, or modal, you MUST consult [`
   - Main headlines use heavy geometric sans with tight tracking.
   - All metrics, prices, percentages, dates, and module tags MUST use monospaced tabular numerals (`font-mono tabular-nums`).
 
+### UI & Component Design Rules (3-Tier Library Strategy — Ban the AI Look)
+
+1. **Never Build Complex Components From Scratch**:
+   - Always install components via their CLI/registry so source code lives in `src/components/ui/` and can be directly edited.
+   - Use **shadcn/ui** (backed by **Radix UI** / **Base UI**) for foundational UI: buttons, inputs, sliders, dialogs, dropdowns, tabs, and forms to guarantee accessibility, focus handling, and keyboard navigation.
+2. **Ban the Default "AI Look"**:
+   - Never leave default shadcn/ui grays, default border radius, or default system fonts untouched.
+   - Apply WishPacer's architectural brand identity globally:
+     - **Border Radius:** Tight architectural geometry (`rounded-xl` for controls/buttons, `rounded-2xl` for cards/panels, `rounded-md` for badges/diode chips).
+     - **Color Palette:** Dark canvas `#0B0E11`, matte carbon cards `#12161A`/`#161B22`, crisp borders `#21262D`/`#30363D`; Light canvas `#CCD7D0`, crisp white cards `#FFFFFF`, slate borders `#CBD5E1`; Phosphor Mint `#38D39F`/`#34D399` $\le 15\%$ surface area.
+     - **Typography:** Heavy geometric sans (`Inter`) for headlines/UI, `JetBrains Mono` (`font-mono tabular-nums`) for all prices, dates, metrics, and telemetry tags.
+3. **Use Specialist Libraries for Micro-Interactions**:
+   - **Toasts / Notifications:** `sonner`
+   - **Mobile Bottom Drawers:** `vaul` (via `ResponsiveOverlay.tsx`, enforcing ADR-0001)
+   - **Command Menus (`Cmd+K` / `Ctrl+K`):** `cmdk` (`src/components/ui/command.tsx` + `CommandPalette.tsx`)
+   - **Animated Numbers / Prices / Counters:** `@number-flow/react` (`AnimatedCurrency.tsx`)
+4. **Use Designed Components Sparingly (Restraint & Performance Rule)**:
+   - Maximum of **one standout animated or interactive focal element per page** (Landing: Dual-Pane Avionics Cockpit; Workspace: Segmented Feasibility Telemetry Meter). Keep the rest of the page clean, static, and readable.
+   - **Low-End Hardware Guardrail:** Never stack heavy `backdrop-blur-2xl` or `blur-3xl` GPU passes on scrolling lists or cards; prefer crisp matte surfaces and static CSS `radial-gradient` lighting.
+
 ---
 
 ## 2. Architecture Seams & Invariants

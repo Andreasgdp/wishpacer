@@ -24,6 +24,7 @@ import {
   Activity,
   Gauge,
 } from 'lucide-react';
+import NumberFlow from '@number-flow/react';
 import { Header } from './Header';
 import { Logo } from './Logo';
 
@@ -161,20 +162,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <div className="min-h-screen bg-[#CCD7D0] dark:bg-[#0B0E11] text-[#131A16] dark:text-[#E6EDF3] flex flex-col font-sans transition-colors duration-200 relative overflow-x-hidden selection:bg-[#34D399]/20 selection:text-[#0B0E11] dark:selection:text-[#34D399]">
-      {/* Sfumato Atmospheric Telemetry Aura (Inspired by Oxide & Drone HUD) */}
+      {/* Zero-blur radial ambient lighting (GPU-friendly on low-end hardware) */}
       <div
-        className="absolute top-0 right-0 w-[55vw] max-w-[850px] h-[550px] pointer-events-none z-0 overflow-hidden opacity-60 dark:opacity-30"
+        className="landing-ambient-hero absolute inset-x-0 top-0 h-[560px] pointer-events-none z-0 opacity-70 dark:opacity-50"
         aria-hidden="true"
-      >
-        <div className="w-full h-full bg-gradient-to-bl from-[#38D39F]/20 via-[#205C45]/15 to-transparent blur-3xl" />
-      </div>
-
-      <div
-        className="absolute top-48 left-[-10vw] w-[40vw] max-w-[500px] h-[400px] pointer-events-none z-0 opacity-40 dark:opacity-20"
-        aria-hidden="true"
-      >
-        <div className="w-full h-full bg-gradient-to-tr from-[#205C45]/15 to-transparent rounded-full blur-3xl" />
-      </div>
+      />
 
       {/* Top Navigation Bar */}
       <Header
@@ -196,7 +188,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* Headline & High-Precision System Overview */}
           <div className="max-w-3xl mx-auto text-center space-y-4">
             {/* Mission Telemetry Tag */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#181D21] text-emerald-300 border border-white/10 shadow-xs text-xs font-mono font-medium backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#181D21] text-emerald-300 border border-white/10 shadow-xs text-xs font-mono font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>WishPacer 2.0 • Turn Dreams Into Timelines</span>
             </div>
@@ -214,11 +206,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          {/* DUAL-PANE AVIONICS COCKPIT: Live Simulation Engine */}
+          {/* DUAL-PANE AVIONICS COCKPIT: Live Simulation Engine (Single Standout Focal Moment) */}
           <div
             id="calculator"
-            className="max-w-5xl mx-auto bg-[#181D21] dark:bg-[#12161A] text-white rounded-3xl p-6 sm:p-8 lg:p-9 border border-black/15 dark:border-[#21262D] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.08)] transition-all duration-300"
+            className="max-w-5xl mx-auto bg-[#181D21] dark:bg-[#12161A] text-white rounded-3xl p-6 sm:p-8 lg:p-9 border border-black/15 dark:border-[#21262D] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.08)] relative overflow-hidden"
           >
+            {/* Subtle GPU-composited top telemetry hairline beam */}
+            <div
+              className="telemetry-beam absolute inset-x-0 top-0 h-[2px] bg-white/[0.04]"
+              aria-hidden="true"
+            />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-start">
               {/* Left Pane: Avionics Telemetry Inputs */}
               <div className="w-full space-y-5 bg-[#121619] p-5 sm:p-6 rounded-2xl border border-white/5 shadow-inner">
@@ -274,7 +271,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     aria-valuemax={10000}
                     aria-valuenow={itemPrice}
                     aria-valuetext={`$${itemPrice.toLocaleString()}`}
-                    className="w-full h-2 bg-[#262C31] rounded-lg appearance-none cursor-pointer accent-emerald-400 focus-visible:outline-2 focus-visible:outline-emerald-400"
+                    style={
+                      {
+                        '--range-progress': `${((itemPrice - 100) / (10000 - 100)) * 100}%`,
+                      } as React.CSSProperties
+                    }
+                    className="architectural-range w-full cursor-pointer"
                   />
                   <div className="flex justify-between items-center text-[11px] sm:text-xs text-slate-400 font-mono gap-1">
                     <button
@@ -349,7 +351,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     aria-valuemax={2000}
                     aria-valuenow={monthlySavings}
                     aria-valuetext={`$${monthlySavings.toLocaleString()} per month`}
-                    className="w-full h-2 bg-[#262C31] rounded-lg appearance-none cursor-pointer accent-emerald-400 focus-visible:outline-2 focus-visible:outline-emerald-400"
+                    style={
+                      {
+                        '--range-progress': `${((monthlySavings - 25) / (2000 - 25)) * 100}%`,
+                      } as React.CSSProperties
+                    }
+                    className="architectural-range w-full cursor-pointer"
                   />
                   <div className="flex justify-between items-center text-[11px] sm:text-xs text-slate-400 font-mono gap-1">
                     <button
@@ -424,7 +431,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     aria-valuemax={10}
                     aria-valuenow={hysaRate}
                     aria-valuetext={`${hysaRate.toFixed(1)} percent`}
-                    className="w-full h-2 bg-[#262C31] rounded-lg appearance-none cursor-pointer accent-emerald-400 focus-visible:outline-2 focus-visible:outline-emerald-400"
+                    style={
+                      {
+                        '--range-progress': `${(hysaRate / 10) * 100}%`,
+                      } as React.CSSProperties
+                    }
+                    className="architectural-range w-full cursor-pointer"
                   />
                   <div className="flex justify-between items-center text-xs text-slate-400 font-mono">
                     <button
@@ -531,7 +543,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                     <div className="flex items-baseline justify-between pt-0.5 font-mono">
                       <div className="text-2xl font-extrabold text-white tabular-nums">
-                        {calculation.months}{' '}
+                        <NumberFlow
+                          value={calculation.months}
+                          transformTiming={{ duration: 350, easing: 'ease-out' }}
+                          spinTiming={{ duration: 350, easing: 'ease-out' }}
+                          isolate
+                        />{' '}
                         <span className="text-xs font-normal text-slate-400">
                           {calculation.months === 1 ? 'Month' : 'Months'}
                         </span>
@@ -576,7 +593,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                     <div className="flex items-baseline justify-between pt-0.5">
                       <div className="text-xl font-bold text-slate-300 tabular-nums">
-                        {calculation.item2FundedMonth}{' '}
+                        <NumberFlow
+                          value={calculation.item2FundedMonth}
+                          transformTiming={{ duration: 350, easing: 'ease-out' }}
+                          spinTiming={{ duration: 350, easing: 'ease-out' }}
+                          isolate
+                        />{' '}
                         <span className="text-xs font-normal text-slate-500">Months</span>
                       </div>
                       <div className="text-xs text-slate-400 flex items-center gap-1.5">
@@ -599,7 +621,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         Total Contributions
                       </span>
                       <span className="text-sm font-semibold text-white tabular-nums">
-                        ${calculation.totalContributed.toLocaleString()}
+                        <NumberFlow
+                          value={calculation.totalContributed}
+                          prefix="$"
+                          transformTiming={{ duration: 350, easing: 'ease-out' }}
+                          spinTiming={{ duration: 350, easing: 'ease-out' }}
+                          isolate
+                        />
                       </span>
                     </div>
                     <div>
@@ -607,7 +635,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         HYSA Yield Compound
                       </span>
                       <span className="text-sm font-semibold text-emerald-400 tabular-nums">
-                        +${calculation.interestEarned.toLocaleString()}
+                        <NumberFlow
+                          value={calculation.interestEarned}
+                          prefix="+$"
+                          transformTiming={{ duration: 350, easing: 'ease-out' }}
+                          spinTiming={{ duration: 350, easing: 'ease-out' }}
+                          isolate
+                        />
                       </span>
                     </div>
                   </div>
@@ -644,7 +678,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* DEEP-DIVE SECTION 1: Engineered for Precision Pacing (Combination of Telemetric Modules & Tasteful Sandboxes) */}
-      <section id="features" className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 z-10 relative">
+      <section
+        id="features"
+        className="content-auto py-20 sm:py-24 px-4 sm:px-6 lg:px-8 z-10 relative"
+      >
         <div className="max-w-6xl mx-auto space-y-12 sm:space-y-16">
           <div className="text-center space-y-3 max-w-2xl mx-auto">
             <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold text-emerald-800 dark:text-emerald-400 uppercase tracking-widest">
@@ -901,11 +938,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* DEEP-DIVE SECTION 2: Dashboard Immersion (Oxide Hardware Telemetry Aesthetic) */}
       <section
         id="dashboard"
-        className="dark py-20 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#0B0E11] text-white relative overflow-hidden z-10 border-t border-[#1C2128]"
+        className="content-auto dark py-20 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#0B0E11] text-white relative overflow-hidden z-10 border-t border-[#1C2128]"
       >
-        {/* Soft Sfumato Glow */}
+        {/* Lightweight Radial Ambient Glow (zero GPU blur filter) */}
         <div
-          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"
+          className="landing-ambient-dashboard absolute inset-x-0 top-0 h-[360px] pointer-events-none"
           aria-hidden="true"
         />
 
@@ -928,7 +965,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Oxide-Inspired Hardware Telemetry Dashboard Mockup */}
-          <div className="rounded-3xl border border-[#21262D] bg-[#12161B] shadow-[0_30px_70px_rgba(0,0,0,0.6)] backdrop-blur-xl overflow-hidden">
+          <div className="rounded-3xl border border-[#21262D] bg-[#12161B] shadow-[0_30px_70px_rgba(0,0,0,0.55)] overflow-hidden">
             {/* Terminal Window Header */}
             <div className="px-5 py-3 border-b border-[#21262D] bg-[#0D1117] flex items-center justify-between gap-4 font-mono">
               <div className="flex items-center gap-3">
@@ -1165,7 +1202,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* HOW WISHPACER WORKS SECTION */}
-      <section id="how-it-works" className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 z-10 relative">
+      <section
+        id="how-it-works"
+        className="content-auto py-20 sm:py-24 px-4 sm:px-6 lg:px-8 z-10 relative"
+      >
         <div className="max-w-5xl mx-auto space-y-12 sm:space-y-16">
           <div className="text-center space-y-3 max-w-xl mx-auto">
             <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold text-emerald-800 dark:text-emerald-400 uppercase tracking-widest">

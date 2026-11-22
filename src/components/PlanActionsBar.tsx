@@ -50,6 +50,7 @@ export const PlanActionsBar: React.FC<PlanActionsBarProps> = ({
         <button
           type="button"
           onClick={onOpenSettings}
+          aria-label="Budget Settings"
           className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-semibold rounded-xl bg-white/80 dark:bg-[#181D21] text-slate-800 dark:text-slate-200 border border-black/10 dark:border-[#30363D] hover:bg-white dark:hover:bg-[#22282E] transition-colors shadow-xs min-h-[34px] sm:min-h-9"
           title="Budget Settings"
         >
