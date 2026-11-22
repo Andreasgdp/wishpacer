@@ -279,13 +279,22 @@ export const Header: React.FC<HeaderProps> = ({
                   </button>
                 )}
 
-                <div className="w-8 h-8 rounded-full bg-slate-200/80 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-slate-300 overflow-hidden shrink-0 border border-black/5 dark:border-white/10">
-                  {isSignedIn ? (
-                    <UserButton />
-                  ) : (
-                    <UserIcon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                  )}
-                </div>
+                {isSignedIn && (
+                  <div className="flex items-center shrink-0">
+                    {typeof window !== 'undefined' && window.__MOCK_AUTH__ ? (
+                      <div
+                        className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold shadow-xs"
+                        title="Mock User Session"
+                      >
+                        U
+                      </div>
+                    ) : (
+                      <SignedIn>
+                        <UserButton userProfileMode="modal" />
+                      </SignedIn>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <>
