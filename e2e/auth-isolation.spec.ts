@@ -68,17 +68,35 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
   });
 
   test('isolates user data between User 1, guest session, and User 2', async ({ page }) => {
-    // 1. Initialize page with User 1 authenticated and onboarding/activation bypassed
+    // 1. Initialize page with User 1 authenticated and onboarding/activation bypassed.
+    // Persist the active mock persona in sessionStorage so subsequent page.goto() navigations
+    // boot as the intended persona (guest or user-2) instead of resetting back to user-1,
+    // while keeping localStorage intact across navigations to verify real storage isolation.
     await page.addInitScript(() => {
-      window.localStorage.clear();
-      window.localStorage.setItem('saving_plan_activated', 'true');
-      window.localStorage.setItem('saving_plan_onboarding_seen', 'true');
-      window.__MOCK_AUTH__ = {
-        isSignedIn: true,
-        isLoaded: true,
-        userId: 'user-1',
-        getToken: async () => 'user-1-token',
-      };
+      if (!window.sessionStorage.getItem('__e2e_initialized__')) {
+        window.localStorage.clear();
+        window.localStorage.setItem('saving_plan_activated', 'true');
+        window.localStorage.setItem('saving_plan_onboarding_seen', 'true');
+        window.sessionStorage.setItem('__e2e_initialized__', '1');
+        window.sessionStorage.setItem('__e2e_mock_persona__', 'user-1');
+      }
+
+      const persona = window.sessionStorage.getItem('__e2e_mock_persona__') || 'user-1';
+      if (persona === 'guest') {
+        window.__MOCK_AUTH__ = {
+          isSignedIn: false,
+          isLoaded: true,
+          userId: null,
+          getToken: async () => null,
+        };
+      } else {
+        window.__MOCK_AUTH__ = {
+          isSignedIn: true,
+          isLoaded: true,
+          userId: persona,
+          getToken: async () => `${persona}-token`,
+        };
+      }
     });
 
     await page.goto('/app');
@@ -86,7 +104,6 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
     // Ensure initial app loading spinner is gone
     await expect(page.getByText('Loading your savings plans...')).not.toBeVisible();
 
-    // Dismiss onboarding tour modal if visible
     // 2. User 1 creates a secret wish item
     await page.getByRole('button', { name: 'Add Wish' }).click();
 
@@ -98,6 +115,7 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
 
     // 3. User 1 signs out -> Switch to guest mode
     await page.evaluate(() => {
+      window.sessionStorage.setItem('__e2e_mock_persona__', 'guest');
       window.__SET_MOCK_AUTH__?.({
         isSignedIn: false,
         isLoaded: true,
@@ -118,6 +136,7 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
 
     // 6. User 2 logs in
     await page.evaluate(() => {
+      window.sessionStorage.setItem('__e2e_mock_persona__', 'user-2');
       window.__SET_MOCK_AUTH__?.({
         isSignedIn: true,
         isLoaded: true,
@@ -126,6 +145,9 @@ test.describe('Multi-User and Guest Data Isolation Flow', () => {
       });
     });
     await page.goto('/app');
+    await expect(
+      page.getByRole('heading', { name: 'Plan for user-2-token', level: 1 })
+    ).toBeVisible();
     // 7. Verify User 2 state: NEITHER User 1 Secret Goal NOR Guest Local Goal should be visible in User 2's account
     await expect(page.getByText('User 1 Secret Goal')).toHaveCount(0);
     await expect(page.getByText('Guest Local Goal')).toHaveCount(0);
