@@ -168,15 +168,19 @@ describe('App Client-Side Routing', () => {
   });
 
   it('renders public Privacy Policy page on route "/privacy"', async () => {
-    const { findByRole, findByText } = renderAppWithRoute('/privacy');
+    const { findByRole, findByText, findAllByText } = renderAppWithRoute('/privacy');
     expect(await findByRole('heading', { level: 1, name: /Privacy Policy/i })).not.toBeNull();
     expect(await findByText('datatilsynet.dk')).not.toBeNull();
+    expect((await findAllByText(/BHelpful/i)).length).toBeGreaterThan(0);
+    expect((await findAllByText(/46951182/)).length).toBeGreaterThan(0);
   });
 
   it('renders public Terms of Service page on route "/terms"', async () => {
-    const { findByRole, findByText } = renderAppWithRoute('/terms');
+    const { findByRole, findByText, findAllByText } = renderAppWithRoute('/terms');
     expect(await findByRole('heading', { level: 1, name: /Terms of Service/i })).not.toBeNull();
     expect(await findByText(/Not Financial Advice/i)).not.toBeNull();
+    expect((await findAllByText(/BHelpful/i)).length).toBeGreaterThan(0);
+    expect((await findAllByText(/46951182/)).length).toBeGreaterThan(0);
   });
   describe('Demo Mode Header Navigation', () => {
     it('hides UserButton and shows "Sign In to Save Plan" when signed out in demo mode', async () => {
