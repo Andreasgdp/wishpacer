@@ -1808,7 +1808,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
             <Logo variant="full" size="sm" onClick={() => onLaunchApp()} badge="2.0" />
-            <p>© {new Date().getFullYear()} WishPacer • Turn Dreams Into Timelines</p>
+            <p className="tabular-nums">
+              © {new Date().getFullYear()} BHelpful (CVR 46951182) • WishPacer
+            </p>
           </div>
         </div>
       </footer>

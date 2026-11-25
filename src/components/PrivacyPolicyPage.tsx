@@ -8,7 +8,7 @@ export const PrivacyPolicyPage: React.FC = () => {
       badge="LEGAL // GDPR_ART_13_14"
       title="Privacy Policy"
       subtitle="Plain-English disclosure of what data WishPacer processes, why, who handles it, and how you can export or erase it."
-      lastUpdated="2026-11-22"
+      lastUpdated="2026-11-25"
     >
       {/* 1. Data Controller */}
       <section className="space-y-3">
@@ -21,12 +21,12 @@ export const PrivacyPolicyPage: React.FC = () => {
         </p>
         <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#161B22] border border-slate-200 dark:border-[#21262D] font-mono text-xs space-y-1">
           <p>
-            <span className="text-slate-500 dark:text-[#8B949E]">Controller:</span> [PMV Business
-            Name — Pending Registration] (Andreas Petersen)
+            <span className="text-slate-500 dark:text-[#8B949E]">Controller:</span> BHelpful
+            (Andreas Petersen)
           </p>
           <p>
-            <span className="text-slate-500 dark:text-[#8B949E]">CVR Number:</span> [CVR-XXXXXXXX —
-            Pending Registration]
+            <span className="text-slate-500 dark:text-[#8B949E]">CVR Number:</span>{' '}
+            <span className="tabular-nums">46951182</span>
           </p>
           <p>
             <span className="text-slate-500 dark:text-[#8B949E]">Jurisdiction:</span> Denmark (EU)

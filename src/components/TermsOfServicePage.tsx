@@ -8,7 +8,7 @@ export const TermsOfServicePage: React.FC = () => {
       badge="LEGAL // HOSTED_SERVICE_TERMS"
       title="Terms of Service"
       subtitle="Terms governing your use of the hosted WishPacer web service at wishpacer.com."
-      lastUpdated="2026-11-22"
+      lastUpdated="2026-11-25"
     >
       {/* 1. Scope: Hosted Service vs Open Source Code */}
       <section className="space-y-3">
@@ -17,9 +17,8 @@ export const TermsOfServicePage: React.FC = () => {
         </h2>
         <p>
           These Terms of Service apply exclusively to the hosted WishPacer web service operated at{' '}
-          <span className="font-mono text-xs">wishpacer.com</span> by{' '}
-          <strong>[PMV Business Name — Pending Registration]</strong> (CVR:{' '}
-          <span className="font-mono text-xs">[CVR-XXXXXXXX]</span>, Denmark).
+          <span className="font-mono text-xs">wishpacer.com</span> by <strong>BHelpful</strong>{' '}
+          (CVR: <span className="font-mono text-xs tabular-nums">46951182</span>, Denmark).
         </p>
         <p>
           The WishPacer source code is separately licensed under the{' '}

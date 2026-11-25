@@ -123,7 +123,9 @@ export const LegalLayout: React.FC<LegalLayoutProps> = ({
       {/* Footer */}
       <footer className="border-t border-slate-300/80 dark:border-[#21262D] py-6 px-4 sm:px-6 text-xs font-mono text-[#475569] dark:text-[#8B949E]">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span>© {new Date().getFullYear()} WishPacer • Hosted Service Legal Documentation</span>
+          <span className="tabular-nums">
+            © {new Date().getFullYear()} BHelpful (CVR 46951182) • WishPacer Legal Documentation
+          </span>
           <div className="flex items-center gap-4">
             <Link to="/privacy" className="hover:text-emerald-700 dark:hover:text-emerald-400">
               Privacy
